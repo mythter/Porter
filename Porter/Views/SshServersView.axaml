@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:Porter.ViewModels"
+			 xmlns:c="clr-namespace:Porter.Controls"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:DataType="vm:SshServersViewModel"
+			 x:Class="Porter.Views.SshServersView">
+
+	<Grid RowDefinitions="Auto,10,*">
+		<Grid Grid.Row="0"
+			  ColumnDefinitions="Auto,*,Auto"
+			  Height="30">
+			<Button Grid.Column="0"
+					Classes="no-padding center"
+					Command="{Binding MainViewModel.GoToTunnels}"
+					Height="{Binding $parent.Height }"
+					Width="{Binding $self.Height}">
+				<TextBlock
+					Text="&#xE138;"
+					FontSize="20"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+			<TextBlock Grid.Column="1"
+					   Text="SSH Servers"
+					   VerticalAlignment="Center"
+					   HorizontalAlignment="Center"
+					   FontSize="16"/>
+			<Button Grid.Column="2"
+					Classes="no-padding center"
+					Command="{Binding AddSshServer}"
+					Height="{Binding $parent.Height }"
+					Width="{Binding $self.Height}">
+				<TextBlock
+					Text="&#xE3D4;"
+					FontSize="20"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+
+		<ScrollViewer Grid.Row="2">
+			<ItemsControl ItemsSource="{Binding Items}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Spacing="5" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<c:SshServerControl Padding="5"
+											Background="#2E2E2E"
+											CornerRadius="5"
+											Model="{Binding}">
+
+						</c:SshServerControl>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+	</Grid>
+</UserControl>

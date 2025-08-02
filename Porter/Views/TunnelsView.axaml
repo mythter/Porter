@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:c="clr-namespace:Porter.Controls"
+			 xmlns:vm="clr-namespace:Porter.ViewModels"
+			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+			 x:DataType="vm:TunnelsViewModel"
+			 x:Class="Porter.Views.TunnelsView">
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		 to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:TunnelsViewModel />
+	</Design.DataContext>
+
+	<Grid RowDefinitions="Auto, 10, *">
+		<Grid Grid.Row="0" ColumnDefinitions="Auto,5,*,5,*,5,*,5,Auto" Height="30">
+
+			<Button Grid.Column="0"
+					Classes="no-padding center"
+					Command="{Binding AddSshTunnel}"
+					Height="{Binding $parent.Height }"
+					Width="{ Binding $self.Height }">
+				<TextBlock
+					Text="&#xE3D4;"
+					FontSize="20"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+
+
+
+			<Button Grid.Column="2"
+					Padding="5, 0"
+					Classes="center"
+					Command="{ Binding MainViewModel.GoToSshServers }"
+					HorizontalAlignment="Stretch"
+					Height="{Binding $parent.Height }">
+				SSH Servers
+			</Button>
+
+			<Button Grid.Column="4"
+					Padding="5, 0"
+					Classes="center"
+					Command="{ Binding MainViewModel.GoToSshKeys }"
+					HorizontalAlignment="Stretch"
+					Height="{Binding $parent.Height }">
+				SSH Private Keys
+			</Button>
+
+			<Button Grid.Column="6"
+					Padding="5, 0"
+					Classes="center"
+					Command="{ Binding MainViewModel.GoToRemoteServers }"
+					HorizontalAlignment="Stretch"
+					Height="{Binding $parent.Height }">
+				Remote Servers
+			</Button>
+			
+			<Button Grid.Column="8"
+					Classes="no-padding center"
+					Height="{Binding $parent.Height }"
+					Width="{Binding $self.Height}">
+				<TextBlock 
+					Text="&#xE272;" 
+					FontSize="20"
+					FontFamily="{ StaticResource Phosphor }"/>
+
+				<Button.Flyout>
+					<MenuFlyout ItemsSource="{Binding SettingsMenuItems}"
+								Placement="BottomEdgeAlignedRight">
+						<MenuFlyout.ItemContainerTheme>
+							<ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"
+										  x:DataType="vm:MenuItemViewModel">
+								<Setter Property="Header" Value="{Binding Header}"/>
+								<Setter Property="ItemsSource" Value="{Binding Items}"/>
+								<Setter Property="Command" Value="{Binding Command}"/>
+								<Setter Property="ToggleType" Value="{Binding ToggleType}"/>
+								<Setter Property="IsChecked" Value="{Binding IsChecked}"/>
+							</ControlTheme>
+						</MenuFlyout.ItemContainerTheme>
+					</MenuFlyout>
+				</Button.Flyout>
+			</Button>
+		</Grid>
+
+		<ScrollViewer Grid.Row="2">
+			<ItemsControl ItemsSource="{Binding Items}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Spacing="5" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<c:SshTunnelControl Padding="5"
+											Background="#2E2E2E"
+											CornerRadius="5"
+											Model="{Binding}">
+
+						</c:SshTunnelControl>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

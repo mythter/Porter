@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:model="using:Porter.ControlModels"
+			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
+			 x:DataType="model:SshServerControlModel"
+			 x:Class="Porter.Controls.SshServerControl"
+			 Classes="deletable">
+
+	<Grid ColumnDefinitions="0.8*, 5, 0.6*, 5, *, 5, 100"
+		  MinHeight="20">
+		<TextBox Grid.Column="0"
+				 Watermark="Name"
+				 Text="{Binding Name}"
+				 LostFocus="OnNameLostFocus"
+				 KeyDown="OnNameKeyDown"
+				 VerticalContentAlignment="Center"/>
+
+		<TextBox Grid.Column="2"
+				 Watermark="User"
+				 Text="{Binding User}"
+				 LostFocus="OnUserLostFocus"
+				 KeyDown="OnUserKeyDown"
+				 VerticalContentAlignment="Center"/>
+
+		<TextBox Grid.Column="4"
+				 Watermark="Host"
+				 Text="{Binding Host}"
+				 LostFocus="OnHostLostFocus"
+				 KeyDown="OnHostKeyDown"
+				 VerticalContentAlignment="Center"/>
+
+
+		<Grid Grid.Column="6"
+			  ColumnDefinitions="*, 5, Auto">
+			<NumericUpDown Grid.Column="0"
+						   Watermark="Port"
+						   VerticalContentAlignment="Center"
+						   MinWidth="0"
+						   Maximum="65535"
+						   Minimum="0"
+						   FormatString="0"
+						   ShowButtonSpinner="False"
+						   KeyDown="OnPortKeyDown"
+						   LostFocus="OnPortLostFocus"
+						   Value="{Binding Port}" />
+
+			<Button Grid.Column="2"
+					x:Name="DeleteButton"
+					Command="{Binding DeleteSshServer}"
+					CommandParameter="{Binding Id}"
+					Classes="no-padding center"
+					VerticalAlignment="Stretch"
+					Height="{ Binding $parent.Bounds.Height }">
+
+				<TextBlock
+					Text="&#xE4A6;"
+					FontSize="24"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+
+	</Grid>
+	
+</UserControl>

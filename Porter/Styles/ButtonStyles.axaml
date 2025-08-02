@@ -1,0 +1,54 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:c="using:Porter.Controls">
+  <Design.PreviewWith>
+	<Border Padding="20" Height="200">
+		
+		<Button Grid.Column="4"
+			Classes="no-padding center stretch"
+			FontSize="12">
+			Stop All
+		</Button>
+		
+	</Border>
+  </Design.PreviewWith>
+
+	<Style Selector="Button.square">
+		<Setter Property="Background" Value="LightBlue"/>
+		<Setter Property="Foreground" Value="DarkBlue"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+	</Style>
+
+	<Style Selector="Button.no-padding">
+		<Setter Property="Padding" Value="0"/>
+	</Style>
+
+	<Style Selector="Button.center">
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+	</Style>
+
+	<Style Selector="Button.stretch">
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+		<Setter Property="VerticalAlignment" Value="Stretch"/>
+	</Style>
+
+	<Style Selector="#DeleteButton"
+		   x:SetterTargetType="Button">
+		<Setter Property="IsTabStop" Value="False"/>
+		<Setter Property="Opacity" Value="0"/>
+		<Setter Property="Width" Value="0"/>
+		<Setter Property="Transitions">
+			<Transitions>
+				<DoubleTransition Property="Opacity" Duration="0:0:0.1" Easing="QuadraticEaseInOut"/>
+				<DoubleTransition Property="Width" Duration="0:0:0.1" Easing="QuadraticEaseInOut"/>
+			</Transitions>
+		</Setter>
+	</Style>
+
+	<Style Selector=".deletable:pointerover #DeleteButton"
+		   x:SetterTargetType="Button">
+		<Setter Property="Opacity" Value="1"/>
+		<Setter Property="Width" Value="{ Binding $self.Height }"/>
+	</Style>
+</Styles>

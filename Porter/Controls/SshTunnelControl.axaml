@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:model="using:Porter.ControlModels"
+			 xmlns:c="using:Porter.Controls"
+			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="40"
+			 x:DataType="model:SshTunnelControlModel"
+			 Classes="deletable"
+			 x:Class="Porter.Controls.SshTunnelControl">
+
+	<Grid ColumnDefinitions="Auto, 5, 0.8*, 5, 65, 5, *, 5, Auto, 5, *"
+		  MinHeight="20">
+
+		<Button Grid.Column="0"
+				Classes="no-padding center"
+				VerticalAlignment="Stretch"
+				Width="{ Binding $parent.Bounds.Height }"
+				Height="{ Binding $parent.Bounds.Height }">
+
+			<TextBlock
+				Text="&#xE3D0;"
+				FontSize="22"
+				FontFamily="{ StaticResource Phosphor }"/>
+		</Button>
+
+		<TextBox Grid.Column="2"
+				 Watermark="Name"
+				 Text="{Binding Name}"
+				 ToolTip.Tip="Tunnel Name"
+				 LostFocus="OnNameLostFocus"
+				 KeyDown="OnNameKeyDown"
+				 VerticalContentAlignment="Center"/>
+
+		<NumericUpDown Grid.Column="4"
+					   Watermark="Port"
+					   VerticalContentAlignment="Center"
+					   AllowSpin="False"
+					   MinWidth="0"
+					   Maximum="65535"
+					   Minimum="0"
+					   FormatString="0"
+					   ToolTip.Tip="Local Port"
+					   ShowButtonSpinner="False"
+					   KeyDown="OnLocalPortKeyDown"
+					   LostFocus="OnLocalPortLostFocus"
+					   Value="{Binding LocalPort}" />
+
+		<ComboBox Grid.Column="6"
+				  ItemsSource="{Binding SshServers}"
+				  SelectedItem="{Binding SelectedSshServer}"
+				  SelectionChanged="OnSshServerSelectionChanged"
+				  PlaceholderText="SSH server"
+				  ComboBoxProperties.TextTrimming="None"
+				  ToolTip.Tip="{Binding SelectedSshServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select SSH server'}"
+				  VerticalAlignment="Stretch"
+				  HorizontalAlignment="Stretch">
+			<ComboBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding Name}"
+							   TextTrimming="None" />
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</ComboBox>
+
+		<StaticComboBox Grid.Column="8"
+						ItemsSource="{Binding PrivateKeys}"
+						SelectedItem="{Binding SelectedPrivateKey}"
+						SelectionChanged="OnPrivateKeySelectionChanged"
+						ToolTip.Tip="{Binding SelectedPrivateKey, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|No SSH private key selected'}"
+						MinWidth="0"
+						VerticalAlignment="Stretch">
+			<StaticComboBox.Placeholder>
+				<TextBlock Text="&#xE2D6;"
+						   FontFamily="{StaticResource Phosphor}"
+						   VerticalAlignment="Center"
+						   FontSize="20"/>
+			</StaticComboBox.Placeholder>
+
+			<StaticComboBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding Name}" />
+				</DataTemplate>
+			</StaticComboBox.ItemTemplate>
+		</StaticComboBox>
+
+		<Grid Grid.Column="10"
+			  ColumnDefinitions="*, 5, Auto">
+			<ComboBox Grid.Column="0"
+					  ItemsSource="{Binding RemoteServers}"
+					  SelectedItem="{Binding SelectedRemoteServer}"
+					  SelectionChanged="OnRemoteServerSelectionChanged"
+					  PlaceholderText="Remote server"
+					  ComboBoxProperties.TextTrimming="None"
+					  ToolTip.Tip="{Binding SelectedRemoteServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select Remote server'}"
+					  VerticalAlignment="Stretch"
+					  HorizontalAlignment="Stretch">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}"
+								   TextTrimming="None" />
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+
+			<Button Grid.Column="2"
+					x:Name="DeleteButton"
+					Command="{Binding DeleteSshTunnel}"
+					CommandParameter="{Binding Id}"
+					Classes="no-padding center"
+					VerticalAlignment="Stretch"
+					Height="{ Binding $parent.Bounds.Height }">
+
+				<TextBlock
+					Text="&#xE4A6;"
+					FontSize="24"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+
+
+
+	</Grid>
+</UserControl>

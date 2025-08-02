@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:Porter.ViewModels"
+			 x:DataType="vm:TunnelsViewModel"
+			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="300"
+			 x:Class="Porter.Views.MiniView">
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		 to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:TunnelsViewModel />
+	</Design.DataContext>
+
+	<Grid Margin="5">
+
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"></RowDefinition>
+			<RowDefinition Height="5"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Spacing="8">
+			<TextBlock Text="Мини-окно" Foreground="LightGray"/>
+			<TextBlock Text="{Binding Status}" Foreground="LightGray"/>
+			<Button Content="Сделать что-то" Command="{Binding DoSomethingCommand}"/>
+			<Button Content="Выход" Command="{Binding ExitCommand}"/>
+		</StackPanel>
+
+		<Grid Grid.Row="2"
+			  ColumnDefinitions="Auto,5,*,5,*"
+			  Background="Transparent"
+			  Height="30">
+			<Button Grid.Column="0"
+					Classes="no-padding center"
+					Height="{Binding $parent.Height }"
+					Width="{Binding $self.Height}"
+					Command="{Binding OpenMainWindow}">
+				<LayoutTransformControl>
+					<LayoutTransformControl.LayoutTransform>
+						<ScaleTransform ScaleX="-1"/>
+					</LayoutTransformControl.LayoutTransform>
+
+					<TextBlock Text="&#xE5DE;"
+							   FontSize="20"
+							   FontFamily="{StaticResource Phosphor}"
+							   FontWeight="Regular"/>
+				</LayoutTransformControl>
+			</Button>
+			<Button Grid.Column="2"
+					Classes="no-padding center stretch"
+					FontSize="12">
+				Start All
+			</Button>
+			<Button Grid.Column="4"
+					Classes="no-padding center stretch"
+					FontSize="12">
+				Stop All
+			</Button>
+		</Grid>
+	</Grid>
+
+</UserControl>

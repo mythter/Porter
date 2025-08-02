@@ -1,0 +1,37 @@
+<Application xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:local="using:Porter"
+			 xmlns:conv="using:Porter.Converters"
+			 x:Class="Porter.App"
+			 RequestedThemeVariant="Default">
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+	<Application.Styles>
+		<FluentTheme />
+	</Application.Styles>
+
+	<Application.DataTemplates>
+		<local:ViewLocator/>
+	</Application.DataTemplates>
+
+	<Application.Resources>
+		<ResourceDictionary>
+
+			<conv:PropertyOrDefaultConverter x:Key="PropertyOrDefaultConverter"/>
+
+			<FontFamily x:Key="Phosphor">avares://Porter/Assets/Fonts#Phosphor</FontFamily>
+			<FontFamily x:Key="PhosphorFill">avares://Porter/Assets/Fonts#Phosphor-Fill</FontFamily>
+
+			<ResourceDictionary.MergedDictionaries>
+				<MergeResourceInclude Source="/Styles/ComboBoxStyles.axaml"/>
+				<MergeResourceInclude Source="/Styles/StaticComboBoxStyles.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+
+		</ResourceDictionary>
+	</Application.Resources>
+
+	<Application.Styles>
+		<StyleInclude Source="/Styles/ButtonStyles.axaml"/>
+	</Application.Styles>
+
+</Application>

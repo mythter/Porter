@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:Porter.ViewModels"
+		xmlns:views="clr-namespace:Porter.Views"
+		mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="300"
+		x:Class="Porter.Views.MiniWindow"
+		x:DataType="vm:MainViewModel"
+		Title="MiniWindow"
+		MaxWidth="250" MaxHeight="300"
+		ShowInTaskbar="False"
+		SystemDecorations="None"
+		CanResize="False"
+		Background="Transparent"
+		TransparencyLevelHint="Transparent"
+		Topmost="True"
+		WindowStartupLocation="Manual">
+
+	<Border CornerRadius="8" Background="#FF333333">
+		<views:MiniView DataContext="{Binding TunnelsViewModel}" />
+	</Border>
+
+</Window>

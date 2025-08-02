@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:model="using:Porter.ControlModels"
+			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
+			 x:DataType="model:PrivateKeyControlModel"
+			 x:Class="Porter.Controls.PrivateKeyControl"
+			 Classes="deletable">
+
+	<Grid ColumnDefinitions="0.5*, 5, *"
+		  MinHeight="20">
+		<TextBox Grid.Column="0"
+				 Watermark="Name"
+				 Text="{Binding Name}"
+				 LostFocus="OnFileNameLostFocus"
+				 KeyDown="OnFileNameKeyDown"
+				 VerticalContentAlignment="Center">
+
+		</TextBox>
+
+		<Grid Grid.Column="2"
+			  ColumnDefinitions="*, 5, Auto">
+			<TextBlock Grid.Column="0"
+					   VerticalAlignment="Center"
+					   HorizontalAlignment="Center"
+					   Cursor="Hand"
+					   TextDecorations="Underline"
+					   PointerPressed="OnFilePathClick"
+					   Text="{Binding FilePath}"
+					   TextTrimming="{x:Static TextTrimming.LeadingCharacterEllipsis}">
+			</TextBlock >
+
+			<Button Grid.Column="2"
+					x:Name="DeleteButton"
+					Command="{Binding DeletePrivateKey}"
+					CommandParameter="{Binding Id}"
+					Classes="no-padding center"
+					VerticalAlignment="Stretch"
+					Height="{ Binding $parent.Bounds.Height }">
+
+				<TextBlock
+					Text="&#xE4A6;"
+					FontSize="24"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+	</Grid>
+
+</UserControl>
