@@ -5,7 +5,7 @@
 	<Border Padding="20" Height="200">
 		
 		<Button Grid.Column="4"
-			Classes="no-padding center stretch"
+			Classes="no-padding content-center stretch"
 			FontSize="12">
 			Stop All
 		</Button>
@@ -19,18 +19,9 @@
 		<Setter Property="FontWeight" Value="Bold"/>
 	</Style>
 
-	<Style Selector="Button.no-padding">
-		<Setter Property="Padding" Value="0"/>
-	</Style>
-
-	<Style Selector="Button.center">
+	<Style Selector="Button.content-center">
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		<Setter Property="VerticalContentAlignment" Value="Center"/>
-	</Style>
-
-	<Style Selector="Button.stretch">
-		<Setter Property="HorizontalAlignment" Value="Stretch"/>
-		<Setter Property="VerticalAlignment" Value="Stretch"/>
 	</Style>
 
 	<Style Selector="#DeleteButton"

@@ -42,7 +42,7 @@
 				  ColumnDefinitions="Auto,5,*,5,*"
 				  Height="30">
 				<Button Grid.Column="0"
-						Classes="no-padding center"
+						Classes="no-padding content-center"
 						Height="{Binding $parent.Height }"
 						Width="{Binding $self.Height}"
 						Command="{Binding OpenMainWindow}">
@@ -58,12 +58,12 @@
 					</LayoutTransformControl>
 				</Button>
 				<Button Grid.Column="2"
-						Classes="no-padding center stretch"
+						Classes="no-padding content-center stretch"
 						FontSize="12">
 					Start All
 				</Button>
 				<Button Grid.Column="4"
-						Classes="no-padding center stretch"
+						Classes="no-padding content-center stretch"
 						FontSize="12">
 					Stop All
 				</Button>

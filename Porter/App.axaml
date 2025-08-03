@@ -32,6 +32,7 @@
 	</Application.Resources>
 
 	<Application.Styles>
+		<StyleInclude Source="/Styles/CommonStyles.axaml"/>
 		<StyleInclude Source="/Styles/ButtonStyles.axaml"/>
 	</Application.Styles>
 

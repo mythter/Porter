@@ -13,7 +13,7 @@
 			  ColumnDefinitions="Auto,*,Auto"
 			  Height="30">
 			<Button Grid.Column="0"
-					Classes="no-padding center"
+					Classes="no-padding content-center"
 					Command="{Binding MainViewModel.GoToTunnels}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">
@@ -28,7 +28,7 @@
 					   HorizontalAlignment="Center"
 					   FontSize="16"/>
 			<Button Grid.Column="2"
-					Classes="no-padding center"
+					Classes="no-padding content-center"
 					Command="{Binding AddRemoteServer}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">

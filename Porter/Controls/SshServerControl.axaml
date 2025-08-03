@@ -50,7 +50,7 @@
 					x:Name="DeleteButton"
 					Command="{Binding DeleteSshServer}"
 					CommandParameter="{Binding Id}"
-					Classes="no-padding center"
+					Classes="no-padding content-center"
 					VerticalAlignment="Stretch"
 					Height="{ Binding $parent.Bounds.Height }">
 

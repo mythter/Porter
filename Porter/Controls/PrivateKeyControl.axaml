@@ -35,7 +35,7 @@
 					x:Name="DeleteButton"
 					Command="{Binding DeletePrivateKey}"
 					CommandParameter="{Binding Id}"
-					Classes="no-padding center"
+					Classes="no-padding content-center"
 					VerticalAlignment="Stretch"
 					Height="{ Binding $parent.Bounds.Height }">
 

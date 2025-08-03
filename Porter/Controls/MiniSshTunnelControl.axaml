@@ -12,7 +12,7 @@
 		  MinHeight="20">
 
 		<Button Grid.Column="0"
-				Classes="no-padding center"
+				Classes="no-padding content-center"
 				Command="{Binding StartTunnel}"
 				ToolTip.Tip="Start Tunnel"
 				VerticalAlignment="Stretch"
