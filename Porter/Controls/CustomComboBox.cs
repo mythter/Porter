@@ -42,10 +42,11 @@ namespace Porter.Controls
 
 				if (e.Property == SelectedItemProperty)
 				{
-					IsDefaultItemSelected = DefaultItemProperty is not null && SelectedItem is null;
+					IsDefaultItemSelected = DefaultItem is not null && SelectedItem is null;
 				}
 
-				if (e.Property == ItemTemplateProperty && 
+				if (e.Property == ItemTemplateProperty &&
+					DefaultItem is not null &&
 					e.NewValue is { } value && 
 					value is not DefaultItemTemplateSelector)
 				{
@@ -73,7 +74,7 @@ namespace Porter.Controls
 
 		private void UpdateItemsAndTemplate()
 		{
-			if (_updating) return;
+			if (_updating || DefaultItem is null) return;
 
 			try
 			{
