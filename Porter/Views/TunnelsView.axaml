@@ -43,7 +43,7 @@
 					Command="{ Binding MainViewModel.GoToPrivateKeys }"
 					HorizontalAlignment="Stretch"
 					Height="{Binding $parent.Height }">
-				SSH Private Keys
+				Private Keys
 			</Button>
 
 			<Button Grid.Column="6"

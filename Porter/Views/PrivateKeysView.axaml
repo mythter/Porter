@@ -23,7 +23,7 @@
 					FontFamily="{ StaticResource Phosphor }"/>
 			</Button>
 			<TextBlock Grid.Column="1" 
-					   Text="SSH Private Keys"
+					   Text="Private Keys"
 					   VerticalAlignment="Center"
 					   HorizontalAlignment="Center"
 					   FontSize="16"/>

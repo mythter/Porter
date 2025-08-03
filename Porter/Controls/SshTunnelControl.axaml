@@ -74,7 +74,7 @@
 						ItemsSource="{Binding PrivateKeys}"
 						SelectedItem="{Binding SelectedPrivateKey}"
 						SelectionChanged="OnPrivateKeySelectionChanged"
-						ToolTip.Tip="{Binding SelectedPrivateKey, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|No SSH private key selected'}"
+						ToolTip.Tip="{Binding SelectedPrivateKey, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|No Private key selected'}"
 						MinWidth="0"
 						VerticalAlignment="Stretch">
 
