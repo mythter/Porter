@@ -54,10 +54,10 @@ public partial class MainViewModel : ViewModelBase
 	{
 		FileDialogService = fileDialogService;
 
-		TunnelsViewModel = new TunnelsViewModel(this, exitAction, openMainWindow);
 		SshServersViewModel = new SshServersViewModel(this);
 		RemoteServersViewModel = new RemoteServersViewModel(this);
 		PrivateKeysViewModel = new PrivateKeysViewModel(this);
+		TunnelsViewModel = new TunnelsViewModel(this, exitAction, openMainWindow);
 
 		_CurrentPage = TunnelsViewModel;
 	}

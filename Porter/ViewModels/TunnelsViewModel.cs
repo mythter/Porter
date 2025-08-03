@@ -5,7 +5,6 @@ using System.Linq;
 
 using Avalonia.Controls;
 
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using Porter.ControlModels;
@@ -16,10 +15,6 @@ namespace Porter.ViewModels
 {
 	public partial class TunnelsViewModel : ViewModelBase
 	{
-		[ObservableProperty]
-		private string status = "Приложение запущено";
-
-		public IRelayCommand DoSomethingCommand { get; }
 		public IRelayCommand ExitCommand { get; }
 		public IRelayCommand OpenMainWindow { get; }
 
@@ -38,13 +33,12 @@ namespace Porter.ViewModels
 		{
 			MainViewModel = mainViewModel;
 
+			mainViewModel.SshServersViewModel.SshServerChanged += OnSshServerChanged;
+			mainViewModel.PrivateKeysViewModel.PrivateKeyChanged += OnPrivateKeyChanged;
+			mainViewModel.RemoteServersViewModel.RemoteServerChanged += OnRemoteServerChanged;
+
 			Items = new ObservableCollection<SshTunnelControlModel>(
 				StorageManager.SshTunnels.Select(CreateSshTunnelControlModel));
-
-			DoSomethingCommand = new RelayCommand(() =>
-			{
-				Status = $"Сделано! {DateTime.Now:T}";
-			});
 
 			ExitCommand = new RelayCommand(exitAction);
 			OpenMainWindow = new RelayCommand(openMainWindow);
@@ -64,6 +58,30 @@ namespace Porter.ViewModels
 					IsChecked = settings.OnCloseMinimizeToTray,
 				}
 			];
+		}
+
+		private void OnSshServerChanged(object? sender, SshServer sshServer)
+		{
+			foreach(var item in Items.Where(i => i.SelectedSshServer?.Id == sshServer.Id))
+			{
+				item.OnSshServerChanged(sender, sshServer);
+			}
+		}
+
+		private void OnPrivateKeyChanged(object? sender, PrivateKey privateKey)
+		{
+			foreach (var item in Items.Where(i => i.SelectedPrivateKey?.Id == privateKey.Id))
+			{
+				item.OnPrivateKeyChanged(sender, privateKey);
+			}
+		}
+
+		private void OnRemoteServerChanged(object? sender, RemoteServer remoteServer)
+		{
+			foreach (var item in Items.Where(i => i.SelectedRemoteServer?.Id == remoteServer.Id))
+			{
+				item.OnRemoteServerChanged(sender, remoteServer);
+			}
 		}
 
 		[RelayCommand]

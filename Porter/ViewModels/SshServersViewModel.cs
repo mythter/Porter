@@ -16,6 +16,8 @@ namespace Porter.ViewModels
 
 		public ObservableCollection<SshServerControlModel> Items { get; }
 
+		public event EventHandler<SshServer>? SshServerChanged;
+
 		public SshServersViewModel(MainViewModel mainViewModel)
 		{
 			MainViewModel = mainViewModel;
@@ -46,42 +48,50 @@ namespace Porter.ViewModels
 			}
 		}
 
-		private static void ChangeSshServerName(Guid id, string? newName)
+		private void ChangeSshServerName(Guid id, string? newName)
 		{
 			if (StorageManager.SshServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.Name = newName;
 
+			SshServerChanged?.Invoke(this, serverToUpdate);
+
 			StorageManager.SaveSshServers();
 		}
 
-		private static void ChangeSshServerUser(Guid id, string? newUser)
+		private void ChangeSshServerUser(Guid id, string? newUser)
 		{
 			if (StorageManager.SshServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.User = newUser;
 
+			SshServerChanged?.Invoke(this, serverToUpdate);
+
 			StorageManager.SaveSshServers();
 		}
 
-		private static void ChangeSshServerHost(Guid id, string? newHost)
+		private void ChangeSshServerHost(Guid id, string? newHost)
 		{
 			if (StorageManager.SshServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.Host = newHost;
 
+			SshServerChanged?.Invoke(this, serverToUpdate);
+
 			StorageManager.SaveSshServers();
 		}
 
-		private static void ChangeSshServerPort(Guid id, int? newPort)
+		private void ChangeSshServerPort(Guid id, int? newPort)
 		{
 			if (StorageManager.SshServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.Port = newPort;
+
+			SshServerChanged?.Invoke(this, serverToUpdate);
 
 			StorageManager.SaveSshServers();
 		}

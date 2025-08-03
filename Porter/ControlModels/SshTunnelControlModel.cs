@@ -31,6 +31,20 @@ namespace Porter.ControlModels
 		[ObservableProperty]
 		private RemoteServer? selectedRemoteServer;
 
+		partial void OnNameChanged(string? oldValue, string? newValue) => UpdateState();
+		partial void OnLocalPortChanged(int? oldValue, int? newValue) => UpdateState();
+		partial void OnSelectedSshServerChanged(SshServer? oldValue, SshServer? newValue) => UpdateState();
+		partial void OnSelectedPrivateKeyChanged(PrivateKey? oldValue, PrivateKey? newValue) => UpdateState();
+		partial void OnSelectedRemoteServerChanged(RemoteServer? oldValue, RemoteServer? newValue) => UpdateState();
+
+		public string MiniToolTip => string.Join(Environment.NewLine,
+			$"Tunnel Name: {Name}",
+			$"Local Port: {LocalPort}",
+			$"SSH server: {string.Join(" - ", SelectedSshServer?.Name, $"{SelectedSshServer?.User}@{SelectedSshServer?.Host}:{SelectedSshServer?.Port}")}",
+			$"Private key: {string.Join(" - ", SelectedPrivateKey?.Name, SelectedPrivateKey?.FilePath)}",
+			$"Remote server: {string.Join(" - ", SelectedRemoteServer?.Name, $"{SelectedRemoteServer?.Host}:{SelectedRemoteServer?.Port}")}"
+		);
+
 		public ObservableCollection<SshServer?> SshServers { get; init; }
 
 		public ObservableCollection<PrivateKey?> PrivateKeys { get; init; }
@@ -60,14 +74,24 @@ namespace Porter.ControlModels
 			Id = model.Id;
 			Name = model.Name;
 			LocalPort = model.LocalPort;
-			
-			SshServers = new ObservableCollection<SshServer?>(new SshServer?[] { null }.Concat(sshServers));
-			PrivateKeys = new ObservableCollection<PrivateKey?>(new PrivateKey?[] { null }.Concat(privateKeys));
-			RemoteServers = new ObservableCollection<RemoteServer?>(new RemoteServer?[] { null }.Concat(remoteServers));
+
+			SshServers = sshServers;
+			PrivateKeys = privateKeys;
+			RemoteServers = remoteServers;
+
+			//SshServers = new ObservableCollection<SshServer?>(new SshServer?[] { null }.Concat(sshServers));
+			//PrivateKeys = new ObservableCollection<PrivateKey?>(new PrivateKey?[] { null }.Concat(privateKeys));
+			//RemoteServers = new ObservableCollection<RemoteServer?>(new RemoteServer?[] { null }.Concat(remoteServers));
 
 			SelectedSshServer = SshServers.FirstOrDefault(x => x?.Id == model.SshServer?.Id);
 			SelectedPrivateKey = PrivateKeys.FirstOrDefault(x => x?.Id == model.PrivateKey?.Id);
 			SelectedRemoteServer = RemoteServers.FirstOrDefault(x => x?.Id == model.RemoteServer?.Id);
+		}
+
+		[RelayCommand]
+		public void StartTunnel()
+		{
+			int some = 1;
 		}
 
 		public void OnNameLostFocus(object? sender, RoutedEventArgs e)
@@ -113,6 +137,26 @@ namespace Porter.ControlModels
 		public void OnRemoteServerSelectionChanged(object? sender, SelectionChangedEventArgs e)
 		{
 			RemoteServerSelectionChanged?.Invoke(Id, SelectedRemoteServer);
+		}
+
+		public void OnSshServerChanged(object? sender, SshServer sshServer)
+		{
+			UpdateState();
+		}
+
+		public void OnPrivateKeyChanged(object? sender, PrivateKey privateKey)
+		{
+			UpdateState();
+		}
+
+		public void OnRemoteServerChanged(object? sender, RemoteServer remoteServer)
+		{
+			UpdateState();
+		}
+
+		private void UpdateState()
+		{
+			OnPropertyChanged(nameof(MiniToolTip));
 		}
 	}
 }

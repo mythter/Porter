@@ -13,52 +13,63 @@
 		<vm:TunnelsViewModel />
 	</Design.DataContext>
 
-	<Grid Margin="5">
+	<Border Padding="5"
+			Width="{ Binding $parent.Bounds.Width }">
+		<Grid RowDefinitions="*, 5, Auto">
 
-		<Grid.RowDefinitions>
-			<RowDefinition Height="*"></RowDefinition>
-			<RowDefinition Height="5"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-		</Grid.RowDefinitions>
+			<ScrollViewer Grid.Row="0">
+				<ItemsControl ItemsSource="{Binding Items}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Spacing="5" />
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<MiniSshTunnelControl Padding="5"
+												Background="#2E2E2E"
+												CornerRadius="5"
+												Height="45"
+												Model="{Binding}">
 
-		<StackPanel Grid.Row="0" Spacing="8">
-			<TextBlock Text="Мини-окно" Foreground="LightGray"/>
-			<TextBlock Text="{Binding Status}" Foreground="LightGray"/>
-			<Button Content="Сделать что-то" Command="{Binding DoSomethingCommand}"/>
-			<Button Content="Выход" Command="{Binding ExitCommand}"/>
-		</StackPanel>
+							</MiniSshTunnelControl>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
 
-		<Grid Grid.Row="2"
-			  ColumnDefinitions="Auto,5,*,5,*"
-			  Background="Transparent"
-			  Height="30">
-			<Button Grid.Column="0"
-					Classes="no-padding center"
-					Height="{Binding $parent.Height }"
-					Width="{Binding $self.Height}"
-					Command="{Binding OpenMainWindow}">
-				<LayoutTransformControl>
-					<LayoutTransformControl.LayoutTransform>
-						<ScaleTransform ScaleX="-1"/>
-					</LayoutTransformControl.LayoutTransform>
+			<Grid Grid.Row="2"
+				  ColumnDefinitions="Auto,5,*,5,*"
+				  Height="30">
+				<Button Grid.Column="0"
+						Classes="no-padding center"
+						Height="{Binding $parent.Height }"
+						Width="{Binding $self.Height}"
+						Command="{Binding OpenMainWindow}">
+					<LayoutTransformControl>
+						<LayoutTransformControl.LayoutTransform>
+							<ScaleTransform ScaleX="-1"/>
+						</LayoutTransformControl.LayoutTransform>
 
-					<TextBlock Text="&#xE5DE;"
-							   FontSize="20"
-							   FontFamily="{StaticResource Phosphor}"
-							   FontWeight="Regular"/>
-				</LayoutTransformControl>
-			</Button>
-			<Button Grid.Column="2"
-					Classes="no-padding center stretch"
-					FontSize="12">
-				Start All
-			</Button>
-			<Button Grid.Column="4"
-					Classes="no-padding center stretch"
-					FontSize="12">
-				Stop All
-			</Button>
+						<TextBlock Text="&#xE5DE;"
+								   FontSize="20"
+								   FontFamily="{StaticResource Phosphor}"
+								   FontWeight="Regular"/>
+					</LayoutTransformControl>
+				</Button>
+				<Button Grid.Column="2"
+						Classes="no-padding center stretch"
+						FontSize="12">
+					Start All
+				</Button>
+				<Button Grid.Column="4"
+						Classes="no-padding center stretch"
+						FontSize="12">
+					Stop All
+				</Button>
+			</Grid>
+			
 		</Grid>
-	</Grid>
+	</Border>
 
 </UserControl>

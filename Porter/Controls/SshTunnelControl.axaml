@@ -14,6 +14,7 @@
 
 		<Button Grid.Column="0"
 				Classes="no-padding center"
+				Command="{Binding StartTunnel}"
 				VerticalAlignment="Stretch"
 				Width="{ Binding $parent.Bounds.Height }"
 				Height="{ Binding $parent.Bounds.Height }">
@@ -117,8 +118,6 @@
 					FontFamily="{ StaticResource Phosphor }"/>
 			</Button>
 		</Grid>
-
-
 
 	</Grid>
 </UserControl>

@@ -16,6 +16,8 @@ namespace Porter.ViewModels
 
 		public ObservableCollection<RemoteServerControlModel> Items { get; }
 
+		public event EventHandler<RemoteServer>? RemoteServerChanged;
+
 		public RemoteServersViewModel(MainViewModel mainViewModel)
 		{
 			MainViewModel = mainViewModel;
@@ -46,32 +48,38 @@ namespace Porter.ViewModels
 			}
 		}
 
-		private static void ChangeRemoteServerName(Guid id, string? newName)
+		private void ChangeRemoteServerName(Guid id, string? newName)
 		{
 			if (StorageManager.RemoteServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.Name = newName;
 
+			RemoteServerChanged?.Invoke(this, serverToUpdate);
+
 			StorageManager.SaveSshServers();
 		}
 
-		private static void ChangeRemoteServerHost(Guid id, string? newHost)
+		private void ChangeRemoteServerHost(Guid id, string? newHost)
 		{
 			if (StorageManager.RemoteServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.Host = newHost;
 
+			RemoteServerChanged?.Invoke(this, serverToUpdate);
+
 			StorageManager.SaveSshServers();
 		}
 
-		private static void ChangeRemoteServerPort(Guid id, int? newPort)
+		private void ChangeRemoteServerPort(Guid id, int? newPort)
 		{
 			if (StorageManager.RemoteServers.FirstOrDefault(s => s.Id == id) is not { } serverToUpdate)
 				return;
 
 			serverToUpdate.Port = newPort;
+
+			RemoteServerChanged?.Invoke(this, serverToUpdate);
 
 			StorageManager.SaveSshServers();
 		}
