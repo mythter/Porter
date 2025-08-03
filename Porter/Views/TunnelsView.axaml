@@ -15,20 +15,31 @@
 	</Design.DataContext>
 
 	<Grid RowDefinitions="Auto, 10, *">
-		<Grid Grid.Row="0" ColumnDefinitions="Auto,5,*,5,*,5,*,5,Auto" Height="30">
+		<Grid Grid.Row="0" ColumnDefinitions="Auto,5,Auto,5,*,5,*,5,*,5,Auto,5,Auto" Height="30">
 
 			<Button Grid.Column="0"
 					Classes="no-padding content-center"
-					Command="{Binding AddSshTunnel}"
+					ToolTip.Tip="Start all tunnels"
 					Height="{Binding $parent.Height }"
 					Width="{ Binding $self.Height }">
 				<TextBlock
-					Text="&#xE3D4;"
+					Text="&#xE3D0;"
 					FontSize="20"
-					FontFamily="{ StaticResource Phosphor }"/>
+					FontFamily="{ StaticResource PhosphorFill }"/>
 			</Button>
 
 			<Button Grid.Column="2"
+					Classes="no-padding content-center"
+					ToolTip.Tip="Stop all tunnels"
+					Height="{Binding $parent.Height }"
+					Width="{ Binding $self.Height }">
+				<TextBlock
+					Text="&#xE46C;"
+					FontSize="20"
+					FontFamily="{ StaticResource PhosphorFill }"/>
+			</Button>
+
+			<Button Grid.Column="4"
 					Padding="5, 0"
 					Classes="content-center"
 					Command="{ Binding MainViewModel.GoToSshServers }"
@@ -37,7 +48,7 @@
 				SSH Servers
 			</Button>
 
-			<Button Grid.Column="4"
+			<Button Grid.Column="6"
 					Padding="5, 0"
 					Classes="content-center"
 					Command="{ Binding MainViewModel.GoToPrivateKeys }"
@@ -46,7 +57,7 @@
 				Private Keys
 			</Button>
 
-			<Button Grid.Column="6"
+			<Button Grid.Column="8"
 					Padding="5, 0"
 					Classes="content-center"
 					Command="{ Binding MainViewModel.GoToRemoteServers }"
@@ -55,7 +66,7 @@
 				Remote Servers
 			</Button>
 			
-			<Button Grid.Column="8"
+			<Button Grid.Column="10"
 					Classes="no-padding content-center"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">
@@ -79,6 +90,17 @@
 						</MenuFlyout.ItemContainerTheme>
 					</MenuFlyout>
 				</Button.Flyout>
+			</Button>
+
+			<Button Grid.Column="12"
+					Classes="no-padding content-center"
+					Command="{Binding AddSshTunnel}"
+					Height="{Binding $parent.Height }"
+					Width="{ Binding $self.Height }">
+				<TextBlock
+					Text="&#xE3D4;"
+					FontSize="20"
+					FontFamily="{ StaticResource Phosphor }"/>
 			</Button>
 		</Grid>
 
