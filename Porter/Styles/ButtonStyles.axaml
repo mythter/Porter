@@ -42,4 +42,17 @@
 		<Setter Property="Opacity" Value="1"/>
 		<Setter Property="Width" Value="{ Binding $self.Height }"/>
 	</Style>
+
+	<Style Selector="ToggleButton TextBlock.tunnel-start">
+		<Setter Property="IsVisible" Value="True"/>
+	</Style>
+	<Style Selector="ToggleButton:checked TextBlock.tunnel-start">
+		<Setter Property="IsVisible" Value="False"/>
+	</Style>
+	<Style Selector="ToggleButton TextBlock.tunnel-stop">
+		<Setter Property="IsVisible" Value="False"/>
+	</Style>
+	<Style Selector="ToggleButton:checked TextBlock.tunnel-stop">
+		<Setter Property="IsVisible" Value="True"/>
+	</Style>
 </Styles>

@@ -12,18 +12,22 @@
 	<Grid ColumnDefinitions="Auto, 5, 0.8*, 5, 65, 5, *, 5, Auto, 5, *"
 		  MinHeight="20">
 
-		<Button Grid.Column="0"
-				Classes="no-padding center"
-				Command="{Binding StartTunnel}"
-				VerticalAlignment="Stretch"
-				Width="{ Binding $parent.Bounds.Height }"
-				Height="{ Binding $parent.Bounds.Height }">
-
-			<TextBlock
-				Text="&#xE3D0;"
-				FontSize="22"
-				FontFamily="{ StaticResource Phosphor }"/>
-		</Button>
+		<ToggleButton Grid.Column="0"
+					  Classes="no-padding"
+					  Command="{Binding StartTunnel}"
+					  Width="{ Binding $parent.Bounds.Height }"
+					  Height="{ Binding $parent.Bounds.Height }">
+			<Panel Classes="center">
+				<TextBlock Text="&#xE3D0;"
+						   FontSize="22"
+						   FontFamily="{ StaticResource Phosphor }"
+						   Classes="tunnel-start"/>
+				<TextBlock Text="&#xE46C;"
+						   FontSize="22"
+						   FontFamily="{ StaticResource Phosphor }"
+						   Classes="tunnel-stop"/>
+			</Panel>
+		</ToggleButton>
 
 		<TextBox Grid.Column="2"
 				 Watermark="Name"

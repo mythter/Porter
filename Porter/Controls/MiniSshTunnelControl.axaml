@@ -6,24 +6,28 @@
 			 xmlns:c="using:Porter.Controls"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
 			 x:DataType="model:SshTunnelControlModel"
-			  ToolTip.Tip="{Binding MiniToolTip}"
+			 ToolTip.Tip="{Binding MiniToolTip}"
 			 x:Class="Porter.Controls.MiniSshTunnelControl">
+	
 	<Grid ColumnDefinitions="Auto, 10, *"
 		  MinHeight="20">
 
-		<Button Grid.Column="0"
-				Classes="no-padding content-center"
-				Command="{Binding StartTunnel}"
-				ToolTip.Tip="Start Tunnel"
-				VerticalAlignment="Stretch"
-				Width="{ Binding $parent.Bounds.Height }"
-				Height="{ Binding $parent.Bounds.Height }">
-
-			<TextBlock
-				Text="&#xE3D0;"
-				FontSize="22"
-				FontFamily="{ StaticResource Phosphor }"/>
-		</Button>
+		<ToggleButton Grid.Column="0"
+					  Classes="no-padding"
+					  Command="{Binding StartTunnel}"
+					  Width="{ Binding $parent.Bounds.Height }"
+					  Height="{ Binding $parent.Bounds.Height }">
+			<Panel Classes="center">
+				<TextBlock Text="&#xE3D0;"
+						   FontSize="22"
+						   FontFamily="{ StaticResource Phosphor }"
+						   Classes="tunnel-start"/>
+				<TextBlock Text="&#xE46C;"
+						   FontSize="22"
+						   FontFamily="{ StaticResource Phosphor }"
+						   Classes="tunnel-stop"/>
+			</Panel>
+		</ToggleButton>
 
 		<TextBlock Grid.Column="2"
 				   Text="{Binding Name}"
