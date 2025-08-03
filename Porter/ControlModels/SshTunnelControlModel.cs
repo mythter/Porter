@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -10,6 +10,7 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Porter.Helpers;
 using Porter.Models;
 
 namespace Porter.ControlModels
@@ -37,19 +38,13 @@ namespace Porter.ControlModels
 		partial void OnSelectedPrivateKeyChanged(PrivateKey? oldValue, PrivateKey? newValue) => UpdateState();
 		partial void OnSelectedRemoteServerChanged(RemoteServer? oldValue, RemoteServer? newValue) => UpdateState();
 
-		public string MiniToolTip => string.Join(Environment.NewLine,
-			$"Tunnel Name: {Name}",
-			$"Local Port: {LocalPort}",
-			$"SSH server: {string.Join(" - ", SelectedSshServer?.Name, $"{SelectedSshServer?.User}@{SelectedSshServer?.Host}:{SelectedSshServer?.Port}")}",
-			$"Private key: {string.Join(" - ", SelectedPrivateKey?.Name, SelectedPrivateKey?.FilePath)}",
-			$"Remote server: {string.Join(" - ", SelectedRemoteServer?.Name, $"{SelectedRemoteServer?.Host}:{SelectedRemoteServer?.Port}")}"
-		);
+		public string MiniToolTip => GetMiniToolTip();
 
-		public ObservableCollection<SshServer?> SshServers { get; init; }
+		public ObservableCollection<SshServer> SshServers { get; init; }
 
-		public ObservableCollection<PrivateKey?> PrivateKeys { get; init; }
+		public ObservableCollection<PrivateKey> PrivateKeys { get; init; }
 
-		public ObservableCollection<RemoteServer?> RemoteServers { get; init; }
+		public ObservableCollection<RemoteServer> RemoteServers { get; init; }
 
 		public IRelayCommand<Guid>? DeleteSshTunnel { get; set; }
 
@@ -78,10 +73,6 @@ namespace Porter.ControlModels
 			SshServers = sshServers;
 			PrivateKeys = privateKeys;
 			RemoteServers = remoteServers;
-
-			//SshServers = new ObservableCollection<SshServer?>(new SshServer?[] { null }.Concat(sshServers));
-			//PrivateKeys = new ObservableCollection<PrivateKey?>(new PrivateKey?[] { null }.Concat(privateKeys));
-			//RemoteServers = new ObservableCollection<RemoteServer?>(new RemoteServer?[] { null }.Concat(remoteServers));
 
 			SelectedSshServer = SshServers.FirstOrDefault(x => x?.Id == model.SshServer?.Id);
 			SelectedPrivateKey = PrivateKeys.FirstOrDefault(x => x?.Id == model.PrivateKey?.Id);
@@ -157,6 +148,99 @@ namespace Porter.ControlModels
 		private void UpdateState()
 		{
 			OnPropertyChanged(nameof(MiniToolTip));
+		}
+
+		private string GetMiniToolTip()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"Tunnel Name: {Name ?? "-"}");
+			sb.AppendLine($"Local Port: {LocalPort?.ToString() ?? "-"}");
+
+			sb.Append("SSH server: ");
+			if (StringHelper.IsAllNullOrEmpty(
+				SelectedSshServer?.Name, 
+				SelectedSshServer?.User, 
+				SelectedSshServer?.Host))
+			{
+				sb.AppendLine("-");
+			}
+			else
+			{
+				if (SelectedSshServer?.Name is not null)
+				{
+					sb.Append($"{SelectedSshServer?.Name}");
+				}
+
+				if (SelectedSshServer?.Host is not null)
+				{
+					if (SelectedSshServer?.Name is not null)
+						sb.Append(" - ");
+
+					sb.Append(SelectedSshServer?.User is null
+						? SelectedSshServer?.Host
+						: $"{SelectedSshServer?.User}@{SelectedSshServer?.Host}");
+
+					if (SelectedSshServer?.Port is not null)
+					{
+						sb.Append($":{SelectedSshServer?.Port}");
+					}
+				}
+
+				sb.AppendLine();
+			}
+
+			sb.Append("Private key: ");
+			if (StringHelper.IsAllNullOrEmpty(
+				SelectedPrivateKey?.Name, 
+				SelectedPrivateKey?.FilePath))
+			{
+				sb.AppendLine("-");
+			}
+			else
+			{
+				if (SelectedPrivateKey?.Name is not null)
+				{
+					sb.Append($"{SelectedPrivateKey?.Name}");
+				}
+
+				if (SelectedPrivateKey?.FilePath is not null)
+				{
+					if (SelectedPrivateKey?.Name is not null)
+						sb.Append(" - ");
+
+					sb.Append(SelectedPrivateKey?.FilePath);
+				}
+
+				sb.AppendLine();
+			}
+
+			sb.Append("Remote server: ");
+			if (StringHelper.IsAllNullOrEmpty(
+				SelectedRemoteServer?.Name,
+				SelectedRemoteServer?.Host))
+			{
+				sb.Append('-');
+			}
+			else
+			{
+				if (SelectedRemoteServer?.Name is not null)
+				{
+					sb.Append($"{SelectedRemoteServer?.Name}");
+				}
+
+				if (SelectedRemoteServer?.Host is not null)
+				{
+					if (SelectedRemoteServer?.Name is not null)
+						sb.Append(" - ");
+
+					sb.Append(SelectedRemoteServer?.Port is null
+						? SelectedRemoteServer?.Host
+						: $"{SelectedRemoteServer?.Host}:{SelectedRemoteServer?.Port}");
+				}
+			}
+
+			return sb.ToString();
 		}
 	}
 }
