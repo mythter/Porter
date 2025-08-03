@@ -47,22 +47,28 @@
 					   LostFocus="OnLocalPortLostFocus"
 					   Value="{Binding LocalPort}" />
 
-		<ComboBox Grid.Column="6"
+		<CustomComboBox Grid.Column="6"
 				  ItemsSource="{Binding SshServers}"
 				  SelectedItem="{Binding SelectedSshServer}"
 				  SelectionChanged="OnSshServerSelectionChanged"
-				  PlaceholderText="SSH server"
 				  ComboBoxProperties.TextTrimming="None"
 				  ToolTip.Tip="{Binding SelectedSshServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select SSH server'}"
 				  VerticalAlignment="Stretch"
 				  HorizontalAlignment="Stretch">
+
+			<CustomComboBox.DefaultItem>
+				<DataTemplate>
+					<TextBlock Text="SSH server" Foreground="Gray"/>
+				</DataTemplate>
+			</CustomComboBox.DefaultItem>
+			
 			<ComboBox.ItemTemplate>
 				<DataTemplate>
 					<TextBlock Text="{Binding Name}"
 							   TextTrimming="None" />
 				</DataTemplate>
 			</ComboBox.ItemTemplate>
-		</ComboBox>
+		</CustomComboBox>
 
 		<StaticComboBox Grid.Column="8"
 						ItemsSource="{Binding PrivateKeys}"
@@ -71,12 +77,19 @@
 						ToolTip.Tip="{Binding SelectedPrivateKey, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|No SSH private key selected'}"
 						MinWidth="0"
 						VerticalAlignment="Stretch">
+
 			<StaticComboBox.Placeholder>
 				<TextBlock Text="&#xE2D6;"
 						   FontFamily="{StaticResource Phosphor}"
 						   VerticalAlignment="Center"
 						   FontSize="20"/>
 			</StaticComboBox.Placeholder>
+
+			<CustomComboBox.DefaultItem>
+				<DataTemplate>
+					<TextBlock Text="Private key" Foreground="Gray"/>
+				</DataTemplate>
+			</CustomComboBox.DefaultItem>
 
 			<StaticComboBox.ItemTemplate>
 				<DataTemplate>
@@ -87,22 +100,28 @@
 
 		<Grid Grid.Column="10"
 			  ColumnDefinitions="*, 5, Auto">
-			<ComboBox Grid.Column="0"
+			<CustomComboBox Grid.Column="0"
 					  ItemsSource="{Binding RemoteServers}"
 					  SelectedItem="{Binding SelectedRemoteServer}"
 					  SelectionChanged="OnRemoteServerSelectionChanged"
-					  PlaceholderText="Remote server"
 					  ComboBoxProperties.TextTrimming="None"
 					  ToolTip.Tip="{Binding SelectedRemoteServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select Remote server'}"
 					  VerticalAlignment="Stretch"
 					  HorizontalAlignment="Stretch">
+
+				<CustomComboBox.DefaultItem>
+					<DataTemplate>
+						<TextBlock Text="Remote server" Foreground="Gray"/>
+					</DataTemplate>
+				</CustomComboBox.DefaultItem>
+
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Name}"
 								   TextTrimming="None" />
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
-			</ComboBox>
+			</CustomComboBox>
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"

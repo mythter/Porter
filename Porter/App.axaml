@@ -24,6 +24,7 @@
 
 			<ResourceDictionary.MergedDictionaries>
 				<MergeResourceInclude Source="/Styles/ComboBoxStyles.axaml"/>
+				<MergeResourceInclude Source="/Styles/CustomComboBoxStyles.axaml"/>
 				<MergeResourceInclude Source="/Styles/StaticComboBoxStyles.axaml"/>
 			</ResourceDictionary.MergedDictionaries>
 

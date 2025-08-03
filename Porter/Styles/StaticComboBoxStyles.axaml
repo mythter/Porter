@@ -6,10 +6,16 @@
 		<Border Padding="20" Width="250">
 			<StackPanel Spacing="10">
 				
-				<StaticComboBox >
+				<StaticComboBox>
 					<StaticComboBox.Placeholder>
-						<TextBlock Text="Hello sfass dafsadfsd sa fsad fsad fsdf"/>
+						<TextBlock Text="=="/>
 					</StaticComboBox.Placeholder>
+
+					<CustomComboBox.DefaultItem>
+						<DataTemplate>
+							<TextBlock Text="Private key" Foreground="Gray"/>
+						</DataTemplate>
+					</CustomComboBox.DefaultItem>
 					
 					<ComboBoxItem>Item 1</ComboBoxItem>
 					<ComboBoxItem>Item 2</ComboBoxItem>
@@ -39,14 +45,6 @@
 		</Border>
 	</Design.PreviewWith>
 
-	<Thickness x:Key="ComboBoxTopHeaderMargin">0,0,0,4</Thickness>
-	<x:Int32 x:Key="ComboBoxPopupMaxNumberOfItems">15</x:Int32>
-	<x:Int32 x:Key="ComboBoxPopupMaxNumberOfItemsThatCanBeShownOnOneSide">7</x:Int32>
-
-	<Thickness x:Key="ComboBoxPadding">12,5,0,7</Thickness>
-	<Thickness x:Key="ComboBoxEditableTextPadding">11,5,32,6</Thickness>
-	<x:Double x:Key="ComboBoxMinHeight">32</x:Double>
-
 	<ControlTheme x:Key="{x:Type StaticComboBox}" TargetType="StaticComboBox">
 		<Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}" />
 		<Setter Property="FocusAdorner" Value="{x:Null}" />
@@ -64,6 +62,7 @@
 		<Setter Property="HorizontalAlignment" Value="Left" />
 		<Setter Property="VerticalAlignment" Value="Top" />
 		<Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForeground}" />
+		<Setter Property="DefaultTitleForeground" Value="{DynamicResource ComboBoxForegroundDisabled}" />
 		<Setter Property="Template">
 			<ControlTemplate>
 				<DataValidationErrors>
@@ -201,6 +200,19 @@
 			<Style Selector="^ /template/ PathIcon#DropDownGlyph">
 				<Setter Property="Foreground" Value="{DynamicResource ComboBoxDropDownGlyphForegroundDisabled}" />
 			</Style>
+		</Style>
+
+		<Style Selector="^[IsDefaultItemSelected=true] /template/ ContentControl#PlaceholderContent">
+			<Setter Property="Foreground">
+				<Setter.Value>
+					<Binding Path="DefaultTitleForeground"
+							 RelativeSource="{RelativeSource TemplatedParent}" />
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style Selector="^ /template/ ContentControl#PlaceholderContent">
+			<Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
 		</Style>
 	</ControlTheme>
 

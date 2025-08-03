@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <AvaloniaXaml Remove="Styles\ComboBoxStyles.axaml" />
+    <AvaloniaXaml Remove="Styles\CustomComboBoxStyles.axaml" />
     <AvaloniaXaml Remove="Styles\StaticComboBoxStyles.axaml" />
   </ItemGroup>
 
@@ -20,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Styles\CustomComboBoxStyles.axaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
     <AvaloniaResource Include="Styles\ComboBoxStyles.axaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
