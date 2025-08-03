@@ -49,5 +49,8 @@
     <Compile Update="Controls\RemoteServerControl.axaml.cs">
       <DependentUpon>RemoteServerControl.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\PrivateKeysView.axaml.cs">
+      <DependentUpon>PrivateKeysView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

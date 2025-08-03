@@ -11,13 +11,15 @@ using Porter.Storage;
 
 namespace Porter.ViewModels
 {
-	public partial class SshKeysViewModel : ViewModelBase
+	public partial class PrivateKeysViewModel : ViewModelBase
 	{
 		public MainViewModel MainViewModel { get; }
 
 		public ObservableCollection<PrivateKeyControlModel> Items { get; }
 
-		public SshKeysViewModel(MainViewModel mainViewModel)
+		public event EventHandler<PrivateKey>? PrivateKeyChanged;
+
+		public PrivateKeysViewModel(MainViewModel mainViewModel)
 		{
 			MainViewModel = mainViewModel;
 
@@ -62,12 +64,14 @@ namespace Porter.ViewModels
 			}
 		}
 
-		private static void ChangePrivateKeyName(Guid id, string? newName)
+		private void ChangePrivateKeyName(Guid id, string? newName)
 		{
 			if (StorageManager.PrivateKeys.FirstOrDefault(pk => pk.Id == id) is not { } privateKeyToUpdate)
 				return;
 
 			privateKeyToUpdate.Name = newName;
+
+			PrivateKeyChanged?.Invoke(this, privateKeyToUpdate);
 
 			StorageManager.SavePrivateKeys();
 		}
@@ -85,6 +89,8 @@ namespace Porter.ViewModels
 			var filePath = file.Path.AbsolutePath;
 
 			privateKeyToUpdate.FilePath = filePath;
+
+			PrivateKeyChanged?.Invoke(this, privateKeyToUpdate);
 
 			StorageManager.SavePrivateKeys();
 

@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Porter.Views;
 
-public partial class SshKeysView : UserControl
+public partial class PrivateKeysView : UserControl
 {
-    public SshKeysView()
+    public PrivateKeysView()
     {
         InitializeComponent();
     }

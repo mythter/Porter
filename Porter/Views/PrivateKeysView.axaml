@@ -5,8 +5,8 @@
 			 xmlns:vm="clr-namespace:Porter.ViewModels"
 			 xmlns:c="clr-namespace:Porter.Controls"
 			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
-			 x:DataType="vm:SshKeysViewModel"
-			 x:Class="Porter.Views.SshKeysView">
+			 x:DataType="vm:PrivateKeysViewModel"
+			 x:Class="Porter.Views.PrivateKeysView">
 	
 	<Grid RowDefinitions="Auto,10,Auto">
 		<Grid Grid.Row="0" 

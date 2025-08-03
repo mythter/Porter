@@ -21,7 +21,7 @@ public partial class MainViewModel : ViewModelBase
 
 	public RemoteServersViewModel RemoteServersViewModel { get; }
 
-	public SshKeysViewModel SshKeysViewModel { get; }
+	public PrivateKeysViewModel PrivateKeysViewModel { get; }
 
 	#endregion
 
@@ -57,7 +57,7 @@ public partial class MainViewModel : ViewModelBase
 		TunnelsViewModel = new TunnelsViewModel(this, exitAction, openMainWindow);
 		SshServersViewModel = new SshServersViewModel(this);
 		RemoteServersViewModel = new RemoteServersViewModel(this);
-		SshKeysViewModel = new SshKeysViewModel(this);
+		PrivateKeysViewModel = new PrivateKeysViewModel(this);
 
 		_CurrentPage = TunnelsViewModel;
 	}
@@ -75,9 +75,9 @@ public partial class MainViewModel : ViewModelBase
 	}
 
 	[RelayCommand]
-	public void GoToSshKeys()
+	public void GoToPrivateKeys()
 	{
-		CurrentPage = SshKeysViewModel;
+		CurrentPage = PrivateKeysViewModel;
 	}
 
 	[RelayCommand]
