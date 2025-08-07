@@ -17,6 +17,7 @@ public partial class MiniWindow : Window
 	public MiniWindow()
 	{
 		InitializeComponent();
+
 		Deactivated += OnDeactivated;
 	}
 
