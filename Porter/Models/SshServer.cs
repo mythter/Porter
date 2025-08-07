@@ -13,5 +13,24 @@ namespace Porter.Models
 		public string? Host { get; set; }
 
 		public int? Port { get; set; }
+
+		public override bool Equals(object? obj)
+		{
+			if (obj is not SshServer other)
+				return false;
+
+			return string.Equals(User, other.User, StringComparison.OrdinalIgnoreCase)
+				&& string.Equals(Host, other.Host, StringComparison.OrdinalIgnoreCase)
+				&& Port == other.Port;
+		}
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(
+				User?.ToLowerInvariant(),
+				Host?.ToLowerInvariant(),
+				Port
+			);
+		}
 	}
 }

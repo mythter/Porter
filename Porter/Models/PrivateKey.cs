@@ -14,5 +14,20 @@ namespace Porter.Models
 		{
 			FilePath = filePath;
 		}
+
+		public override bool Equals(object? obj)
+		{
+			if (obj is not PrivateKey other)
+				return false;
+
+			return string.Equals(FilePath, other.FilePath, StringComparison.OrdinalIgnoreCase);
+		}
+
+		public override int GetHashCode()
+		{
+			return FilePath is not null
+				? StringComparer.OrdinalIgnoreCase.GetHashCode(FilePath)
+				: 0;
+		}
 	}
 }
