@@ -8,6 +8,8 @@ namespace Porter.Views;
 
 public partial class MainWindow : Window
 {
+	private bool _isClosing = false;
+
 	public TrayIcon? TrayIcon { get; set; }
 
 	public MiniWindow? MiniWindow { get; set; }
@@ -15,6 +17,17 @@ public partial class MainWindow : Window
 	public MainWindow()
 	{
 		InitializeComponent();
+
+		PropertyChanged += (sender, e) =>
+		{
+			if (e.Property == IsVisibleProperty &&
+				!IsVisible && !(MiniWindow?.IsVisible ?? true)
+				&& TrayIcon is not null
+				&& !_isClosing)
+			{
+				TrayIcon.IsVisible = true;
+			}
+		};
 	}
 
 	protected override void OnOpened(EventArgs e)
@@ -31,6 +44,7 @@ public partial class MainWindow : Window
 
 		if (!StorageManager.Settings.OnCloseMinimizeToTray)
 		{
+			_isClosing = true;
 			MiniWindow?.Close();
 			return;
 		}
