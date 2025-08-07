@@ -58,11 +58,13 @@
 					</LayoutTransformControl>
 				</Button>
 				<Button Grid.Column="2"
+						Command="{Binding StartAllSshTunnels}"
 						Classes="no-padding content-center stretch"
 						FontSize="14">
 					Start All
 				</Button>
 				<Button Grid.Column="4"
+						Command="{Binding StopAllSshTunnels}"
 						Classes="no-padding content-center stretch"
 						FontSize="14">
 					Stop All

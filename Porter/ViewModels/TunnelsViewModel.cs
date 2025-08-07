@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Avalonia.Controls;
+using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.Input;
 
 using Porter.ControlModels;
 using Porter.Models;
+using Porter.Services;
 using Porter.Storage;
 
 namespace Porter.ViewModels
@@ -23,6 +27,8 @@ namespace Porter.ViewModels
 		public List<MenuItemViewModel> SettingsMenuItems { get; }
 
 		public ObservableCollection<SshTunnelControlModel> Items { get; }
+
+		public PortForwardManager PortForwardManager { get; }
 
 		public TunnelsViewModel()
 		{
@@ -43,6 +49,8 @@ namespace Porter.ViewModels
 			ExitCommand = new RelayCommand(exitAction);
 			OpenMainWindow = new RelayCommand(openMainWindow);
 
+			PortForwardManager = new();
+
 			var settings = StorageManager.Settings;
 
 			SettingsMenuItems =
@@ -60,27 +68,54 @@ namespace Porter.ViewModels
 			];
 		}
 
-		private void OnSshServerChanged(object? sender, SshServer sshServer)
+		public async Task<bool> OnStartForward(
+			SshTunnel tunnel, 
+			Action<Exception>? exceptionCallback = null, 
+			Func<PrivateKey, Task<string?>>? promptPassphrase = null, 
+			CancellationToken? cancellationToken = null)
 		{
-			foreach(var item in Items.Where(i => i.SelectedSshServer?.Id == sshServer.Id))
-			{
-				item.OnSshServerChanged(sender, sshServer);
-			}
+			return await PortForwardManager.StartForward(
+				tunnel,
+				exceptionCallback,
+				promptPassphrase ?? (privateKey => Dispatcher.UIThread.InvokeAsync(() => MainViewModel.DialogService.ShowPrivateKeyPasswordDialogAsync(privateKey))),
+				cancellationToken);
 		}
 
-		private void OnPrivateKeyChanged(object? sender, PrivateKey privateKey)
+		public void OnStopForward(SshTunnel tunnel)
 		{
-			foreach (var item in Items.Where(i => i.SelectedPrivateKey?.Id == privateKey.Id))
-			{
-				item.OnPrivateKeyChanged(sender, privateKey);
-			}
+			PortForwardManager.StopForward(tunnel);
 		}
 
-		private void OnRemoteServerChanged(object? sender, RemoteServer remoteServer)
+		[RelayCommand]
+		public async Task StartAllSshTunnels()
 		{
-			foreach (var item in Items.Where(i => i.SelectedRemoteServer?.Id == remoteServer.Id))
+			using var cts = new CancellationTokenSource();
+
+			async Task<string?> OnPromptPassphrase(PrivateKey privateKey)
 			{
-				item.OnRemoteServerChanged(sender, remoteServer);
+				var password = await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.DialogService.ShowPrivateKeyPasswordDialogAsync(privateKey));
+				if (password is null)
+				{
+					await cts.CancelAsync();
+				}
+
+				return password;
+			}
+
+			foreach (var tunnel in Items)
+			{
+				await tunnel.StartTunnel(OnPromptPassphrase, cts.Token);
+			}
+
+			//await Task.WhenAll(Items.Select(tunnel => tunnel.StartTunnel(OnPromptPassphrase, cts.Token)));
+		}
+
+		[RelayCommand]
+		public void StopAllSshTunnels()
+		{
+			foreach (var tunnel in Items)
+			{
+				tunnel.StopTunnel();
 			}
 		}
 
@@ -100,10 +135,12 @@ namespace Porter.ViewModels
 
 			StorageManager.SshTunnels.Remove(tunnelToDelete);
 
-			if (Items.FirstOrDefault(i => i.Id == id) is { } item)
+			if (Items.FirstOrDefault(i => i.Model.Id == id) is { } item)
 			{
 				Items.Remove(item);
 			}
+
+			PortForwardManager.StopForward(tunnelToDelete);
 		}
 
 		private static void ChangeSshTunnelName(Guid id, string? newName)
@@ -156,9 +193,33 @@ namespace Porter.ViewModels
 			StorageManager.SaveSshTunnels();
 		}
 
+		private void OnSshServerChanged(object? sender, SshServer sshServer)
+		{
+			foreach (var item in Items.Where(i => i.SelectedSshServer?.Id == sshServer.Id))
+			{
+				item.OnSshServerChanged(sender, sshServer);
+			}
+		}
+
+		private void OnPrivateKeyChanged(object? sender, PrivateKey privateKey)
+		{
+			foreach (var item in Items.Where(i => i.SelectedPrivateKey?.Id == privateKey.Id))
+			{
+				item.OnPrivateKeyChanged(sender, privateKey);
+			}
+		}
+
+		private void OnRemoteServerChanged(object? sender, RemoteServer remoteServer)
+		{
+			foreach (var item in Items.Where(i => i.SelectedRemoteServer?.Id == remoteServer.Id))
+			{
+				item.OnRemoteServerChanged(sender, remoteServer);
+			}
+		}
+
 		private SshTunnelControlModel CreateSshTunnelControlModel(SshTunnel tunnel)
 		{
-			return new SshTunnelControlModel(tunnel, StorageManager.SshServers, StorageManager.PrivateKeys, StorageManager.RemoteServers)
+			var sshTunnelControlModel = new SshTunnelControlModel(tunnel, StorageManager.SshServers, StorageManager.PrivateKeys, StorageManager.RemoteServers)
 			{
 				DeleteSshTunnel = new RelayCommand<Guid>(DeleteSshTunnel),
 				ChangeSshTunnelName = ChangeSshTunnelName,
@@ -166,7 +227,11 @@ namespace Porter.ViewModels
 				SshServerSelectionChanged = ChangeSshTunnelSshServer,
 				PrivateKeySelectionChanged = ChangeSshTunnelPrivateKey,
 				RemoteServerSelectionChanged = ChangeSshTunnelRemoteServer,
+				StartForward = OnStartForward,
+				StopForward = OnStopForward,
 			};
+
+			return sshTunnelControlModel;
 		}
 	}
 }

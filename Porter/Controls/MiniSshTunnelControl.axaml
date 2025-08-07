@@ -12,22 +12,27 @@
 	<Grid ColumnDefinitions="Auto, 10, *"
 		  MinHeight="20">
 
-		<ToggleButton Grid.Column="0"
-					  Classes="no-padding"
-					  Command="{Binding StartTunnel}"
-					  Width="{ Binding $parent.Bounds.Height }"
-					  Height="{ Binding $parent.Bounds.Height }">
+		<Button Grid.Column="0"
+				Classes="no-padding"
+				Classes.tunnel-started="{Binding IsTunnelStarted}"
+				Command="{Binding ToggleTunnel}"
+				Width="{ Binding $parent.Bounds.Height }"
+				Height="{ Binding $parent.Bounds.Height }">
 			<Panel Classes="center">
 				<TextBlock Text="&#xE3D0;"
 						   FontSize="22"
-						   FontFamily="{ StaticResource Phosphor }"
-						   Classes="tunnel-start"/>
+						   IsVisible="{Binding IsDisconnected}"
+						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE46C;"
 						   FontSize="22"
-						   FontFamily="{ StaticResource Phosphor }"
-						   Classes="tunnel-stop"/>
+						   IsVisible="{Binding IsTunnelStarted}"
+						   FontFamily="{ StaticResource Phosphor }"/>
+				<TextBlock Text="&#xE66A;"
+						   FontSize="22"
+						   IsVisible="{Binding IsConnecting}"
+						   FontFamily="{ StaticResource Phosphor }"/>
 			</Panel>
-		</ToggleButton>
+		</Button>
 
 		<TextBlock Grid.Column="2"
 				   Text="{Binding Name}"

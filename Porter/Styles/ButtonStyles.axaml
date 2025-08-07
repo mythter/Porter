@@ -43,16 +43,10 @@
 		<Setter Property="Width" Value="{ Binding $self.Height }"/>
 	</Style>
 
-	<Style Selector="ToggleButton TextBlock.tunnel-start">
-		<Setter Property="IsVisible" Value="True"/>
+	<Style Selector="Button.tunnel-started">
+		<Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}"/>
 	</Style>
-	<Style Selector="ToggleButton:checked TextBlock.tunnel-start">
-		<Setter Property="IsVisible" Value="False"/>
-	</Style>
-	<Style Selector="ToggleButton TextBlock.tunnel-stop">
-		<Setter Property="IsVisible" Value="False"/>
-	</Style>
-	<Style Selector="ToggleButton:checked TextBlock.tunnel-stop">
-		<Setter Property="IsVisible" Value="True"/>
+	<Style Selector="Button.tunnel-started:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundCheckedPointerOver}"/>
 	</Style>
 </Styles>

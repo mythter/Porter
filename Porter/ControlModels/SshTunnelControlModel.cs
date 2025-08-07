@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -32,11 +34,15 @@ namespace Porter.ControlModels
 		[ObservableProperty]
 		private RemoteServer? selectedRemoteServer;
 
-		partial void OnNameChanged(string? oldValue, string? newValue) => UpdateState();
-		partial void OnLocalPortChanged(int? oldValue, int? newValue) => UpdateState();
-		partial void OnSelectedSshServerChanged(SshServer? oldValue, SshServer? newValue) => UpdateState();
-		partial void OnSelectedPrivateKeyChanged(PrivateKey? oldValue, PrivateKey? newValue) => UpdateState();
-		partial void OnSelectedRemoteServerChanged(RemoteServer? oldValue, RemoteServer? newValue) => UpdateState();
+		[ObservableProperty]
+		private bool isTunnelStarted;
+
+		[ObservableProperty]
+		private bool isConnecting;
+
+		public bool IsDisconnected => !IsTunnelStarted && !IsConnecting;
+
+		public SshTunnel Model { get; set; }
 
 		public string MiniToolTip => GetMiniToolTip();
 
@@ -58,15 +64,17 @@ namespace Porter.ControlModels
 
 		public Action<Guid, RemoteServer?>? RemoteServerSelectionChanged { get; set; }
 
-		public Guid Id { get; set; }
+		public Func<SshTunnel, Action<Exception>?, Func<PrivateKey, Task<string?>>?, CancellationToken?, Task<bool>>? StartForward { get; set; }
+
+		public Action<SshTunnel>? StopForward { get; set; }
 
 		public SshTunnelControlModel(
-			SshTunnel model, 
-			ObservableCollection<SshServer> sshServers, 
+			SshTunnel model,
+			ObservableCollection<SshServer> sshServers,
 			ObservableCollection<PrivateKey> privateKeys,
 			ObservableCollection<RemoteServer> remoteServers)
 		{
-			Id = model.Id;
+			Model = model;
 			Name = model.Name;
 			LocalPort = model.LocalPort;
 
@@ -79,22 +87,71 @@ namespace Porter.ControlModels
 			SelectedRemoteServer = RemoteServers.FirstOrDefault(x => x?.Id == model.RemoteServer?.Id);
 		}
 
+		partial void OnNameChanged(string? oldValue, string? newValue) => UpdateState();
+		partial void OnLocalPortChanged(int? oldValue, int? newValue) => UpdateState();
+		partial void OnSelectedSshServerChanged(SshServer? oldValue, SshServer? newValue) => UpdateState();
+		partial void OnSelectedPrivateKeyChanged(PrivateKey? oldValue, PrivateKey? newValue) => UpdateState();
+		partial void OnSelectedRemoteServerChanged(RemoteServer? oldValue, RemoteServer? newValue) => UpdateState();
+
+		partial void OnIsTunnelStartedChanged(bool oldValue, bool newValue) => UpdateTunnelState();
+		partial void OnIsConnectingChanged(bool oldValue, bool newValue) => UpdateTunnelState();
+
 		[RelayCommand]
-		public void StartTunnel()
+		public async Task ToggleTunnel()
 		{
-			int some = 1;
+			if (IsConnecting)
+			{
+				//UpdateTunnelState();
+				return;
+			}
+
+			if (IsTunnelStarted)
+			{
+				StopTunnel();
+			}
+			else
+			{
+				await StartTunnel();
+			}
+		}
+
+		public async Task StartTunnel(Func<PrivateKey, Task<string?>>? promptPassphrase = null, CancellationToken? cancellationToken = null)
+		{
+			if (!IsTunnelStarted && StartForward is not null)
+			{
+				IsConnecting = true;
+				if (await StartForward(Model, OnTunnelException, promptPassphrase, cancellationToken))
+				{
+					IsTunnelStarted = true;
+				}
+				IsConnecting = false;
+			}
+		}
+
+		public void StopTunnel()
+		{
+			if (IsTunnelStarted && StopForward is not null)
+			{
+				StopForward(Model);
+				IsTunnelStarted = false;
+			}
+		}
+
+		public void OnTunnelException(Exception ex)
+		{
+			IsTunnelStarted = false;
 		}
 
 		public void OnNameLostFocus(object? sender, RoutedEventArgs e)
 		{
-			ChangeSshTunnelName?.Invoke(Id, Name);
+			ChangeSshTunnelName?.Invoke(Model.Id, Name);
 		}
 
 		public void OnNameKeyDown(object? sender, KeyEventArgs e, TopLevel? topLevel)
 		{
 			if (e.Key == Key.Enter)
 			{
-				ChangeSshTunnelName?.Invoke(Id, Name);
+				ChangeSshTunnelName?.Invoke(Model.Id, Name);
 				topLevel?.Focus();
 				e.Handled = true;
 			}
@@ -102,14 +159,14 @@ namespace Porter.ControlModels
 
 		public void OnLocalPortLostFocus(object? sender, RoutedEventArgs e)
 		{
-			ChangeSshTunnelLocalPort?.Invoke(Id, LocalPort);
+			ChangeSshTunnelLocalPort?.Invoke(Model.Id, LocalPort);
 		}
 
 		public void OnLocalPortKeyDown(object? sender, KeyEventArgs e, TopLevel? topLevel)
 		{
 			if (e.Key == Key.Enter)
 			{
-				ChangeSshTunnelLocalPort?.Invoke(Id, LocalPort);
+				ChangeSshTunnelLocalPort?.Invoke(Model.Id, LocalPort);
 				topLevel?.Focus();
 				e.Handled = true;
 			}
@@ -117,17 +174,17 @@ namespace Porter.ControlModels
 
 		public void OnSshServerSelectionChanged(object? sender, SelectionChangedEventArgs e)
 		{
-			SshServerSelectionChanged?.Invoke(Id, SelectedSshServer);
+			SshServerSelectionChanged?.Invoke(Model.Id, SelectedSshServer);
 		}
 
 		public void OnPrivateKeySelectionChanged(object? sender, SelectionChangedEventArgs e)
 		{
-			PrivateKeySelectionChanged?.Invoke(Id, SelectedPrivateKey);
+			PrivateKeySelectionChanged?.Invoke(Model.Id, SelectedPrivateKey);
 		}
 
 		public void OnRemoteServerSelectionChanged(object? sender, SelectionChangedEventArgs e)
 		{
-			RemoteServerSelectionChanged?.Invoke(Id, SelectedRemoteServer);
+			RemoteServerSelectionChanged?.Invoke(Model.Id, SelectedRemoteServer);
 		}
 
 		public void OnSshServerChanged(object? sender, SshServer sshServer)
@@ -150,6 +207,11 @@ namespace Porter.ControlModels
 			OnPropertyChanged(nameof(MiniToolTip));
 		}
 
+		private void UpdateTunnelState()
+		{
+			OnPropertyChanged(nameof(IsDisconnected));
+		}
+
 		private string GetMiniToolTip()
 		{
 			var sb = new StringBuilder();
@@ -159,8 +221,8 @@ namespace Porter.ControlModels
 
 			sb.Append("SSH server: ");
 			if (StringHelper.IsAllNullOrEmpty(
-				SelectedSshServer?.Name, 
-				SelectedSshServer?.User, 
+				SelectedSshServer?.Name,
+				SelectedSshServer?.User,
 				SelectedSshServer?.Host))
 			{
 				sb.AppendLine("-");
@@ -192,7 +254,7 @@ namespace Porter.ControlModels
 
 			sb.Append("Private key: ");
 			if (StringHelper.IsAllNullOrEmpty(
-				SelectedPrivateKey?.Name, 
+				SelectedPrivateKey?.Name,
 				SelectedPrivateKey?.FilePath))
 			{
 				sb.AppendLine("-");

@@ -19,6 +19,7 @@
 
 			<Button Grid.Column="0"
 					Classes="no-padding content-center"
+					Command="{Binding StartAllSshTunnels}"
 					ToolTip.Tip="Start all tunnels"
 					Height="{Binding $parent.Height }"
 					Width="{ Binding $self.Height }">
@@ -30,6 +31,7 @@
 
 			<Button Grid.Column="2"
 					Classes="no-padding content-center"
+					Command="{Binding StopAllSshTunnels}"
 					ToolTip.Tip="Stop all tunnels"
 					Height="{Binding $parent.Height }"
 					Width="{ Binding $self.Height }">

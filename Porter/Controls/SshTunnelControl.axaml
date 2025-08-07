@@ -12,22 +12,27 @@
 	<Grid ColumnDefinitions="Auto, 5, 0.8*, 5, 65, 5, *, 5, Auto, 5, *"
 		  MinHeight="20">
 
-		<ToggleButton Grid.Column="0"
-					  Classes="no-padding"
-					  Command="{Binding StartTunnel}"
-					  Width="{ Binding $parent.Bounds.Height }"
-					  Height="{ Binding $parent.Bounds.Height }">
+		<Button Grid.Column="0"
+				Classes="no-padding"
+				Classes.tunnel-started="{Binding IsTunnelStarted}"
+				Command="{Binding ToggleTunnel}"
+				Width="{ Binding $parent.Bounds.Height }"
+				Height="{ Binding $parent.Bounds.Height }">
 			<Panel Classes="center">
 				<TextBlock Text="&#xE3D0;"
 						   FontSize="22"
-						   FontFamily="{ StaticResource Phosphor }"
-						   Classes="tunnel-start"/>
+						   IsVisible="{Binding IsDisconnected}"
+						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE46C;"
 						   FontSize="22"
-						   FontFamily="{ StaticResource Phosphor }"
-						   Classes="tunnel-stop"/>
+						   IsVisible="{Binding IsTunnelStarted}"
+						   FontFamily="{ StaticResource Phosphor }"/>
+				<TextBlock Text="&#xE66A;"
+						   FontSize="22"
+						   IsVisible="{Binding IsConnecting}"
+						   FontFamily="{ StaticResource Phosphor }"/>
 			</Panel>
-		</ToggleButton>
+		</Button>
 
 		<TextBox Grid.Column="2"
 				 Watermark="Name"
@@ -65,7 +70,7 @@
 					<TextBlock Text="SSH server" Foreground="Gray"/>
 				</DataTemplate>
 			</CustomComboBox.DefaultItem>
-			
+
 			<ComboBox.ItemTemplate>
 				<DataTemplate>
 					<TextBlock Text="{Binding Name}"
@@ -130,7 +135,7 @@
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
 					Command="{Binding DeleteSshTunnel}"
-					CommandParameter="{Binding Id}"
+					CommandParameter="{Binding Model.Id}"
 					Classes="no-padding content-center"
 					VerticalAlignment="Stretch"
 					Height="{ Binding $parent.Bounds.Height }">
