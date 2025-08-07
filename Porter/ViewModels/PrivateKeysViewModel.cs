@@ -30,7 +30,7 @@ namespace Porter.ViewModels
 		[RelayCommand]
 		public async Task AddPrivateKey()
 		{
-			var file = await MainViewModel.FileDialogService.ShowPrivateKeyOpenFileDialogAsync();
+			var file = await MainViewModel.DialogService.ShowPrivateKeyOpenFileDialogAsync();
 
 			if (file is null)
 				return;
@@ -81,7 +81,7 @@ namespace Porter.ViewModels
 			if (StorageManager.PrivateKeys.FirstOrDefault(pk => pk.Id == id) is not { } privateKeyToUpdate)
 				return;
 
-			var file = await MainViewModel.FileDialogService.ShowPrivateKeyOpenFileDialogAsync();
+			var file = await MainViewModel.DialogService.ShowPrivateKeyOpenFileDialogAsync();
 
 			if (file is null)
 				return;

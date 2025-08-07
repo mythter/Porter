@@ -27,7 +27,7 @@ public partial class MainViewModel : ViewModelBase
 
 	#region Services
 
-	public IFileDialogService FileDialogService { get; private set; }
+	public IDialogService DialogService { get; private set; }
 
 	#endregion
 
@@ -48,11 +48,11 @@ public partial class MainViewModel : ViewModelBase
 	}
 
 	public MainViewModel(
-		IFileDialogService fileDialogService,
+		IDialogService fileDialogService,
 		Action exitAction,
 		Action openMainWindow)
 	{
-		FileDialogService = fileDialogService;
+		DialogService = fileDialogService;
 
 		SshServersViewModel = new SshServersViewModel(this);
 		RemoteServersViewModel = new RemoteServersViewModel(this);

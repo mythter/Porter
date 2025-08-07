@@ -41,7 +41,7 @@ public partial class App : Application
 
 			void openMainWindowCommand() => mainWindow.Show();
 
-			var fileDialogService = new FileDialogService(mainWindow);
+			var fileDialogService = new DialogService(mainWindow);
 
 			vm = new MainViewModel(fileDialogService, exitCommand, openMainWindowCommand);
 
@@ -49,7 +49,7 @@ public partial class App : Application
 
 			desktop.MainWindow = mainWindow;
 
-			var miniWindow = new MiniWindow
+			var miniWindow = new MiniWindow()
 			{
 				DataContext = vm
 			};

@@ -2,10 +2,14 @@
 
 using Avalonia.Platform.Storage;
 
+using Porter.Models;
+
 namespace Porter.Interfaces
 {
-	public interface IFileDialogService
+	public interface IDialogService
 	{
 		Task<IStorageFile?> ShowPrivateKeyOpenFileDialogAsync();
+
+		Task<string?> ShowPrivateKeyPasswordDialogAsync(PrivateKey privateKey);
 	}
 }
