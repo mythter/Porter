@@ -10,7 +10,7 @@ namespace Porter.Views;
 public partial class MiniWindow : Window
 {
 
-	private const int _windowMargin = 10;
+	private const int _windowMargin = 5;
 
 	private bool _isDeactivated;
 
