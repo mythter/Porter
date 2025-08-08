@@ -40,7 +40,8 @@ namespace Porter.Services
 		{
 			var dialog = new PrivateKeyPasswordWindow
 			{
-				DataContext = new PrivateKeyPasswordViewModel(privateKey)
+				DataContext = new PrivateKeyPasswordViewModel(privateKey),
+				WindowStartupLocation = WindowStartupLocation.CenterScreen
 			};
 
 			var windowVisible = _window.IsVisible;
