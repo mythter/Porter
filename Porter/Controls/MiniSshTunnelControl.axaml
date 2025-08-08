@@ -35,9 +35,34 @@
 		</Button>
 
 		<TextBlock Grid.Column="2"
+				   IsVisible="{Binding !IsNameNullOrEmpty}"
 				   Text="{Binding Name}"
 				   HorizontalAlignment="Left"
 				   VerticalAlignment="Center"/>
+
+		<Grid Grid.Column="2"
+			  ColumnDefinitions="Auto,5,Auto,5,*"
+			  IsVisible="{Binding IsNameNullOrEmpty}">
+			
+			<TextBlock Grid.Column="0"
+					   Text="{Binding LocalPort}"
+					   HorizontalAlignment="Left"
+					   VerticalAlignment="Center"/>
+
+			<TextBlock Grid.Column="2"
+					   Text="&#xE13A;"
+					   FontSize="20"
+					   HorizontalAlignment="Left"
+					   VerticalAlignment="Center"
+					   FontFamily="{ StaticResource Phosphor }"/>
+
+			<TextBlock Grid.Column="4"
+					   Text="{Binding RemoteServerAlias}"
+					   HorizontalAlignment="Left"
+					   VerticalAlignment="Center"/>
+		</Grid>
+
+
 
 	</Grid>
 </UserControl>

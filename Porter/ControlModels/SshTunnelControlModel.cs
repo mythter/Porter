@@ -42,6 +42,18 @@ namespace Porter.ControlModels
 
 		public bool IsDisconnected => !IsTunnelStarted && !IsConnecting;
 
+		public bool IsNameNullOrEmpty => string.IsNullOrEmpty(Name) && RemoteServerAlias is not null;
+
+		public string? RemoteServerAlias => Model.RemoteServer?.Host switch
+		{
+			not null => Model.RemoteServer.Port switch
+			{
+				not null => $"{Model.RemoteServer.Host}:{Model.RemoteServer.Port}",
+				_ => Model.RemoteServer.Host
+			},
+			_ => null
+		};
+
 		public SshTunnel Model { get; set; }
 
 		public string MiniToolTip => GetMiniToolTip();
@@ -87,12 +99,16 @@ namespace Porter.ControlModels
 			SelectedRemoteServer = RemoteServers.FirstOrDefault(x => x?.Id == model.RemoteServer?.Id);
 		}
 
-		partial void OnNameChanged(string? oldValue, string? newValue) => UpdateState();
+		partial void OnNameChanged(string? oldValue, string? newValue) 
+		{
+			OnPropertyChanged(nameof(IsNameNullOrEmpty));
+			UpdateState();
+		}
+
 		partial void OnLocalPortChanged(int? oldValue, int? newValue) => UpdateState();
 		partial void OnSelectedSshServerChanged(SshServer? oldValue, SshServer? newValue) => UpdateState();
 		partial void OnSelectedPrivateKeyChanged(PrivateKey? oldValue, PrivateKey? newValue) => UpdateState();
 		partial void OnSelectedRemoteServerChanged(RemoteServer? oldValue, RemoteServer? newValue) => UpdateState();
-
 		partial void OnIsTunnelStartedChanged(bool oldValue, bool newValue) => UpdateTunnelState();
 		partial void OnIsConnectingChanged(bool oldValue, bool newValue) => UpdateTunnelState();
 
@@ -199,6 +215,7 @@ namespace Porter.ControlModels
 
 		public void OnRemoteServerChanged(object? sender, RemoteServer remoteServer)
 		{
+			OnPropertyChanged(nameof(RemoteServerAlias));
 			UpdateState();
 		}
 
