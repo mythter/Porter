@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Avalonia;
 using Avalonia.Controls;
 
 using Porter.Storage;
@@ -17,6 +18,8 @@ public partial class MainWindow : Window
 	public MainWindow()
 	{
 		InitializeComponent();
+
+		RestoreWindowSettings();
 
 		PropertyChanged += (sender, e) =>
 		{
@@ -42,6 +45,8 @@ public partial class MainWindow : Window
 	{
 		base.OnClosing(e);
 
+		SaveWindowSettings();
+
 		if (!StorageManager.Settings.OnCloseMinimizeToTray)
 		{
 			_isClosing = true;
@@ -54,5 +59,41 @@ public partial class MainWindow : Window
 
 		if (TrayIcon is not null) 
 			TrayIcon.IsVisible = true;
+	}
+
+	private void SaveWindowSettings()
+	{
+		var windowSettings = StorageManager.WindowSettings;
+
+		windowSettings.Left = Position.X;
+		windowSettings.Top = Position.Y;
+		windowSettings.Width = Width;
+		windowSettings.Height = Height;
+		windowSettings.Maximized = WindowState == WindowState.Maximized;
+
+		StorageManager.SaveWindowSettings(windowSettings);
+	}
+
+	private void RestoreWindowSettings()
+	{
+		var windowSettings = StorageManager.WindowSettings;
+
+		if (windowSettings.Maximized)
+		{
+			WindowState = WindowState.Maximized;
+			return;
+		}
+
+		var screen = Screens.ScreenFromPoint(new PixelPoint(windowSettings.Left, windowSettings.Top));
+		if (screen is null)
+		{
+			WindowStartupLocation = WindowStartupLocation.CenterScreen;
+		}
+		else if (Width > 0 && Height > 0)
+		{
+			Position = new PixelPoint(windowSettings.Left, windowSettings.Top);
+			Width = windowSettings.Width;
+			Height = windowSettings.Height;
+		}
 	}
 }

@@ -25,6 +25,8 @@ namespace Porter.Storage
 
 		public static Settings Settings => _data.Settings ??= new();
 
+		public static WindowSettings WindowSettings => _data.WindowSettings ??= new();
+
 		public static ObservableCollection<SshServer> SshServers => _sshServers;
 
 		public static ObservableCollection<RemoteServer> RemoteServers => _remoteServers;
@@ -68,6 +70,12 @@ namespace Porter.Storage
 		public static void SaveSettings(Settings? settings = null)
 		{
 			_data.Settings = settings ?? _data.Settings;
+			Save();
+		}
+
+		public static void SaveWindowSettings(WindowSettings? windowSettings = null)
+		{
+			_data.WindowSettings = windowSettings ?? _data.WindowSettings;
 			Save();
 		}
 

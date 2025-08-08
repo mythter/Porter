@@ -6,6 +6,8 @@ namespace Porter.Models
 	{
 		public Settings Settings { get; set; }
 
+		public WindowSettings WindowSettings { get; set; }
+
 		public List<SshServer> SshServers { get; set; } = [];
 
 		public List<RemoteServer> RemoteServers { get; set; } = [];
