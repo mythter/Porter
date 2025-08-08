@@ -37,10 +37,10 @@ namespace Porter.ViewModels
 
 		private void DeleteRemoteServer(Guid id)
 		{
-			if (StorageManager.RemoteServers.FirstOrDefault(pk => pk.Id == id) is not { } serverToDelete)
-				return;
-
-			StorageManager.RemoteServers.Remove(serverToDelete);
+			if (StorageManager.RemoteServers.FirstOrDefault(pk => pk.Id == id) is { } serverToDelete)
+			{
+				StorageManager.RemoteServers.Remove(serverToDelete);
+			}
 
 			if (Items.FirstOrDefault(i => i.Id == id) is { } item)
 			{

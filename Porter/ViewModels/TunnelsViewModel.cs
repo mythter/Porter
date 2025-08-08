@@ -69,9 +69,9 @@ namespace Porter.ViewModels
 		}
 
 		public async Task<bool> OnStartForward(
-			SshTunnel tunnel, 
-			Action<Exception>? exceptionCallback = null, 
-			Func<PrivateKey, Task<string?>>? promptPassphrase = null, 
+			SshTunnel tunnel,
+			Action<Exception>? exceptionCallback = null,
+			Func<PrivateKey, Task<string?>>? promptPassphrase = null,
 			CancellationToken? cancellationToken = null)
 		{
 			return await PortForwardManager.StartForward(
@@ -130,17 +130,16 @@ namespace Porter.ViewModels
 
 		private void DeleteSshTunnel(Guid id)
 		{
-			if (StorageManager.SshTunnels.FirstOrDefault(pk => pk.Id == id) is not { } tunnelToDelete)
-				return;
-
-			StorageManager.SshTunnels.Remove(tunnelToDelete);
+			if (StorageManager.SshTunnels.FirstOrDefault(pk => pk.Id == id) is { } tunnelToDelete)
+			{
+				StorageManager.SshTunnels.Remove(tunnelToDelete);
+				PortForwardManager.StopForward(tunnelToDelete);
+			}
 
 			if (Items.FirstOrDefault(i => i.Model.Id == id) is { } item)
 			{
 				Items.Remove(item);
 			}
-
-			PortForwardManager.StopForward(tunnelToDelete);
 		}
 
 		private static void ChangeSshTunnelName(Guid id, string? newName)

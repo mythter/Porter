@@ -37,10 +37,10 @@ namespace Porter.ViewModels
 
 		private void DeleteSshServer(Guid id)
 		{
-			if (StorageManager.SshServers.FirstOrDefault(pk => pk.Id == id) is not { } serverToDelete)
-				return;
-
-			StorageManager.SshServers.Remove(serverToDelete);
+			if (StorageManager.SshServers.FirstOrDefault(pk => pk.Id == id) is { } serverToDelete)
+			{
+				StorageManager.SshServers.Remove(serverToDelete);
+			}
 
 			if (Items.FirstOrDefault(i => i.Id == id) is { } item)
 			{
