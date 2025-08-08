@@ -21,14 +21,17 @@
 			<Panel Classes="center">
 				<TextBlock Text="&#xE3D0;"
 						   FontSize="22"
+						   ToolTip.Tip="Start Tunnel"
 						   IsVisible="{Binding IsDisconnected}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE46C;"
 						   FontSize="22"
+						   ToolTip.Tip="Stop Tunnel"
 						   IsVisible="{Binding IsTunnelStarted}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE66A;"
 						   FontSize="22"
+						   ToolTip.Tip="Connecting"
 						   IsVisible="{Binding IsConnecting}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 			</Panel>
@@ -37,7 +40,7 @@
 		<TextBox Grid.Column="2"
 				 Watermark="Name"
 				 Text="{Binding Name}"
-				 ToolTip.Tip="Tunnel Name"
+				 ToolTip.Tip="{Binding Name, TargetNullValue=Tunnel Name}"
 				 LostFocus="OnNameLostFocus"
 				 KeyDown="OnNameKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -134,6 +137,7 @@
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
+					ToolTip.Tip="Delete Tunnel"
 					Command="{Binding DeleteSshTunnel}"
 					CommandParameter="{Binding Model.Id}"
 					Classes="no-padding content-center"

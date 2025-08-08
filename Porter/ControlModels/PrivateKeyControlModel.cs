@@ -47,11 +47,13 @@ namespace Porter.ControlModels
 
 		public void OnFileNameLostFocus(object sender, RoutedEventArgs e)
 		{
+			Name = string.IsNullOrEmpty(Name) ? null : Name;
 			ChangePrivateKeyName?.Invoke(Id, Name);
 		}
 
 		public void OnFileNameKeyDown(object sender, KeyEventArgs e, TopLevel? topLevel)
 		{
+			Name = string.IsNullOrEmpty(Name) ? null : Name;
 			if (e.Key == Key.Enter)
 			{
 				ChangePrivateKeyName?.Invoke(Id, Name);

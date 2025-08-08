@@ -96,6 +96,7 @@
 
 			<Button Grid.Column="12"
 					Classes="no-padding content-center"
+					ToolTip.Tip="Add new Tunnel"
 					Command="{Binding AddSshTunnel}"
 					Height="{Binding $parent.Height }"
 					Width="{ Binding $self.Height }">

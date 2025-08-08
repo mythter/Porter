@@ -13,6 +13,7 @@
 		<TextBox Grid.Column="0"
 				 Watermark="Name"
 				 Text="{Binding Name}"
+				 ToolTip.Tip="{Binding Name, TargetNullValue=Private Key Name}"
 				 LostFocus="OnFileNameLostFocus"
 				 KeyDown="OnFileNameKeyDown"
 				 VerticalContentAlignment="Center">
@@ -28,11 +29,13 @@
 					   TextDecorations="Underline"
 					   PointerPressed="OnFilePathClick"
 					   Text="{Binding FilePath}"
+					   ToolTip.Tip="{Binding FilePath}"
 					   TextTrimming="{x:Static TextTrimming.LeadingCharacterEllipsis}">
 			</TextBlock >
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
+					ToolTip.Tip="Delete Private Key"
 					Command="{Binding DeletePrivateKey}"
 					CommandParameter="{Binding Id}"
 					Classes="no-padding content-center"

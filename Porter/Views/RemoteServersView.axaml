@@ -29,6 +29,7 @@
 					   FontSize="16"/>
 			<Button Grid.Column="2"
 					Classes="no-padding content-center"
+					ToolTip.Tip="Add new Remote Server"
 					Command="{Binding AddRemoteServer}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">

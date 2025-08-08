@@ -48,11 +48,13 @@ namespace Porter.ControlModels
 
 		public void OnNameLostFocus(object? sender, RoutedEventArgs e)
 		{
+			Name = string.IsNullOrEmpty(Name) ? null : Name;
 			ChangeSshServerName?.Invoke(Id, Name);
 		}
 
 		public void OnNameKeyDown(object? sender, KeyEventArgs e, TopLevel? topLevel)
 		{
+			Name = string.IsNullOrEmpty(Name) ? null : Name;
 			if (e.Key == Key.Enter)
 			{
 				ChangeSshServerName?.Invoke(Id, Name);
@@ -63,11 +65,13 @@ namespace Porter.ControlModels
 
 		public void OnUserLostFocus(object? sender, RoutedEventArgs e)
 		{
+			User = string.IsNullOrEmpty(User) ? null : User;
 			ChangeSshServerUser?.Invoke(Id, User);
 		}
 
 		public void OnUserKeyDown(object? sender, KeyEventArgs e, TopLevel? topLevel)
 		{
+			User = string.IsNullOrEmpty(User) ? null : User;
 			if (e.Key == Key.Enter)
 			{
 				ChangeSshServerUser?.Invoke(Id, User);
@@ -78,11 +82,13 @@ namespace Porter.ControlModels
 
 		public void OnHostLostFocus(object? sender, RoutedEventArgs e)
 		{
+			Host = string.IsNullOrEmpty(Host) ? null : Host;
 			ChangeSshServerHost?.Invoke(Id, Host);
 		}
 
 		public void OnHostKeyDown(object? sender, KeyEventArgs e, TopLevel? topLevel)
 		{
+			Host = string.IsNullOrEmpty(Host) ? null : Host;
 			if (e.Key == Key.Enter)
 			{
 				ChangeSshServerHost?.Invoke(Id, Host);

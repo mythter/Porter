@@ -13,6 +13,7 @@
 		<TextBox Grid.Column="0"
 				 Watermark="Name"
 				 Text="{Binding Name}"
+				 ToolTip.Tip="{Binding Name, TargetNullValue=SSH Server Name}"
 				 LostFocus="OnNameLostFocus"
 				 KeyDown="OnNameKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -20,6 +21,7 @@
 		<TextBox Grid.Column="2"
 				 Watermark="User"
 				 Text="{Binding User}"
+				 ToolTip.Tip="{Binding User, TargetNullValue=SSH Server User Name}"
 				 LostFocus="OnUserLostFocus"
 				 KeyDown="OnUserKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -27,6 +29,7 @@
 		<TextBox Grid.Column="4"
 				 Watermark="Host"
 				 Text="{Binding Host}"
+				 ToolTip.Tip="{Binding Host, TargetNullValue=SSH Server Host}"
 				 LostFocus="OnHostLostFocus"
 				 KeyDown="OnHostKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -36,6 +39,7 @@
 			  ColumnDefinitions="*, 5, Auto">
 			<NumericUpDown Grid.Column="0"
 						   Watermark="Port"
+						   ToolTip.Tip="SSH Server Port"
 						   VerticalContentAlignment="Center"
 						   MinWidth="0"
 						   Maximum="65535"
@@ -48,6 +52,7 @@
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
+					ToolTip.Tip="Delete SSH Server"
 					Command="{Binding DeleteSshServer}"
 					CommandParameter="{Binding Id}"
 					Classes="no-padding content-center"

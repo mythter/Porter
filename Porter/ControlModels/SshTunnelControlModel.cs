@@ -160,11 +160,13 @@ namespace Porter.ControlModels
 
 		public void OnNameLostFocus(object? sender, RoutedEventArgs e)
 		{
+			Name = string.IsNullOrEmpty(Name) ? null : Name;
 			ChangeSshTunnelName?.Invoke(Model.Id, Name);
 		}
 
 		public void OnNameKeyDown(object? sender, KeyEventArgs e, TopLevel? topLevel)
 		{
+			Name = string.IsNullOrEmpty(Name) ? null : Name;
 			if (e.Key == Key.Enter)
 			{
 				ChangeSshTunnelName?.Invoke(Model.Id, Name);

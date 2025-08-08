@@ -45,6 +45,7 @@
 						Classes="no-padding content-center"
 						Height="{Binding $parent.Height }"
 						Width="{Binding $self.Height}"
+						ToolTip.Tip="Open Main Window"
 						Command="{Binding OpenMainWindow}">
 					<LayoutTransformControl>
 						<LayoutTransformControl.LayoutTransform>

@@ -21,14 +21,17 @@
 			<Panel Classes="center">
 				<TextBlock Text="&#xE3D0;"
 						   FontSize="22"
+						   ToolTip.Tip="Start Tunnel"
 						   IsVisible="{Binding IsDisconnected}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE46C;"
 						   FontSize="22"
+						   ToolTip.Tip="Stop Tunnel"
 						   IsVisible="{Binding IsTunnelStarted}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE66A;"
 						   FontSize="22"
+						   ToolTip.Tip="Connecting"
 						   IsVisible="{Binding IsConnecting}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 			</Panel>

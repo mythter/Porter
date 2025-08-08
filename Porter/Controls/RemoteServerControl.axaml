@@ -13,6 +13,7 @@
 		<TextBox Grid.Column="0"
 				 Watermark="Name"
 				 Text="{Binding Name}"
+				 ToolTip.Tip="{Binding Name, TargetNullValue=Remote Host Name}"
 				 LostFocus="OnNameLostFocus"
 				 KeyDown="OnNameKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -20,6 +21,7 @@
 		<TextBox Grid.Column="2"
 				 Watermark="Host"
 				 Text="{Binding Host}"
+				 ToolTip.Tip="{Binding Host, TargetNullValue=Remote Host}"
 				 LostFocus="OnHostLostFocus"
 				 KeyDown="OnHostKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -29,6 +31,7 @@
 			  ColumnDefinitions="*, 5, Auto">
 			<NumericUpDown Grid.Column="0"
 						   Watermark="Port"
+						   ToolTip.Tip="Remote Server Port"
 						   VerticalContentAlignment="Center"
 						   MinWidth="0"
 						   Maximum="65535"
@@ -41,6 +44,7 @@
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
+					ToolTip.Tip="Delete Remote Server"
 					Command="{Binding DeleteRemoteServer}"
 					CommandParameter="{Binding Id}"
 					Classes="no-padding content-center"
