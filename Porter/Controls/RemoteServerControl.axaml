@@ -13,7 +13,7 @@
 		<TextBox Grid.Column="0"
 				 Watermark="Name"
 				 Text="{Binding Name}"
-				 ToolTip.Tip="{Binding Name, TargetNullValue=Remote Host Name}"
+				 ToolTip.Tip="{Binding Name, TargetNullValue=Remote Server Name}"
 				 LostFocus="OnNameLostFocus"
 				 KeyDown="OnNameKeyDown"
 				 VerticalContentAlignment="Center"/>
