@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Tools\puttygen.exe" />
-  </ItemGroup>
-
-  <ItemGroup>
     <AvaloniaResource Include="Styles\CustomComboBoxStyles.axaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
@@ -30,12 +26,6 @@
     <AvaloniaResource Include="Styles\StaticComboBoxStyles.axaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Tools\puttygen.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
