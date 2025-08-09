@@ -17,7 +17,7 @@ class Program
 		AppDomain.CurrentDomain.UnhandledException += (s, e) =>
 		{
 			if (e.ExceptionObject is Exception ex)
-				File.WriteAllText("fatal2.log", ex.ToString());
+				File.WriteAllText("fatal.log", ex.ToString());
 		};
 
 		TaskScheduler.UnobservedTaskException += (s, e) =>
