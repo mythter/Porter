@@ -17,11 +17,11 @@ namespace Porter.Storage
 			WriteIndented = true
 		};
 
-		private static AppData _data = LoadData();
-		private static ObservableCollection<SshServer> _sshServers = new(_data.SshServers);
-		private static ObservableCollection<RemoteServer> _remoteServers = new(_data.RemoteServers);
-		private static ObservableCollection<PrivateKey> _privateKeys = new(_data.PrivateKeys);
-		private static ObservableCollection<SshTunnel> _sshTunnels = new(_data.SshTunnels);
+		private static AppData _data = null!;
+		private static ObservableCollection<SshServer> _sshServers = null!;
+		private static ObservableCollection<RemoteServer> _remoteServers = null!;
+		private static ObservableCollection<PrivateKey> _privateKeys= null!;
+		private static ObservableCollection<SshTunnel> _sshTunnels= null!;
 
 		public static Settings Settings => _data.Settings ??= new();
 
@@ -37,10 +37,7 @@ namespace Porter.Storage
 
 		static StorageManager()
 		{
-			_sshServers.CollectionChanged += (s, e) => SaveSshServers();
-			_remoteServers.CollectionChanged += (s, e) => SaveRemoteServers();
-			_privateKeys.CollectionChanged += (s, e) => SavePrivateKeys();
-			_sshTunnels.CollectionChanged += (s, e) => SaveSshTunnels();
+			InitData();
 		}
 
 		public static void SaveSshServers(List<SshServer>? sshServers = null)
@@ -81,7 +78,50 @@ namespace Porter.Storage
 
 		public static void Save()
 		{
-			SaveData(_data);
+			SaveData(_data, _filePath);
+		}
+
+		public static void Export(string filePath)
+		{
+			SaveData(_data, filePath);
+		}
+
+		public static bool Import(string filePath)
+		{
+			AppData? data;
+
+			try
+			{
+				var json = File.ReadAllText(filePath);
+				data = JsonSerializer.Deserialize<AppData>(json, _serializerOptions);
+			}
+			catch
+			{
+				return false;
+			}
+
+			if (data is not null)
+			{
+				SaveData(data, _filePath);
+				InitData();
+			}
+
+			return true;
+		}
+
+		private static void InitData()
+		{
+			_data = LoadData();
+
+			_sshServers = new(_data.SshServers);
+			_remoteServers = new(_data.RemoteServers);
+			_privateKeys = new(_data.PrivateKeys);
+			_sshTunnels = new(_data.SshTunnels);
+
+			_sshServers.CollectionChanged += (s, e) => SaveSshServers();
+			_remoteServers.CollectionChanged += (s, e) => SaveRemoteServers();
+			_privateKeys.CollectionChanged += (s, e) => SavePrivateKeys();
+			_sshTunnels.CollectionChanged += (s, e) => SaveSshTunnels();
 		}
 
 		private static AppData LoadData()
@@ -89,7 +129,7 @@ namespace Porter.Storage
 			if (!File.Exists(_filePath))
 			{
 				var newData = new AppData();
-				SaveData(newData);
+				SaveData(newData, _filePath);
 				return newData;
 			}
 
@@ -104,10 +144,10 @@ namespace Porter.Storage
 			}
 		}
 
-		private static void SaveData(AppData data)
+		private static void SaveData(AppData data, string filePath)
 		{
 			string json = JsonSerializer.Serialize(data, _serializerOptions);
-			File.WriteAllText(_filePath, json);
+			File.WriteAllText(filePath, json);
 		}
 	}
 }

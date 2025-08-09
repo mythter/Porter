@@ -8,20 +8,23 @@ namespace Porter.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-	#region Commands
+	#region Private Fields
 
+	private readonly Action _exitAction;
+
+	private readonly Action _openMainWindowAction;
 
 	#endregion
 
 	#region ViewModels
 
-	public TunnelsViewModel TunnelsViewModel { get; }
+	public TunnelsViewModel TunnelsViewModel { get; private set; }
 
-	public SshServersViewModel SshServersViewModel { get; }
+	public SshServersViewModel SshServersViewModel { get; private set; }
 
-	public RemoteServersViewModel RemoteServersViewModel { get; }
+	public RemoteServersViewModel RemoteServersViewModel { get; private set; }
 
-	public PrivateKeysViewModel PrivateKeysViewModel { get; }
+	public PrivateKeysViewModel PrivateKeysViewModel { get; private set; }
 
 	#endregion
 
@@ -53,17 +56,26 @@ public partial class MainViewModel : ViewModelBase
 		IDialogService fileDialogService,
 		ITrayService trayService,
 		Action exitAction,
-		Action openMainWindow)
+		Action openMainWindowAction)
 	{
 		DialogService = fileDialogService;
 		TrayService = trayService;
 
+		_exitAction = exitAction;
+		_openMainWindowAction = openMainWindowAction;
+
+		InitViewModels();
+
+		_CurrentPage = TunnelsViewModel!;
+	}
+
+	public void InitViewModels()
+	{
 		SshServersViewModel = new SshServersViewModel(this);
 		RemoteServersViewModel = new RemoteServersViewModel(this);
 		PrivateKeysViewModel = new PrivateKeysViewModel(this);
-		TunnelsViewModel = new TunnelsViewModel(this, exitAction, openMainWindow);
-
-		_CurrentPage = TunnelsViewModel;
+		TunnelsViewModel = new TunnelsViewModel(this, _exitAction, _openMainWindowAction);
+		OnPropertyChanged(nameof(TunnelsViewModel));
 	}
 
 	[RelayCommand]

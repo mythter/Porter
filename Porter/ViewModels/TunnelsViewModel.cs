@@ -65,7 +65,29 @@ namespace Porter.ViewModels
 					}),
 					ToggleType = MenuItemToggleType.CheckBox,
 					IsChecked = settings.OnCloseMinimizeToTray,
-				}
+				},
+				new MenuItemViewModel
+				{
+					Header = "Export settings",
+					Command = new RelayCommand(async () => 
+					{
+						await MainViewModel.DialogService.ShowSettingsSaveFileDialogAsync();
+					}),
+				},
+				new MenuItemViewModel
+				{
+					Header = "Import settings",
+					Command = new RelayCommand(async () => 
+					{
+						var file = await MainViewModel.DialogService.ShowSettingsOpenFileDialogAsync();
+
+						if (file is not null && StorageManager.Import(file.Path.AbsolutePath))
+						{
+							MainViewModel.InitViewModels();
+							MainViewModel.GoToTunnels();
+						}
+					}),
+				},
 			];
 		}
 

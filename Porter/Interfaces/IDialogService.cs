@@ -10,6 +10,10 @@ namespace Porter.Interfaces
 	{
 		Task<IStorageFile?> ShowPrivateKeyOpenFileDialogAsync();
 
+		Task<IStorageFile?> ShowSettingsOpenFileDialogAsync();
+
+		Task ShowSettingsSaveFileDialogAsync();
+
 		Task<string?> ShowPrivateKeyPasswordDialogAsync(PrivateKey privateKey);
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -6,6 +7,7 @@ using Avalonia.Platform.Storage;
 
 using Porter.Interfaces;
 using Porter.Models;
+using Porter.Storage;
 using Porter.ViewModels;
 using Porter.Views;
 
@@ -34,6 +36,42 @@ namespace Porter.Services
 
 			var result = await _window.StorageProvider.OpenFilePickerAsync(options);
 			return result.FirstOrDefault();
+		}
+
+		public async Task<IStorageFile?> ShowSettingsOpenFileDialogAsync()
+		{
+			var options = new FilePickerOpenOptions
+			{
+				Title = "Choose settings file",
+				AllowMultiple = false,
+				FileTypeFilter =
+				[
+					new FilePickerFileType("JSON files") { Patterns = [ "*.json" ] }
+				]
+			};
+
+			var result = await _window.StorageProvider.OpenFilePickerAsync(options);
+			return result.FirstOrDefault();
+		}
+
+		public async Task ShowSettingsSaveFileDialogAsync()
+		{
+			var options = new FilePickerSaveOptions
+			{
+				Title = "Export settings",
+				SuggestedFileName = "settings.json",
+				FileTypeChoices =
+				[
+					new FilePickerFileType("JSON files") { Patterns = ["*.json"] }
+				]
+			};
+
+			var file = await _window.StorageProvider.SaveFilePickerAsync(options);
+
+			if (file != null)
+			{
+				StorageManager.Export(file.Path.AbsolutePath);
+			}
 		}
 
 		public async Task<string?> ShowPrivateKeyPasswordDialogAsync(PrivateKey privateKey)
