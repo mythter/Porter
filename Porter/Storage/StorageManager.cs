@@ -100,13 +100,14 @@ namespace Porter.Storage
 				return false;
 			}
 
-			if (data is not null)
+			if (data?.Settings is not null)
 			{
 				SaveData(data, _filePath);
 				InitData();
+				return true;
 			}
 
-			return true;
+			return false;
 		}
 
 		private static void InitData()
