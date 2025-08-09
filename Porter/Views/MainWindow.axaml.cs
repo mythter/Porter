@@ -89,7 +89,7 @@ public partial class MainWindow : Window
 		{
 			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 		}
-		else if (Width > 0 && Height > 0)
+		else if (windowSettings.Width > 0 && windowSettings.Height > 0)
 		{
 			Position = new PixelPoint(windowSettings.Left, windowSettings.Top);
 			Width = windowSettings.Width;
