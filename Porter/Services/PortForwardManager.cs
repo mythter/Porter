@@ -51,6 +51,17 @@ namespace Porter.Services
 			return GetConnectionByTunnelId(tunnel.Id) is { } connection && connection.IsForwardStarted(tunnel.Id);
 		}
 
+		public bool IsAnyForwardStarted()
+		{
+			foreach (var connection in _connections)
+			{
+				if (connection.Tunnels.Any(connection.IsForwardStarted))
+					return true;
+			}
+
+			return false;
+		}
+
 		public void Dispose()
 		{
 			foreach (var connection in _connections)

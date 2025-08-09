@@ -12,6 +12,11 @@ public partial class PrivateKeyPasswordView : UserControl
 	public PrivateKeyPasswordView()
 	{
 		InitializeComponent();
+
+		PasswordTextBox.AttachedToVisualTree += (_, _) =>
+		{
+			PasswordTextBox.Focus();
+		};
 	}
 
 	private void OnOkClick(object? sender, RoutedEventArgs e)

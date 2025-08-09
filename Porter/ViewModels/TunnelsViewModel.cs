@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 
 using Porter.ControlModels;
+using Porter.Enums;
 using Porter.Models;
 using Porter.Services;
 using Porter.Storage;
@@ -74,16 +75,51 @@ namespace Porter.ViewModels
 			Func<PrivateKey, Task<string?>>? promptPassphrase = null,
 			CancellationToken? cancellationToken = null)
 		{
-			return await PortForwardManager.StartForward(
+			var started = await PortForwardManager.StartForward(
 				tunnel,
-				exceptionCallback,
+				(e) =>
+				{
+					exceptionCallback?.Invoke(e);
+					OnTunnelException(e);
+				},
 				promptPassphrase ?? (privateKey => Dispatcher.UIThread.InvokeAsync(() => MainViewModel.DialogService.ShowPrivateKeyPasswordDialogAsync(privateKey))),
 				cancellationToken);
+
+			if (started)
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.AllUp);
+			}
+			else if (PortForwardManager.IsAnyForwardStarted())
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.PartiallyDown);
+			}
+			else
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.None);
+			}
+
+			return started;
 		}
 
 		public void OnStopForward(SshTunnel tunnel)
 		{
 			PortForwardManager.StopForward(tunnel);
+
+			if (!PortForwardManager.IsAnyForwardStarted())
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.None);
+			}
+		}
+
+		public void OnTunnelException(Exception exception)
+		{
+			var forwardState = PortForwardManager.IsAnyForwardStarted() switch
+			{
+				true => ForwardState.PartiallyDown,
+				false => ForwardState.AllDown,
+			};
+
+			Dispatcher.UIThread.Invoke(() => MainViewModel.TrayService.SetTrayIcon(forwardState));
 		}
 
 		[RelayCommand]

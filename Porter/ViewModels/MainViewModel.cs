@@ -29,6 +29,8 @@ public partial class MainViewModel : ViewModelBase
 
 	public IDialogService DialogService { get; private set; }
 
+	public ITrayService TrayService { get; private set; }
+
 	#endregion
 
 	private ViewModelBase _CurrentPage;
@@ -49,10 +51,12 @@ public partial class MainViewModel : ViewModelBase
 
 	public MainViewModel(
 		IDialogService fileDialogService,
+		ITrayService trayService,
 		Action exitAction,
 		Action openMainWindow)
 	{
 		DialogService = fileDialogService;
+		TrayService = trayService;
 
 		SshServersViewModel = new SshServersViewModel(this);
 		RemoteServersViewModel = new RemoteServersViewModel(this);
