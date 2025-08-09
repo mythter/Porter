@@ -60,13 +60,14 @@
 					   Value="{Binding LocalPort}" />
 
 		<CustomComboBox Grid.Column="6"
-				  ItemsSource="{Binding SshServers}"
-				  SelectedItem="{Binding SelectedSshServer}"
-				  SelectionChanged="OnSshServerSelectionChanged"
-				  ComboBoxProperties.TextTrimming="None"
-				  ToolTip.Tip="{Binding SelectedSshServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select SSH server'}"
-				  VerticalAlignment="Stretch"
-				  HorizontalAlignment="Stretch">
+						Name="SshServersComboBox"
+						ItemsSource="{Binding SshServers}"
+						SelectedItem="{Binding SelectedSshServer}"
+						SelectionChanged="OnSshServerSelectionChanged"
+						ComboBoxProperties.TextTrimming="None"
+						ToolTip.Tip="{Binding SelectedSshServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select SSH server'}"
+						VerticalAlignment="Stretch"
+						HorizontalAlignment="Stretch">
 
 			<CustomComboBox.DefaultItem>
 				<DataTemplate>
@@ -83,6 +84,7 @@
 		</CustomComboBox>
 
 		<StaticComboBox Grid.Column="8"
+						Name="PrivateKeysComboBox"
 						ItemsSource="{Binding PrivateKeys}"
 						SelectedItem="{Binding SelectedPrivateKey}"
 						SelectionChanged="OnPrivateKeySelectionChanged"
@@ -113,13 +115,14 @@
 		<Grid Grid.Column="10"
 			  ColumnDefinitions="*, 5, Auto">
 			<CustomComboBox Grid.Column="0"
-					  ItemsSource="{Binding RemoteServers}"
-					  SelectedItem="{Binding SelectedRemoteServer}"
-					  SelectionChanged="OnRemoteServerSelectionChanged"
-					  ComboBoxProperties.TextTrimming="None"
-					  ToolTip.Tip="{Binding SelectedRemoteServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select Remote server'}"
-					  VerticalAlignment="Stretch"
-					  HorizontalAlignment="Stretch">
+							Name="RemoteServersComboBox"
+							ItemsSource="{Binding RemoteServers}"
+							SelectedItem="{Binding SelectedRemoteServer}"
+							SelectionChanged="OnRemoteServerSelectionChanged"
+							ComboBoxProperties.TextTrimming="None"
+							ToolTip.Tip="{Binding SelectedRemoteServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select Remote server'}"
+							VerticalAlignment="Stretch"
+							HorizontalAlignment="Stretch">
 
 				<CustomComboBox.DefaultItem>
 					<DataTemplate>

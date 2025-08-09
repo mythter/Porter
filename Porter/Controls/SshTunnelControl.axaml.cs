@@ -22,6 +22,10 @@ public partial class SshTunnelControl : UserControl
 	{
 		InitializeComponent();
 
+		SshServersComboBox.AddHandler(PointerWheelChangedEvent, OnPointerWheelChanging, RoutingStrategies.Tunnel);
+		PrivateKeysComboBox.AddHandler(PointerWheelChangedEvent, OnPointerWheelChanging, RoutingStrategies.Tunnel);
+		RemoteServersComboBox.AddHandler(PointerWheelChangedEvent, OnPointerWheelChanging, RoutingStrategies.Tunnel);
+
 		PropertyChanged += (_, e) =>
 		{
 			if (e.Property == ModelProperty)
@@ -66,5 +70,10 @@ public partial class SshTunnelControl : UserControl
 	private void OnRemoteServerSelectionChanged(object? sender, SelectionChangedEventArgs e)
 	{
 		Model?.OnRemoteServerSelectionChanged(sender, e);
+	}
+
+	private static void OnPointerWheelChanging(object? sender, PointerWheelEventArgs e)
+	{
+		e.Handled = true;
 	}
 }
