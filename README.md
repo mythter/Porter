@@ -2,7 +2,7 @@
 
 # <img width="40" height="40" alt="logo-main" src="https://github.com/user-attachments/assets/28174d89-f4db-4c2c-b3e3-3d8dbc5cd2ca" /> Porter
 
-**Porter** is a convenient utility for creating and managing SSH tunnels to remote servers
+Convenient utility for creating and managing SSH tunnels to remote servers
 
 ## Features
 
@@ -11,12 +11,12 @@
 - **System tray integration** – monitor, start and stop tunnels directly from the system tray
 - **Export and Import settings**
 
-## 🛠 Powered By
+## Powered By
 - [.NET 8](https://dotnet.microsoft.com/)
 - [SSH.NET](https://github.com/sshnet/SSH.NET)
 - [Avalonia UI](https://avaloniaui.net/)
 
-## 📸 Screenshots
+## Screenshots
 
 ![image](https://github.com/user-attachments/assets/d6c74e2b-97c7-4675-8045-78c6dcfa90eb)
 
