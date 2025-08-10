@@ -9,6 +9,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PackageIcon>logo-main.png</PackageIcon>
     <ApplicationIcon>logo-main.ico</ApplicationIcon>
+    <Product>Porter</Product>
+    <Description>Convenient utility for creating and managing SSH tunnels to remote servers</Description>
+    <PackageProjectUrl>https://github.com/mythter/Porter</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/mythter/Porter</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="logo-main.ico" />
