@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
 using Avalonia;
+
+using Porter.Services;
 
 namespace Porter.Desktop;
 
@@ -26,8 +29,29 @@ class Program
 			e.SetObserved();
 		};
 
-		BuildAvaloniaApp()
-			.StartWithClassicDesktopLifetime(args);
+		try
+		{
+			BuildAvaloniaApp()
+				.StartWithClassicDesktopLifetime(args);
+		}
+		catch (Exception ex)
+		{
+			var lastCrash = CrashService.GetCrashData();
+
+			// Write a crash log
+			if (CrashService.SetCrashData(ex))
+			{
+				// If we previously crashed in under 10 seconds, don't re-open
+				if (lastCrash == null || lastCrash.CrashDate < DateTimeOffset.UtcNow - TimeSpan.FromSeconds(10))
+				{
+					TryRestartApp();
+				}
+			}
+			else
+			{
+				throw;
+			}
+		}
 	}
 
 	// Avalonia configuration, don't remove; also used by visual designer.
@@ -37,4 +61,15 @@ class Program
 			.WithInterFont()
 			.LogToTrace();
 
+	private static void TryRestartApp()
+	{
+		try
+		{
+			Process.Start(typeof(Program).Assembly.Location.Replace(".dll", ".exe"));
+		}
+		catch
+		{
+			// Ignore
+		}
+	}
 }
