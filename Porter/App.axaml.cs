@@ -36,11 +36,11 @@ public partial class App : Application
 
 			void openMainWindowCommand() => mainWindow.Show();
 
-			var fileDialogService = new DialogService(mainWindow);
+			var dialogService = new DialogService(mainWindow);
 			
 			var trayService = new TrayService(Current!, (s, e) => exitCommand(), mainWindow);
 
-			vm = new MainViewModel(fileDialogService, trayService, exitCommand, openMainWindowCommand);
+			vm = new MainViewModel(dialogService, trayService, exitCommand, openMainWindowCommand);
 
 			mainWindow.DataContext = vm;
 
@@ -51,6 +51,7 @@ public partial class App : Application
 
 			mainWindow.TrayIcon = trayService.TrayIcon;
 			mainWindow.MiniWindow = miniWindow;
+			mainWindow.DialogService = dialogService;
 
 			desktop.MainWindow = mainWindow;
 		}

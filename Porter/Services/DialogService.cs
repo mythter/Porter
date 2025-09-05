@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 
+using Porter.Enums;
 using Porter.Interfaces;
 using Porter.Models;
 using Porter.Storage;
@@ -100,6 +101,31 @@ namespace Porter.Services
 			}
 
 			return password;
+		}
+
+		public Task ShowInfoAsync(string message, string? title = null)
+		{
+			return ShowMessageBoxAsync(message, title ?? "Info", MessageBoxIcon.Info);
+		}
+
+		public Task ShowWarningAsync(string message, string? title = null)
+		{
+			return ShowMessageBoxAsync(message, title ?? "Warning", MessageBoxIcon.Warning);
+		}
+
+		public  Task ShowErrorAsync(string message, string? title = null)
+		{
+			return ShowMessageBoxAsync(message, title ?? "Error", MessageBoxIcon.Error);
+		}
+
+		private Task ShowMessageBoxAsync(string message, string title, MessageBoxIcon icon)
+		{
+			var dialog = new MessageBoxWindow
+			{
+				DataContext = new MessageBoxViewModel(title, message, icon),
+			};
+
+			return dialog.ShowDialog(_window);
 		}
 	}
 }

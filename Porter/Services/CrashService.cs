@@ -65,5 +65,10 @@ namespace Porter.Services
 
 			return null;
 		}
+
+		public static void RemoveCrashData()
+		{
+			ClearCrashData();
+		}
 	}
 }

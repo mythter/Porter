@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Avalonia;
 using Avalonia.Controls;
 
+using Porter.Interfaces;
+using Porter.Services;
 using Porter.Storage;
 
 namespace Porter.Views;
@@ -14,6 +17,8 @@ public partial class MainWindow : Window
 	public TrayIcon? TrayIcon { get; set; }
 
 	public MiniWindow? MiniWindow { get; set; }
+
+	public IDialogService? DialogService { get; set; }
 
 	public MainWindow()
 	{
@@ -33,12 +38,14 @@ public partial class MainWindow : Window
 		};
 	}
 
-	protected override void OnOpened(EventArgs e)
+	protected override async void OnOpened(EventArgs e)
 	{
 		base.OnOpened(e);
 
 		if (TrayIcon is not null)
 			TrayIcon.IsVisible = false;
+
+		await ShowCrashInfoIfExists();
 	}
 
 	protected override void OnClosing(WindowClosingEventArgs e)
@@ -57,7 +64,7 @@ public partial class MainWindow : Window
 		e.Cancel = true;
 		Hide();
 
-		if (TrayIcon is not null) 
+		if (TrayIcon is not null)
 			TrayIcon.IsVisible = true;
 	}
 
@@ -95,5 +102,26 @@ public partial class MainWindow : Window
 			Width = windowSettings.Width;
 			Height = windowSettings.Height;
 		}
+	}
+
+	private async Task ShowCrashInfoIfExists()
+	{
+		if (CrashService.GetCrashData() is null)
+		{
+			return;
+		}
+		else
+		{
+			CrashService.RemoveCrashData();
+		}
+
+		if (DialogService is null)
+			return;
+
+		await DialogService.ShowErrorAsync(
+			"The application has been restarted due to a critical error." +
+			"For details, see the crash.log file in the application folder.",
+			"Error occurred");
+
 	}
 }
