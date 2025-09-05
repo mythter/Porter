@@ -22,11 +22,11 @@ Convenient utility for creating and managing SSH tunnels to remote servers
 
 ![image](https://github.com/user-attachments/assets/16d4d6fc-a256-46d0-ba51-7aa0de337248)
 
-![image](https://github.com/user-attachments/assets/6a09816f-b32c-4d0f-a8d6-7f3b3e72f91c)
+![image](https://github.com/user-attachments/assets/4ca2da25-1981-4301-a0ae-fe98eef8fc1d)
 
-![image](https://github.com/user-attachments/assets/54f6187b-b7d5-4d79-ac2e-8ab5b47eed91)
+![image](https://github.com/user-attachments/assets/ced393b2-6fa1-4329-8c48-82c3930f82dd)
 
-![image](https://github.com/user-attachments/assets/ba9f700a-32c2-46ed-a416-6ce5c0701c5e)
+![image](https://github.com/user-attachments/assets/22de6362-f2f2-43a6-9e74-44ac85df1bb9)
 
 ![image](https://github.com/user-attachments/assets/9a619aa6-885f-47ce-b2c1-c00a59187042)
 
