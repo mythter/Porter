@@ -28,7 +28,7 @@ namespace Porter.Services
 			}
 			catch (Exception)
 			{
-				// TODO: Handle system message box or other way to inform user of crash
+				// Handle system message box or other way to inform user of crash
 			}
 
 			return false;
