@@ -18,6 +18,8 @@
 		<ResourceDictionary>
 
 			<conv:PropertyOrDefaultConverter x:Key="PropertyOrDefaultConverter"/>
+			<conv:MessageBoxIconToGlyphConverter x:Key="MessageBoxIconToGlyphConverter"/>
+			<conv:MessageBoxIconToColorConverter x:Key="MessageBoxIconToColorConverter"/>
 
 			<FontFamily x:Key="Phosphor">avares://Porter/Assets/Fonts#Phosphor</FontFamily>
 			<FontFamily x:Key="PhosphorFill">avares://Porter/Assets/Fonts#Phosphor-Fill</FontFamily>
