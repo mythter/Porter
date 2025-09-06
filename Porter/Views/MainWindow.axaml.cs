@@ -110,10 +110,6 @@ public partial class MainWindow : Window
 		{
 			return;
 		}
-		else
-		{
-			CrashService.RemoveCrashData();
-		}
 
 		if (DialogService is null)
 			return;
@@ -123,5 +119,6 @@ public partial class MainWindow : Window
 			"For details, see the crash.log file in the application folder.",
 			"Error occurred");
 
+		CrashService.RemoveCrashData();
 	}
 }
