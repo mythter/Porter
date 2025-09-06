@@ -115,7 +115,7 @@ public partial class MainWindow : Window
 			return;
 
 		await DialogService.ShowErrorAsync(
-			"The application has been restarted due to a critical error." +
+			"The application has been restarted due to a critical error. " +
 			"For details, see the crash.log file in the application folder.",
 			"Error occurred");
 
