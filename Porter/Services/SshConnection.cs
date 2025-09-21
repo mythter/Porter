@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,19 +50,16 @@ namespace Porter.Services
 			if (_sshClient?.IsConnected == true || cancellationToken?.IsCancellationRequested == true)
 				return _sshClient?.IsConnected ?? false;
 
-			if (_sshClient is not null)
+			if (_sshClient is null)
 			{
-				await _sshClient.ConnectAsync(cancellationToken ?? CancellationToken.None);
-				return true;
+				if (await GetPrivateKeyFile(PrivateKey, promptPassphrase) is not { } keyFile)
+					return false;
+
+				var auth = new PrivateKeyAuthenticationMethod(SshServer.User, keyFile);
+				var connectionInfo = new ConnectionInfo(SshServer.Host, (int)SshServer.Port!, SshServer.User, auth);
+
+				_sshClient = new SshClient(connectionInfo);
 			}
-
-			if (await GetPrivateKeyFile(PrivateKey, promptPassphrase) is not { } keyFile)
-				return false;
-
-			var auth = new PrivateKeyAuthenticationMethod(SshServer.User, keyFile);
-			var connectionInfo = new ConnectionInfo(SshServer.Host, (int)SshServer.Port!, SshServer.User, auth);
-
-			_sshClient = new SshClient(connectionInfo);
 
 			await _sshClient.ConnectAsync(cancellationToken ?? CancellationToken.None);
 			return true;
@@ -166,7 +162,6 @@ namespace Porter.Services
 				StopForwardByTunnelId(tunnel.Id);
 				exceptionCallback?.Invoke(e.Exception);
 			};
-
 
 			_sshClient.AddForwardedPort(forward);
 			Debug.WriteLine($"Forwarding added to _sshClient, _sshClient.ForwardedPorts.Count = {_sshClient.ForwardedPorts.Count()}");
