@@ -120,6 +120,11 @@ namespace Porter.Services
 
 		private Task ShowMessageBoxAsync(string message, string title, MessageBoxIcon icon)
 		{
+			if (!_window.IsVisible)
+			{
+				_window.Show();
+			}
+
 			var dialog = new MessageBoxWindow
 			{
 				DataContext = new MessageBoxViewModel(title, message, icon),
