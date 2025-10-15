@@ -31,6 +31,10 @@ namespace Porter.ViewModels
 
 		public PortForwardManager PortForwardManager { get; }
 
+		private readonly Dictionary<SshTunnel, CancellationTokenSource> _connectingTunnels = [];
+
+		private CancellationTokenSource? _startAllCancellationTokenSource;
+
 		public TunnelsViewModel()
 		{
 
@@ -97,23 +101,35 @@ namespace Porter.ViewModels
 			Func<PrivateKey, Task<string?>>? promptPassphrase = null,
 			CancellationToken? cancellationToken = null)
 		{
-			var started = await PortForwardManager.StartForward(
-				tunnel,
-				(e) =>
-				{
-					exceptionCallback?.Invoke(e);
-					OnTunnelException(e);
-				},
-				promptPassphrase ?? (privateKey => Dispatcher.UIThread.InvokeAsync(() => MainViewModel.DialogService.ShowPrivateKeyPasswordDialogAsync(privateKey))),
-				cancellationToken);
+			var cts = cancellationToken is null
+				? new CancellationTokenSource()
+				: CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Value);
+
+			_connectingTunnels.Add(tunnel, cts);
+
+			bool started = false;
+
+			try
+			{
+				started = await PortForwardManager.StartForward(
+					tunnel,
+					(e) =>
+					{
+						exceptionCallback?.Invoke(e);
+						OnTunnelException(tunnel, e);
+					},
+					promptPassphrase ?? (privateKey => Dispatcher.UIThread.InvokeAsync(() => MainViewModel.DialogService.ShowPrivateKeyPasswordDialogAsync(privateKey))),
+					cts.Token);
+			}
+			finally
+			{
+				cts?.Dispose();
+				_connectingTunnels.Remove(tunnel);
+			}
 
 			if (started)
 			{
 				MainViewModel.TrayService.SetTrayIcon(ForwardState.AllUp);
-			}
-			else if (PortForwardManager.IsAnyForwardStarted())
-			{
-				MainViewModel.TrayService.SetTrayIcon(ForwardState.PartiallyDown);
 			}
 			else
 			{
@@ -125,6 +141,13 @@ namespace Porter.ViewModels
 
 		public void OnStopForward(SshTunnel tunnel)
 		{
+			_startAllCancellationTokenSource?.Cancel();
+
+			if (_connectingTunnels.TryGetValue(tunnel, out var cts))
+			{
+				cts.Cancel();
+			}
+
 			PortForwardManager.StopForward(tunnel);
 
 			if (!PortForwardManager.IsAnyForwardStarted())
@@ -133,7 +156,7 @@ namespace Porter.ViewModels
 			}
 		}
 
-		public void OnTunnelException(Exception exception)
+		public void OnTunnelException(SshTunnel tunnel, Exception exception)
 		{
 			var forwardState = PortForwardManager.IsAnyForwardStarted() switch
 			{
@@ -147,30 +170,57 @@ namespace Porter.ViewModels
 		[RelayCommand]
 		public async Task StartAllSshTunnels()
 		{
-			using var cts = new CancellationTokenSource();
+			_startAllCancellationTokenSource ??= new CancellationTokenSource();
 
 			async Task<string?> OnPromptPassphrase(PrivateKey privateKey)
 			{
 				var password = await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.DialogService.ShowPrivateKeyPasswordDialogAsync(privateKey));
-				if (password is null)
+				if (password is null && _startAllCancellationTokenSource is not null)
 				{
-					await cts.CancelAsync();
+					await _startAllCancellationTokenSource.CancelAsync();
 				}
 
 				return password;
 			}
 
-			foreach (var tunnel in Items)
+			var startedTunnels = 0;
+
+			try
 			{
-				await tunnel.StartTunnel(OnPromptPassphrase, cts.Token);
+				foreach (var tunnel in Items)
+				{
+					if (_startAllCancellationTokenSource.IsCancellationRequested)
+						break;
+
+					if (await tunnel.StartTunnel(OnPromptPassphrase, _startAllCancellationTokenSource.Token))
+						startedTunnels++;
+				}
+			}
+			finally
+			{
+				_startAllCancellationTokenSource?.Dispose();
+				_startAllCancellationTokenSource = null;
 			}
 
-			//await Task.WhenAll(Items.Select(tunnel => tunnel.StartTunnel(OnPromptPassphrase, cts.Token)));
+			if (startedTunnels == Items.Count)
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.AllUp);
+			}
+			else if (startedTunnels == 0)
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.AllDown);
+			}
+			else
+			{
+				MainViewModel.TrayService.SetTrayIcon(ForwardState.PartiallyDown);
+			}
 		}
 
 		[RelayCommand]
 		public void StopAllSshTunnels()
 		{
+			_startAllCancellationTokenSource?.Cancel();
+
 			foreach (var tunnel in Items)
 			{
 				tunnel.StopTunnel();

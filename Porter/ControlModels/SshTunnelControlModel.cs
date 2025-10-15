@@ -117,7 +117,7 @@ namespace Porter.ControlModels
 		{
 			if (IsConnecting)
 			{
-				//UpdateTunnelState();
+				StopTunnel();
 				return;
 			}
 
@@ -131,7 +131,7 @@ namespace Porter.ControlModels
 			}
 		}
 
-		public async Task StartTunnel(Func<PrivateKey, Task<string?>>? promptPassphrase = null, CancellationToken? cancellationToken = null)
+		public async Task<bool> StartTunnel(Func<PrivateKey, Task<string?>>? promptPassphrase = null, CancellationToken? cancellationToken = null)
 		{
 			if (!IsTunnelStarted && StartForward is not null)
 			{
@@ -142,11 +142,13 @@ namespace Porter.ControlModels
 				}
 				IsConnecting = false;
 			}
+
+			return IsTunnelStarted;
 		}
 
 		public void StopTunnel()
 		{
-			if (IsTunnelStarted && StopForward is not null)
+			if ((IsConnecting || IsTunnelStarted) && StopForward is not null)
 			{
 				StopForward(Model);
 				IsTunnelStarted = false;
