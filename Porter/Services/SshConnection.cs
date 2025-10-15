@@ -59,6 +59,7 @@ namespace Porter.Services
 				var connectionInfo = new ConnectionInfo(SshServer.Host, (int)SshServer.Port!, SshServer.User, auth);
 
 				_sshClient = new SshClient(connectionInfo);
+				_sshClient.KeepAliveInterval = TimeSpan.FromMinutes(5);
 			}
 
 			await _sshClient.ConnectAsync(cancellationToken ?? CancellationToken.None);
