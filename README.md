@@ -1,6 +1,12 @@
+<div align="center">
+ <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/b66458a7-e793-4d42-b9db-21ffb86f1a63">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/84448296-0560-496b-ae41-e2541000626c">
+    <img src="https://github.com/user-attachments/assets/b66458a7-e793-4d42-b9db-21ffb86f1a63" alt="Porter Logo" width="400">
+  </picture>
+</div>
 
-
-# <img width="40" height="40" alt="logo-main" src="https://github.com/user-attachments/assets/28174d89-f4db-4c2c-b3e3-3d8dbc5cd2ca" /> Porter
+# Porter
 
 Convenient utility for creating and managing SSH tunnels to remote servers
 
