@@ -18,7 +18,7 @@ Convenient utility for creating and managing SSH tunnels to remote servers
 - **Export and Import settings**
 
 ## Powered By
-- [.NET 8](https://dotnet.microsoft.com/)
+- [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - [SSH.NET](https://github.com/sshnet/SSH.NET)
 - [Avalonia UI](https://avaloniaui.net/)
 
