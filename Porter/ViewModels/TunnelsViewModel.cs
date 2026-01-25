@@ -170,6 +170,9 @@ namespace Porter.ViewModels
 		[RelayCommand]
 		public async Task StartAllSshTunnels()
 		{
+			if (Items.Count == 0)
+				return;
+
 			_startAllCancellationTokenSource ??= new CancellationTokenSource();
 
 			async Task<string?> OnPromptPassphrase(PrivateKey privateKey)
