@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Porter.Controls;
+namespace Porter.Views.Controls;
 
 public partial class MiniSshTunnelControl : UserControl
 {

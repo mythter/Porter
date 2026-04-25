@@ -12,7 +12,7 @@ using Porter.Helpers;
 using Porter.Models;
 using Porter.Services.Interfaces;
 
-namespace Porter.ViewModels;
+namespace Porter.ViewModels.Controls;
 
 public partial class SshTunnelViewModel : ObservableObject
 {

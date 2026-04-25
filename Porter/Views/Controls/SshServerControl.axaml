@@ -3,10 +3,10 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:model="using:Porter.Models"
-			 xmlns:vm="using:Porter.ViewModels"
+			 xmlns:vm="using:Porter.ViewModels.Pages"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
 			 x:DataType="model:SshServer"
-			 x:Class="Porter.Controls.SshServerControl"
+			 x:Class="Porter.Views.Controls.SshServerControl"
 			 Classes="deletable">
 
 	<Grid ColumnDefinitions="0.8*, 5, 0.6*, 5, *, 5, 100"

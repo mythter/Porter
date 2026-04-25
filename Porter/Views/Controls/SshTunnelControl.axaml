@@ -2,11 +2,12 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="using:Porter.ViewModels"
+			 xmlns:vm="using:Porter.ViewModels.Controls"
+			 xmlns:vm_pages="using:Porter.ViewModels.Pages"
 			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="40"
 			 x:DataType="vm:SshTunnelViewModel"
 			 Classes="deletable"
-			 x:Class="Porter.Controls.SshTunnelControl">
+			 x:Class="Porter.Views.Controls.SshTunnelControl">
 
 	<Grid ColumnDefinitions="Auto, 5, 0.8*, 5, 65, 5, *, 5, Auto, 5, *"
 		  MinHeight="20">
@@ -138,7 +139,7 @@
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
 					ToolTip.Tip="Delete Tunnel"
-					Command="{Binding $parent[ItemsControl].((vm:SshTunnelsPageViewModel)DataContext).DeleteCommand}"
+					Command="{Binding $parent[ItemsControl].((vm_pages:SshTunnelsPageViewModel)DataContext).DeleteCommand}"
 					CommandParameter="{Binding Model}"
 					Classes="no-padding content-center"
 					VerticalAlignment="Stretch"

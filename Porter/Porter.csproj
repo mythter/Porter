@@ -52,19 +52,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="Controls\RemoteServerControl.axaml.cs">
+		<Compile Update="Views\Controls\RemoteServerControl.axaml.cs">
 			<DependentUpon>RemoteServerControl.axaml</DependentUpon>
 		</Compile>
-		<Compile Update="Views\PrivateKeysPageView.axaml.cs">
+		<Compile Update="Views\Pages\PrivateKeysPageView.axaml.cs">
 			<DependentUpon>PrivateKeysPageView.axaml</DependentUpon>
 		</Compile>
-		<Compile Update="Views\RemoteServersPageView.axaml.cs">
+		<Compile Update="Views\Pages\RemoteServersPageView.axaml.cs">
 		  <DependentUpon>RemoteServersPageView.axaml</DependentUpon>
 		</Compile>
-		<Compile Update="Views\SshServersPageView.axaml.cs">
+		<Compile Update="Views\Pages\SshServersPageView.axaml.cs">
 		  <DependentUpon>SshServersPageView.axaml</DependentUpon>
 		</Compile>
-		<Compile Update="Views\SshTunnelsPageView.axaml.cs">
+		<Compile Update="Views\Pages\SshTunnelsPageView.axaml.cs">
 		  <DependentUpon>SshTunnelsPageView.axaml</DependentUpon>
 		</Compile>
 	</ItemGroup>

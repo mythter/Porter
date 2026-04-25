@@ -21,9 +21,10 @@ using Porter.Models;
 using Porter.Services;
 using Porter.Services.Interfaces;
 using Porter.Services.Ssh;
+using Porter.ViewModels.Controls;
 using Porter.Views;
 
-namespace Porter.ViewModels;
+namespace Porter.ViewModels.Pages;
 
 public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 {

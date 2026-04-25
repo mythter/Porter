@@ -10,7 +10,7 @@ using Porter.Messages;
 using Porter.Models;
 using Porter.Services.Interfaces;
 
-namespace Porter.ViewModels;
+namespace Porter.ViewModels.Pages;
 
 public partial class SshServersPageViewModel : PageViewModel
 {

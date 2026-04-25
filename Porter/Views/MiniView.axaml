@@ -2,7 +2,8 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="using:Porter.ViewModels"
+			 xmlns:c="using:Porter.Views.Controls"
+			 xmlns:vm="using:Porter.ViewModels.Pages"
 			 x:DataType="vm:SshTunnelsPageViewModel"
 			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="300"
 			 x:Class="Porter.Views.MiniView">
@@ -26,12 +27,12 @@
 					</ItemsControl.ItemsPanel>
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<MiniSshTunnelControl Padding="5"
+							<c:MiniSshTunnelControl Padding="5"
 												Background="#2E2E2E"
 												CornerRadius="5"
 												Height="45">
 
-							</MiniSshTunnelControl>
+							</c:MiniSshTunnelControl>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>

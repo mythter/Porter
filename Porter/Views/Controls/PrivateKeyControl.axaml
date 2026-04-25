@@ -3,12 +3,12 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:model="using:Porter.Models"
-			 xmlns:vm="using:Porter.ViewModels"
+			 xmlns:vm="using:Porter.ViewModels.Pages"
 			 xmlns:i="using:Avalonia.Xaml.Interactivity"
 			 xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
 			 x:DataType="model:PrivateKey"
-			 x:Class="Porter.Controls.PrivateKeyControl"
+			 x:Class="Porter.Views.Controls.PrivateKeyControl"
 			 Classes="deletable">
 
 	<Grid ColumnDefinitions="0.5*, 5, *"

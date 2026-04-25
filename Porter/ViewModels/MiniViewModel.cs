@@ -1,15 +1,15 @@
 ﻿using Porter.Enums;
 using Porter.Factories;
+using Porter.ViewModels.Pages;
 
-namespace Porter.ViewModels
+namespace Porter.ViewModels;
+
+public class MiniViewModel : ViewModelBase
 {
-	public class MiniViewModel : ViewModelBase
-	{
-		public PageViewModel Page { get; set; }
+	public PageViewModel Page { get; set; }
 
-		public MiniViewModel(PageFactory pageFactory)
-		{
-			Page = pageFactory.GetPageViewModel(PageNames.Tunnels);
-		}
+	public MiniViewModel(PageFactory pageFactory)
+	{
+		Page = pageFactory.GetPageViewModel(PageNames.Tunnels);
 	}
 }

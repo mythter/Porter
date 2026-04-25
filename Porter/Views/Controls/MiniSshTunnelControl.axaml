@@ -2,12 +2,12 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="using:Porter.ViewModels"
-			 xmlns:c="using:Porter.Controls"
+			 xmlns:vm="using:Porter.ViewModels.Controls"
+			 xmlns:c="using:Porter.Views.Controls"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
 			 x:DataType="vm:SshTunnelViewModel"
 			 ToolTip.Tip="{Binding MiniToolTip}"
-			 x:Class="Porter.Controls.MiniSshTunnelControl">
+			 x:Class="Porter.Views.Controls.MiniSshTunnelControl">
 	
 	<Grid ColumnDefinitions="Auto, 10, *"
 		  MinHeight="20">

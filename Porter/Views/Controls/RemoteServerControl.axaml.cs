@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 
-namespace Porter.Controls;
+namespace Porter.Views.Controls;
 
-public partial class PrivateKeyControl : UserControl
+public partial class RemoteServerControl : UserControl
 {
-	public PrivateKeyControl()
+	public RemoteServerControl()
 	{
 		InitializeComponent();
 	}

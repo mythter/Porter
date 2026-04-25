@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
-namespace Porter.Controls;
+namespace Porter.Views.Controls;
 
 public partial class SshTunnelControl : UserControl
 {
