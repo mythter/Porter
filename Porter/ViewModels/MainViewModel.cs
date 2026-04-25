@@ -1,104 +1,52 @@
-﻿using System;
-
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
-using Porter.Interfaces;
+using Porter.Enums;
+using Porter.Factories;
+using Porter.Messages;
 
 namespace Porter.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>
 {
 	#region Private Fields
 
-	private readonly Action _exitAction;
-
-	private readonly Action _openMainWindowAction;
+	private readonly PageFactory _pageFactory;
 
 	#endregion
 
-	#region ViewModels
-
-	public TunnelsViewModel TunnelsViewModel { get; private set; }
-
-	public SshServersViewModel SshServersViewModel { get; private set; }
-
-	public RemoteServersViewModel RemoteServersViewModel { get; private set; }
-
-	public PrivateKeysViewModel PrivateKeysViewModel { get; private set; }
-
-	#endregion
-
-	#region Services
-
-	public IDialogService DialogService { get; private set; }
-
-	public ITrayService TrayService { get; private set; }
-
-	#endregion
-
-	private ViewModelBase _CurrentPage;
-
-	/// <summary>
-	/// Gets the current page. The property is read-only
-	/// </summary>
-	public ViewModelBase CurrentPage
-	{
-		get { return _CurrentPage; }
-		private set { SetProperty(ref _CurrentPage, value); }
-	}
+	[ObservableProperty]
+	private PageViewModel _currentPage;
 
 	public MainViewModel()
 	{
 
 	}
 
-	public MainViewModel(
-		IDialogService fileDialogService,
-		ITrayService trayService,
-		Action exitAction,
-		Action openMainWindowAction)
+	public MainViewModel(PageFactory pageFactory, IMessenger messenger)
 	{
-		DialogService = fileDialogService;
-		TrayService = trayService;
+		_pageFactory = pageFactory;
 
-		_exitAction = exitAction;
-		_openMainWindowAction = openMainWindowAction;
+		messenger.Register(this);
 
-		InitViewModels();
-
-		_CurrentPage = TunnelsViewModel!;
-	}
-
-	public void InitViewModels()
-	{
-		SshServersViewModel = new SshServersViewModel(this);
-		RemoteServersViewModel = new RemoteServersViewModel(this);
-		PrivateKeysViewModel = new PrivateKeysViewModel(this);
-		TunnelsViewModel = new TunnelsViewModel(this, _exitAction, _openMainWindowAction);
-		OnPropertyChanged(nameof(TunnelsViewModel));
+		GoToTunnels();
 	}
 
 	[RelayCommand]
-	public void GoToSshServers()
-	{
-		CurrentPage = SshServersViewModel;
-	}
+	public void GoToSshServers() => CurrentPage = _pageFactory.GetPageViewModel(PageNames.SshServers);
 
 	[RelayCommand]
-	public void GoToRemoteServers()
-	{
-		CurrentPage = RemoteServersViewModel;
-	}
+	public void GoToRemoteServers() => CurrentPage = _pageFactory.GetPageViewModel(PageNames.RemoteServers);
 
 	[RelayCommand]
-	public void GoToPrivateKeys()
-	{
-		CurrentPage = PrivateKeysViewModel;
-	}
+	public void GoToPrivateKeys() => CurrentPage = _pageFactory.GetPageViewModel(PageNames.PrivateKeys);
 
 	[RelayCommand]
-	public void GoToTunnels()
+	public void GoToTunnels() => CurrentPage = _pageFactory.GetPageViewModel(PageNames.Tunnels);
+
+	public void Receive(NavigateMessage message)
 	{
-		CurrentPage = TunnelsViewModel;
+		CurrentPage = _pageFactory.GetPageViewModel(message.Page);
 	}
 }

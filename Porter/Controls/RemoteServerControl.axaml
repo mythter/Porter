@@ -2,9 +2,10 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:model="using:Porter.ControlModels"
+			 xmlns:model="using:Porter.Models"
+			 xmlns:vm="using:Porter.ViewModels"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
-			 x:DataType="model:RemoteServerControlModel"
+			 x:DataType="model:RemoteServer"
 			 x:Class="Porter.Controls.RemoteServerControl"
 			 Classes="deletable">
 
@@ -14,16 +15,14 @@
 				 Watermark="Name"
 				 Text="{Binding Name}"
 				 ToolTip.Tip="{Binding Name, TargetNullValue=Remote Server Name}"
-				 LostFocus="OnNameLostFocus"
-				 KeyDown="OnNameKeyDown"
+				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
 		<TextBox Grid.Column="2"
 				 Watermark="Host"
 				 Text="{Binding Host}"
 				 ToolTip.Tip="{Binding Host, TargetNullValue=Remote Host}"
-				 LostFocus="OnHostLostFocus"
-				 KeyDown="OnHostKeyDown"
+				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
 
@@ -38,15 +37,14 @@
 						   Minimum="0"
 						   FormatString="0"
 						   ShowButtonSpinner="False"
-						   KeyDown="OnPortKeyDown"
-						   LostFocus="OnPortLostFocus"
+						   KeyDown="OnKeyDown"
 						   Value="{Binding Port}" />
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
 					ToolTip.Tip="Delete Remote Server"
-					Command="{Binding DeleteRemoteServer}"
-					CommandParameter="{Binding Id}"
+					Command="{Binding $parent[ItemsControl].((vm:RemoteServersPageViewModel)DataContext).DeleteCommand}"
+					CommandParameter="{Binding}"
 					Classes="no-padding content-center"
 					VerticalAlignment="Stretch"
 					Height="{ Binding $parent.Bounds.Height }">

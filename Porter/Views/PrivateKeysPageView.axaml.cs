@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Porter.Views;
 
-public partial class TunnelsView : UserControl
+public partial class PrivateKeysPageView : UserControl
 {
-    public TunnelsView()
+    public PrivateKeysPageView()
     {
         InitializeComponent();
     }

@@ -7,7 +7,7 @@
 		mc:Ignorable="d" d:DesignWidth="280" d:DesignHeight="350"
 		MaxWidth="280" MaxHeight="350"
 		x:Class="Porter.Views.MiniWindow"
-		x:DataType="vm:MainViewModel"
+		x:DataType="vm:MiniViewModel"
 		Title="MiniWindow"
 		ShowInTaskbar="False"
 		SystemDecorations="None"
@@ -18,7 +18,7 @@
 		WindowStartupLocation="Manual">
 
 	<Border CornerRadius="8" Background="#FF333333">
-		<views:MiniView DataContext="{Binding TunnelsViewModel}" />
+		<views:MiniView DataContext="{Binding Page}" />
 	</Border>
 
 </Window>

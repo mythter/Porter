@@ -1,50 +1,71 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationIcon>Assets\Images\logo-main.ico</ApplicationIcon>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+		<Product>Porter</Product>
+		<Description>Convenient utility for creating and managing SSH tunnels to remote servers</Description>
+		<RepositoryUrl>https://github.com/mythter/Porter</RepositoryUrl>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaXaml Remove="Styles\ComboBoxStyles.axaml" />
-    <AvaloniaXaml Remove="Styles\CustomComboBoxStyles.axaml" />
-    <AvaloniaXaml Remove="Styles\StaticComboBoxStyles.axaml" />
-  </ItemGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Styles\CustomComboBoxStyles.axaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Include="Styles\ComboBoxStyles.axaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Include="Styles\StaticComboBoxStyles.axaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="Assets\Images\logo-main.ico" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	<ItemGroup>
+		<AvaloniaResource Include="Styles\ComboBoxStyles.axaml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Include="Styles\CustomComboBoxStyles.axaml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Include="Styles\StaticComboBoxStyles.axaml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</AvaloniaResource>
+	</ItemGroup>
 
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="SSH.NET" Version="2025.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 
-  <ItemGroup>
-    <Compile Update="Controls\RemoteServerControl.axaml.cs">
-      <DependentUpon>RemoteServerControl.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\PrivateKeysView.axaml.cs">
-      <DependentUpon>PrivateKeysView.axaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
+		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+		<PackageReference Include="SSH.NET" Version="2025.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Myth.Avalonia\Myth.Avalonia\Myth.Avalonia.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Controls\RemoteServerControl.axaml.cs">
+			<DependentUpon>RemoteServerControl.axaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\PrivateKeysPageView.axaml.cs">
+			<DependentUpon>PrivateKeysPageView.axaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\RemoteServersPageView.axaml.cs">
+		  <DependentUpon>RemoteServersPageView.axaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\SshServersPageView.axaml.cs">
+		  <DependentUpon>SshServersPageView.axaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\SshTunnelsPageView.axaml.cs">
+		  <DependentUpon>SshTunnelsPageView.axaml</DependentUpon>
+		</Compile>
+	</ItemGroup>
 </Project>

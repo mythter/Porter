@@ -1,19 +1,34 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
-namespace Porter.Models
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Porter.Models;
+
+public partial class SshTunnel : ObservableObject
 {
-	public class SshTunnel
-	{
-		public Guid Id { get; set; } = Guid.NewGuid();
+	public Guid Id { get; set; } = Guid.NewGuid();
 
-		public string? Name { get; set; }
+	[ObservableProperty]
+	private string? name;
 
-		public int? LocalPort { get; set; }
+	[ObservableProperty]
+	private int? localPort;
 
-		public SshServer? SshServer { get; set; }
+	[ObservableProperty]
+	private SshServer? sshServer;
 
-		public PrivateKey? PrivateKey { get; set; }
+	[ObservableProperty]
+	private PrivateKey? privateKey;
 
-		public RemoteServer? RemoteServer { get; set; }
-	}
+	[ObservableProperty]
+	private RemoteServer? remoteServer;
+
+	[ObservableProperty]
+	[property: JsonIgnore]
+	private bool isTunnelStarted;
+
+	[ObservableProperty]
+	[property: JsonIgnore]
+	private bool isConnecting;
 }

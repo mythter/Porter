@@ -17,7 +17,7 @@ using Porter.Models;
 
 namespace Porter.ControlModels
 {
-	public partial class SshTunnelControlModel : ObservableObject
+	public partial class SshTunnelViewModel : ObservableObject
 	{
 		[ObservableProperty]
 		private string? name;
@@ -80,7 +80,7 @@ namespace Porter.ControlModels
 
 		public Action<SshTunnel>? StopForward { get; set; }
 
-		public SshTunnelControlModel(
+		public SshTunnelViewModel(
 			SshTunnel model,
 			ObservableCollection<SshServer> sshServers,
 			ObservableCollection<PrivateKey> privateKeys,

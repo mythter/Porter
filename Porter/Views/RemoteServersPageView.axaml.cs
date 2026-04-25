@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Porter.Views;
 
-public partial class PrivateKeysView : UserControl
+public partial class RemoteServersPageView : UserControl
 {
-    public PrivateKeysView()
+    public RemoteServersPageView()
     {
         InitializeComponent();
     }

@@ -11,11 +11,27 @@
 					<ComboBoxItem>Item 1</ComboBoxItem>
 					<ComboBoxItem>Item 2</ComboBoxItem>
 				</ComboBox>
-				
+
+				<ComboBox PlaceholderText="Long long long placeholder text"
+						  ComboBoxProperties.TextTrimming="CharacterEllipsis">
+
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding}"
+									   TextTrimming="CharacterEllipsis" />
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+
+					<ComboBoxItem>Long long long long long long item text 0</ComboBoxItem>
+					<ComboBoxItem>Item 1</ComboBoxItem>
+					<ComboBoxItem>Item 2</ComboBoxItem>
+				</ComboBox>
+
 				<ComboBox PlaceholderText="Select an item">
 					<ComboBoxItem>Item 1</ComboBoxItem>
 					<ComboBoxItem>Item 2</ComboBoxItem>
 				</ComboBox>
+
 				<ComboBox IsEnabled="False"
 						  Width="200"
 						  SelectedIndex="1"

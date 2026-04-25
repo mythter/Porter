@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 
-namespace Porter.Models
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Porter.Models;
+
+public class AppData : ObservableObject
 {
-	public class AppData
-	{
-		public Settings Settings { get; set; }
+	public AppSettings Settings { get; set; } = new();
 
-		public WindowSettings WindowSettings { get; set; }
+	public WindowSettings WindowSettings { get; set; } = new();
 
-		public List<SshServer> SshServers { get; set; } = [];
+	public ObservableCollection<SshServer> SshServers { get; set; } = [];
 
-		public List<RemoteServer> RemoteServers { get; set; } = [];
+	public ObservableCollection<RemoteServer> RemoteServers { get; set; } = [];
 
-		public List<PrivateKey> PrivateKeys { get; set; } = [];
+	public ObservableCollection<PrivateKey> PrivateKeys { get; set; } = [];
 
-		public List<SshTunnel> SshTunnels { get; set; } = [];
-	}
+	public ObservableCollection<SshTunnel> SshTunnels { get; set; } = [];
 }

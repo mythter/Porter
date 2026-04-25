@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
@@ -23,7 +22,9 @@ namespace Porter.Storage
 		private static ObservableCollection<PrivateKey> _privateKeys= null!;
 		private static ObservableCollection<SshTunnel> _sshTunnels= null!;
 
-		public static Settings Settings => _data.Settings ??= new();
+		public static AppData AppData => _data;
+
+		public static AppSettings Settings => _data.Settings ??= new();
 
 		public static WindowSettings WindowSettings => _data.WindowSettings ??= new();
 
@@ -40,39 +41,9 @@ namespace Porter.Storage
 			InitData();
 		}
 
-		public static void SaveSshServers(List<SshServer>? sshServers = null)
-		{
-			_data.SshServers = sshServers ?? [.. _sshServers];
-			Save();
-		}
-
-		public static void SaveRemoteServers(List<RemoteServer>? remoteServers = null)
-		{
-			_data.RemoteServers = remoteServers ?? [.. _remoteServers];
-			Save();
-		}
-
-		public static void SavePrivateKeys(List<PrivateKey>? privateKeys = null)
-		{
-			_data.PrivateKeys = privateKeys ?? [.. _privateKeys];
-			Save();
-		}
-
-		public static void SaveSshTunnels(List<SshTunnel>? sshTunnels = null)
-		{
-			_data.SshTunnels = sshTunnels ?? [.. _sshTunnels];
-			Save();
-		}
-
-		public static void SaveSettings(Settings? settings = null)
+		public static void SaveSettings(AppSettings? settings = null)
 		{
 			_data.Settings = settings ?? _data.Settings;
-			Save();
-		}
-
-		public static void SaveWindowSettings(WindowSettings? windowSettings = null)
-		{
-			_data.WindowSettings = windowSettings ?? _data.WindowSettings;
 			Save();
 		}
 
@@ -118,11 +89,6 @@ namespace Porter.Storage
 			_remoteServers = new(_data.RemoteServers);
 			_privateKeys = new(_data.PrivateKeys);
 			_sshTunnels = new(_data.SshTunnels);
-
-			_sshServers.CollectionChanged += (s, e) => SaveSshServers();
-			_remoteServers.CollectionChanged += (s, e) => SaveRemoteServers();
-			_privateKeys.CollectionChanged += (s, e) => SavePrivateKeys();
-			_sshTunnels.CollectionChanged += (s, e) => SaveSshTunnels();
 		}
 
 		private static AppData LoadData()

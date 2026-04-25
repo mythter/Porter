@@ -3,26 +3,34 @@ using System.IO;
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
 using Porter.Enums;
-using Porter.Interfaces;
+using Porter.Services.Interfaces;
 using Porter.Views;
 
 namespace Porter.Services
 {
 	public class TrayService : ITrayService
 	{
-		private const string IMAGES_PATH = "avares://Porter/Assets/Images";
+		private const string IMAGES_PATH = $"avares://{nameof(Porter)}/Assets/Images";
 
 		private ForwardState _iconState = ForwardState.None;
 
+		private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
+
+		private readonly MiniWindow _miniWindow;
+
 		public TrayIcon TrayIcon { get; }
 
-		public TrayService(Application current, EventHandler exitAction, MainWindow mainWindow)
+		public TrayService(IClassicDesktopStyleApplicationLifetime lifetime, MiniWindow miniWindow)
 		{
-			TrayIcon = InitTrayIcon(current, exitAction, mainWindow);
+			_lifetime = lifetime;
+			_miniWindow = miniWindow;
+
+			TrayIcon = InitTrayIcon();
 		}
 
 		public void SetTrayIcon(ForwardState forwardState)
@@ -36,10 +44,12 @@ namespace Porter.Services
 			}
 		}
 
-		private TrayIcon InitTrayIcon(Application current, EventHandler exitAction, MainWindow mainWindow)
+		private TrayIcon InitTrayIcon()
 		{
 			var exitItem = new NativeMenuItem("Exit");
-			exitItem.Click += exitAction;
+			exitItem.Click += (s, e) => _lifetime.Shutdown();
+
+			var mainWindow = _lifetime.MainWindow!;
 
 			var openMainWindowItem = new NativeMenuItem("Open Main Window");
 			openMainWindowItem.Click += (s, e) =>
@@ -64,7 +74,7 @@ namespace Porter.Services
 				]
 			};
 
-			trayIcon.Clicked += (s, e) => mainWindow.MiniWindow?.ToggleVisibility();
+			trayIcon.Clicked += (s, e) => _miniWindow.ToggleVisibility();
 
 			trayIcon.PropertyChanged += (s, e) =>
 			{
@@ -76,10 +86,11 @@ namespace Porter.Services
 
 			var icons = new TrayIcons() { trayIcon };
 
-			TrayIcon.SetIcons(current, icons);
+			TrayIcon.SetIcons(Application.Current!, icons);
 
 			return trayIcon;
 		}
+
 		private static WindowIcon GetWindowIcon(ForwardState forwardState)
 		{
 			var icon = forwardState switch

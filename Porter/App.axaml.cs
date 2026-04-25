@@ -1,15 +1,27 @@
-﻿using Avalonia;
+﻿using System;
+
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Metadata;
 
+using CommunityToolkit.Mvvm.Messaging;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using Porter.Enums;
+using Porter.Factories;
+using Porter.Models;
 using Porter.Services;
+using Porter.Services.Interfaces;
+using Porter.Services.Ssh;
 using Porter.ViewModels;
 using Porter.Views;
 
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "Porter.Controls")]
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "Porter.AttachedProperties")]
+[assembly: XmlnsDefinition("https://github.com/avaloniaui", "Myth.Avalonia.Controls")]
 
 namespace Porter;
 
@@ -26,43 +38,53 @@ public partial class App : Application
 		// Without this line you will get duplicate validations from both Avalonia and CT
 		BindingPlugins.DataValidators.RemoveAt(0);
 
-		var vm = default(MainViewModel);
+		var collection = new ServiceCollection();
+
+		collection.AddTransient<MainViewModel>();
+		collection.AddTransient<MiniViewModel>();
+		collection.AddTransient<SshTunnelsPageViewModel>();
+		collection.AddTransient<PrivateKeysPageViewModel>();
+		collection.AddTransient<SshServersPageViewModel>();
+		collection.AddTransient<RemoteServersPageViewModel>();
+
+		collection.AddSingleton<IAppDataProvider<AppData>, AppDataProvider>();
+
+		collection.AddSingleton<Func<PageNames, PageViewModel>>(sp =>
+			name => name switch
+			{
+				PageNames.Tunnels => sp.GetRequiredService<SshTunnelsPageViewModel>(),
+				PageNames.PrivateKeys => sp.GetRequiredService<PrivateKeysPageViewModel>(),
+				PageNames.SshServers => sp.GetRequiredService<SshServersPageViewModel>(),
+				PageNames.RemoteServers => sp.GetRequiredService<RemoteServersPageViewModel>(),
+				_ => throw new InvalidOperationException()
+			});
+
+		collection.AddSingleton<PageFactory>();
+
+		collection.AddSingleton<Func<SshTunnel, SshTunnelViewModel>>(sp =>
+			tunnel => new SshTunnelViewModel(tunnel, sp.GetRequiredService<IAppDataProvider<AppData>>()));
+
+		collection.AddSingleton<PortForwardManager>();
+
+		collection.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			void exitCommand() => desktop.Shutdown();
+			collection.AddSingleton<IPlatformServicesAccessor>(new PlatformServicesAccessor(desktop));
 
-			var mainWindow = new MainWindow();
+			var miniWindow = new MiniWindow();
 
-			void openMainWindowCommand() => mainWindow.Show();
+			collection.AddSingleton(sp => new TrayService(desktop, miniWindow));
 
-			var dialogService = new DialogService(mainWindow);
-			
-			var trayService = new TrayService(Current!, (s, e) => exitCommand(), mainWindow);
+			var services = collection.BuildServiceProvider();
 
-			vm = new MainViewModel(dialogService, trayService, exitCommand, openMainWindowCommand);
-
-			mainWindow.DataContext = vm;
-
-			var miniWindow = new MiniWindow()
+			desktop.MainWindow = new MainWindow(services.GetRequiredService<IAppDataProvider<AppData>>())
 			{
-				DataContext = vm
+				DataContext = services.GetRequiredService<MainViewModel>(),
+				TrayIcon = services.GetRequiredService<TrayService>().TrayIcon
 			};
 
-			mainWindow.TrayIcon = trayService.TrayIcon;
-			mainWindow.MiniWindow = miniWindow;
-			mainWindow.DialogService = dialogService;
-
-			desktop.MainWindow = mainWindow;
-		}
-		else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-		{
-			vm = new MainViewModel();
-
-			singleViewPlatform.MainView = new TunnelsView
-			{
-				DataContext = vm
-			};
+			miniWindow.DataContext = services.GetRequiredService<MiniViewModel>();
 		}
 
 		base.OnFrameworkInitializationCompleted();

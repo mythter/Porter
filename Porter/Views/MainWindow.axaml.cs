@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 
-using Porter.Interfaces;
+using Porter.Models;
 using Porter.Services;
-using Porter.Storage;
+using Porter.Services.Interfaces;
 
 namespace Porter.Views;
 
@@ -14,14 +14,18 @@ public partial class MainWindow : Window
 {
 	private bool _isClosing = false;
 
+	private IAppDataProvider<AppData> _appDataProvider;
+
 	public TrayIcon? TrayIcon { get; set; }
 
 	public MiniWindow? MiniWindow { get; set; }
 
 	public IDialogService? DialogService { get; set; }
 
-	public MainWindow()
+	public MainWindow(IAppDataProvider<AppData> appDataProvider)
 	{
+		_appDataProvider = appDataProvider;
+
 		InitializeComponent();
 
 		RestoreWindowSettings();
@@ -54,7 +58,7 @@ public partial class MainWindow : Window
 
 		SaveWindowSettings();
 
-		if (!StorageManager.Settings.OnCloseMinimizeToTray)
+		if (!_appDataProvider.Value.Settings.OnCloseMinimizeToTray)
 		{
 			_isClosing = true;
 			MiniWindow?.Close();
@@ -64,13 +68,12 @@ public partial class MainWindow : Window
 		e.Cancel = true;
 		Hide();
 
-		if (TrayIcon is not null)
-			TrayIcon.IsVisible = true;
+		TrayIcon?.IsVisible = true;
 	}
 
 	private void SaveWindowSettings()
 	{
-		var windowSettings = StorageManager.WindowSettings;
+		var windowSettings = _appDataProvider.Value.WindowSettings;
 
 		windowSettings.Left = Position.X;
 		windowSettings.Top = Position.Y;
@@ -78,12 +81,12 @@ public partial class MainWindow : Window
 		windowSettings.Height = Height;
 		windowSettings.Maximized = WindowState == WindowState.Maximized;
 
-		StorageManager.SaveWindowSettings(windowSettings);
+		_appDataProvider.Save();
 	}
 
 	private void RestoreWindowSettings()
 	{
-		var windowSettings = StorageManager.WindowSettings;
+		var windowSettings = _appDataProvider.Value.WindowSettings;
 
 		if (windowSettings.Maximized)
 		{

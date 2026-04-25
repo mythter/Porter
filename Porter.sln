@@ -1,11 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Porter", "Porter\Porter.csproj", "{EF52CBD0-F5BD-698F-C1FD-0FA5AECB2929}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Porter.Desktop", "Porter.Desktop\Porter.Desktop.csproj", "{63F94467-8229-8FB7-4C28-61306759649D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{7F4CA41E-7919-4AB6-B1C5-A929B6969C04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myth.Avalonia.Styles", "Myth.Avalonia\Myth.Avalonia.Styles\Myth.Avalonia.Styles.csproj", "{BF35AEF4-0F84-6051-C976-282EA6A0F6E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myth.Avalonia.Services", "Myth.Avalonia\Myth.Avalonia.Services\Myth.Avalonia.Services.csproj", "{0D69654C-3915-1B8B-D4E5-D7A0FDCD5FC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myth.Avalonia.Controls", "Myth.Avalonia\Myth.Avalonia.Controls\Myth.Avalonia.Controls.csproj", "{31B40BBB-A0B5-8CEB-8786-4477EB2B472B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myth.Avalonia", "Myth.Avalonia\Myth.Avalonia\Myth.Avalonia.csproj", "{90EDC9C3-A8B4-384A-643B-BC6C0EE056BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,13 +25,31 @@ Global
 		{EF52CBD0-F5BD-698F-C1FD-0FA5AECB2929}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF52CBD0-F5BD-698F-C1FD-0FA5AECB2929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF52CBD0-F5BD-698F-C1FD-0FA5AECB2929}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63F94467-8229-8FB7-4C28-61306759649D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63F94467-8229-8FB7-4C28-61306759649D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63F94467-8229-8FB7-4C28-61306759649D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63F94467-8229-8FB7-4C28-61306759649D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF35AEF4-0F84-6051-C976-282EA6A0F6E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF35AEF4-0F84-6051-C976-282EA6A0F6E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF35AEF4-0F84-6051-C976-282EA6A0F6E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF35AEF4-0F84-6051-C976-282EA6A0F6E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D69654C-3915-1B8B-D4E5-D7A0FDCD5FC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D69654C-3915-1B8B-D4E5-D7A0FDCD5FC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D69654C-3915-1B8B-D4E5-D7A0FDCD5FC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D69654C-3915-1B8B-D4E5-D7A0FDCD5FC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31B40BBB-A0B5-8CEB-8786-4477EB2B472B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31B40BBB-A0B5-8CEB-8786-4477EB2B472B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31B40BBB-A0B5-8CEB-8786-4477EB2B472B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31B40BBB-A0B5-8CEB-8786-4477EB2B472B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90EDC9C3-A8B4-384A-643B-BC6C0EE056BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90EDC9C3-A8B4-384A-643B-BC6C0EE056BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90EDC9C3-A8B4-384A-643B-BC6C0EE056BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90EDC9C3-A8B4-384A-643B-BC6C0EE056BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BF35AEF4-0F84-6051-C976-282EA6A0F6E6} = {7F4CA41E-7919-4AB6-B1C5-A929B6969C04}
+		{0D69654C-3915-1B8B-D4E5-D7A0FDCD5FC0} = {7F4CA41E-7919-4AB6-B1C5-A929B6969C04}
+		{31B40BBB-A0B5-8CEB-8786-4477EB2B472B} = {7F4CA41E-7919-4AB6-B1C5-A929B6969C04}
+		{90EDC9C3-A8B4-384A-643B-BC6C0EE056BD} = {7F4CA41E-7919-4AB6-B1C5-A929B6969C04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B32CBA87-FD70-4918-BA58-0C71AE22B9C9}

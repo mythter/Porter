@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Porter.Views;
 
-public partial class RemoteServersView : UserControl
+public partial class SshServersPageView : UserControl
 {
-    public RemoteServersView()
+    public SshServersPageView()
     {
         InitializeComponent();
     }

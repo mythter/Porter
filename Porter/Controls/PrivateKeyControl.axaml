@@ -2,9 +2,12 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:model="using:Porter.ControlModels"
+			 xmlns:model="using:Porter.Models"
+			 xmlns:vm="using:Porter.ViewModels"
+			 xmlns:i="using:Avalonia.Xaml.Interactivity"
+			 xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
-			 x:DataType="model:PrivateKeyControlModel"
+			 x:DataType="model:PrivateKey"
 			 x:Class="Porter.Controls.PrivateKeyControl"
 			 Classes="deletable">
 
@@ -14,8 +17,7 @@
 				 Watermark="Name"
 				 Text="{Binding Name}"
 				 ToolTip.Tip="{Binding Name, TargetNullValue=Private Key Name}"
-				 LostFocus="OnFileNameLostFocus"
-				 KeyDown="OnFileNameKeyDown"
+				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center">
 
 		</TextBox>
@@ -27,25 +29,33 @@
 					   HorizontalAlignment="Center"
 					   Cursor="Hand"
 					   TextDecorations="Underline"
-					   PointerPressed="OnFilePathClick"
 					   Text="{Binding FilePath}"
 					   ToolTip.Tip="{Binding FilePath}"
 					   TextTrimming="{x:Static TextTrimming.LeadingCharacterEllipsis}">
+
+				<i:Interaction.Behaviors>
+					<ia:EventTriggerBehavior EventName="PointerPressed">
+						<ia:InvokeCommandAction
+							Command="{Binding $parent[ItemsControl].((vm:PrivateKeysPageViewModel)DataContext).OpenPrivateKeyFileCommand}"
+							CommandParameter="{Binding}"/>
+					</ia:EventTriggerBehavior>
+				</i:Interaction.Behaviors>
+
 			</TextBlock >
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
 					ToolTip.Tip="Delete Private Key"
-					Command="{Binding DeletePrivateKey}"
-					CommandParameter="{Binding Id}"
+					Command="{Binding $parent[ItemsControl].((vm:PrivateKeysPageViewModel)DataContext).DeleteCommand}"
+					CommandParameter="{Binding}"
 					Classes="no-padding content-center"
 					VerticalAlignment="Stretch"
 					Height="{ Binding $parent.Bounds.Height }">
 
 				<TextBlock
-					Text="&#xE4A6;"
-					FontSize="24"
-					FontFamily="{ StaticResource Phosphor }"/>
+				Text="&#xE4A6;"
+				FontSize="24"
+				FontFamily="{ StaticResource Phosphor }"/>
 			</Button>
 		</Grid>
 	</Grid>

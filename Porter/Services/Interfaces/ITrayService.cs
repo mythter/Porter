@@ -1,6 +1,6 @@
 ﻿using Porter.Enums;
 
-namespace Porter.Interfaces
+namespace Porter.Services.Interfaces
 {
 	public interface ITrayService
 	{

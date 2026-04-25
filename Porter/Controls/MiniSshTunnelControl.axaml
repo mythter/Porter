@@ -2,10 +2,10 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:model="using:Porter.ControlModels"
+			 xmlns:vm="using:Porter.ViewModels"
 			 xmlns:c="using:Porter.Controls"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
-			 x:DataType="model:SshTunnelControlModel"
+			 x:DataType="vm:SshTunnelViewModel"
 			 ToolTip.Tip="{Binding MiniToolTip}"
 			 x:Class="Porter.Controls.MiniSshTunnelControl">
 	
@@ -14,7 +14,7 @@
 
 		<Button Grid.Column="0"
 				Classes="no-padding"
-				Classes.tunnel-started="{Binding IsTunnelStarted}"
+				Classes.tunnel-started="{Binding Model.IsTunnelStarted}"
 				Command="{Binding ToggleTunnel}"
 				Width="{ Binding $parent.Bounds.Height }"
 				Height="{ Binding $parent.Bounds.Height }">
@@ -27,19 +27,19 @@
 				<TextBlock Text="&#xE46C;"
 						   FontSize="22"
 						   ToolTip.Tip="Stop Tunnel"
-						   IsVisible="{Binding IsTunnelStarted}"
+						   IsVisible="{Binding Model.IsTunnelStarted}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE66A;"
 						   FontSize="22"
 						   ToolTip.Tip="Connecting"
-						   IsVisible="{Binding IsConnecting}"
+						   IsVisible="{Binding Model.IsConnecting}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 			</Panel>
 		</Button>
 
 		<TextBlock Grid.Column="2"
 				   IsVisible="{Binding !IsNameNullOrEmpty}"
-				   Text="{Binding Name}"
+				   Text="{Binding Model.Name}"
 				   HorizontalAlignment="Left"
 				   VerticalAlignment="Center"/>
 
@@ -48,7 +48,7 @@
 			  IsVisible="{Binding IsNameNullOrEmpty}">
 			
 			<TextBlock Grid.Column="0"
-					   Text="{Binding LocalPort}"
+					   Text="{Binding Model.LocalPort}"
 					   HorizontalAlignment="Left"
 					   VerticalAlignment="Center"/>
 

@@ -5,16 +5,16 @@
 			 xmlns:vm="clr-namespace:Porter.ViewModels"
 			 xmlns:c="clr-namespace:Porter.Controls"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 x:DataType="vm:RemoteServersViewModel"
-			 x:Class="Porter.Views.RemoteServersView">
-	
+			 x:DataType="vm:SshServersPageViewModel"
+			 x:Class="Porter.Views.SshServersPageView">
+
 	<Grid RowDefinitions="Auto,10,*">
 		<Grid Grid.Row="0"
 			  ColumnDefinitions="Auto,*,Auto"
 			  Height="30">
 			<Button Grid.Column="0"
 					Classes="no-padding content-center"
-					Command="{Binding MainViewModel.GoToTunnels}"
+					Command="{Binding GoToTunnelsCommand}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">
 				<TextBlock
@@ -23,14 +23,14 @@
 					FontFamily="{ StaticResource Phosphor }"/>
 			</Button>
 			<TextBlock Grid.Column="1"
-					   Text="Remote Servers"
+					   Text="SSH Servers"
 					   VerticalAlignment="Center"
 					   HorizontalAlignment="Center"
 					   FontSize="16"/>
 			<Button Grid.Column="2"
 					Classes="no-padding content-center"
-					ToolTip.Tip="Add new Remote Server"
-					Command="{Binding AddRemoteServer}"
+					ToolTip.Tip="Add new SSH Server"
+					Command="{Binding AddSshServer}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">
 				<TextBlock
@@ -49,12 +49,12 @@
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
-						<c:RemoteServerControl Padding="5"
+						<c:SshServerControl Padding="5"
 											Background="#2E2E2E"
 											CornerRadius="5"
-											Model="{Binding}">
+											DataContext="{Binding}">
 
-						</c:RemoteServerControl>
+						</c:SshServerControl>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>

@@ -2,19 +2,21 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="clr-namespace:Porter.ViewModels"
-			 xmlns:c="clr-namespace:Porter.Controls"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 x:DataType="vm:SshServersViewModel"
-			 x:Class="Porter.Views.SshServersView">
-
-	<Grid RowDefinitions="Auto,10,*">
-		<Grid Grid.Row="0"
+			 xmlns:vm="using:Porter.ViewModels"
+			 xmlns:c="using:Porter.Controls"
+			 xmlns:s="using:Myth.Avalonia.Services"
+			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+			 s:DialogManager.Register="{Binding}"
+			 x:DataType="vm:PrivateKeysPageViewModel"
+			 x:Class="Porter.Views.PrivateKeysPageView">
+	
+	<Grid RowDefinitions="Auto,10,Auto">
+		<Grid Grid.Row="0" 
 			  ColumnDefinitions="Auto,*,Auto"
 			  Height="30">
 			<Button Grid.Column="0"
 					Classes="no-padding content-center"
-					Command="{Binding MainViewModel.GoToTunnels}"
+					Command="{Binding GoToTunnelsCommand}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">
 				<TextBlock
@@ -22,15 +24,15 @@
 					FontSize="20"
 					FontFamily="{ StaticResource Phosphor }"/>
 			</Button>
-			<TextBlock Grid.Column="1"
-					   Text="SSH Servers"
+			<TextBlock Grid.Column="1" 
+					   Text="Private Keys"
 					   VerticalAlignment="Center"
 					   HorizontalAlignment="Center"
 					   FontSize="16"/>
 			<Button Grid.Column="2"
 					Classes="no-padding content-center"
-					ToolTip.Tip="Add new SSH Server"
-					Command="{Binding AddSshServer}"
+					ToolTip.Tip="Add new Private Key"
+					Command="{Binding AddPrivateKey}"
 					Height="{Binding $parent.Height }"
 					Width="{Binding $self.Height}">
 				<TextBlock
@@ -47,14 +49,13 @@
 						<StackPanel Spacing="5" />
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
+
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
-						<c:SshServerControl Padding="5"
-											Background="#2E2E2E"
-											CornerRadius="5"
-											Model="{Binding}">
-
-						</c:SshServerControl>
+						<c:PrivateKeyControl Padding="5"
+											 Background="#2E2E2E"
+											 CornerRadius="5">
+						</c:PrivateKeyControl>
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
