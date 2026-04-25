@@ -12,31 +12,30 @@
 	<Grid ColumnDefinitions="0.8*, 5, 0.6*, 5, *, 5, 100"
 		  MinHeight="20">
 		<TextBox Grid.Column="0"
-				 Watermark="Name"
+				 PlaceholderText="Name"
 				 Text="{Binding Name}"
 				 ToolTip.Tip="{Binding Name, TargetNullValue=SSH Server Name}"
 				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
 		<TextBox Grid.Column="2"
-				 Watermark="User"
+				 PlaceholderText="User"
 				 Text="{Binding User}"
 				 ToolTip.Tip="{Binding User, TargetNullValue=SSH Server User Name}"
 				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
 		<TextBox Grid.Column="4"
-				 Watermark="Host"
+				 PlaceholderText="Host"
 				 Text="{Binding Host}"
 				 ToolTip.Tip="{Binding Host, TargetNullValue=SSH Server Host}"
 				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
-
 		<Grid Grid.Column="6"
 			  ColumnDefinitions="*, 5, Auto">
 			<NumericUpDown Grid.Column="0"
-						   Watermark="Port"
+						   PlaceholderText="Port"
 						   ToolTip.Tip="SSH Server Port"
 						   VerticalContentAlignment="Center"
 						   MinWidth="0"

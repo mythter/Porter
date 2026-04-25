@@ -7,7 +7,7 @@ namespace Porter.Views;
 
 public partial class PrivateKeyPasswordView : UserControl
 {
-	public Window? Owner => this.GetVisualRoot() as Window;
+	public Window? Owner => this.GetPresentationSource()?.RootVisual?.Parent as Window;
 
 	public PrivateKeyPasswordView()
 	{

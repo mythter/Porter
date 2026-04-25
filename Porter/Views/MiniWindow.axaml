@@ -10,7 +10,7 @@
 		x:DataType="vm:MiniViewModel"
 		Title="MiniWindow"
 		ShowInTaskbar="False"
-		SystemDecorations="None"
+		WindowDecorations="None"
 		CanResize="False"
 		Background="Transparent"
 		TransparencyLevelHint="Transparent"

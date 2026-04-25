@@ -38,14 +38,14 @@
 		</Button>
 
 		<TextBox Grid.Column="2"
-				 Watermark="Name"
+				 PlaceholderText="Name"
 				 Text="{Binding Model.Name}"
 				 ToolTip.Tip="{Binding Model.Name, TargetNullValue=Tunnel Name}"
 				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
 		<NumericUpDown Grid.Column="4"
-					   Watermark="Port"
+					   PlaceholderText="Port"
 					   VerticalContentAlignment="Center"
 					   AllowSpin="False"
 					   MinWidth="0"
