@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Submodules/">
+    <Project Path="Myth.Avalonia/Myth.Avalonia.Controls/Myth.Avalonia.Controls.csproj" />
+    <Project Path="Myth.Avalonia/Myth.Avalonia.Services/Myth.Avalonia.Services.csproj" />
+    <Project Path="Myth.Avalonia/Myth.Avalonia.Styles/Myth.Avalonia.Styles.csproj" />
+    <Project Path="Myth.Avalonia/Myth.Avalonia/Myth.Avalonia.csproj" />
+  </Folder>
+  <Project Path="Porter/Porter.csproj" />
+</Solution>
