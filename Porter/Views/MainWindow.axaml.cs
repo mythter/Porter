@@ -33,7 +33,7 @@ public partial class MainWindow : Window
 		PropertyChanged += (sender, e) =>
 		{
 			if (e.Property == IsVisibleProperty &&
-				!IsVisible && !(MiniWindow?.IsVisible ?? true)
+				!IsVisible && !(MiniWindow?.IsVisible ?? false)
 				&& TrayIcon is not null
 				&& !_isClosing)
 			{
@@ -46,8 +46,7 @@ public partial class MainWindow : Window
 	{
 		base.OnOpened(e);
 
-		if (TrayIcon is not null)
-			TrayIcon.IsVisible = false;
+		TrayIcon?.IsVisible = false;
 
 		await ShowCrashInfoIfExists();
 	}
