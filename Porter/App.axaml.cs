@@ -2,10 +2,10 @@
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Metadata;
 
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -75,14 +75,16 @@ public partial class App : Application
 			collection.AddSingleton(sp => new TrayService(desktop, miniWindow));
 
 			var services = collection.BuildServiceProvider();
+			Ioc.Default.ConfigureServices(services);
+
+			miniWindow.DataContext = services.GetRequiredService<MiniViewModel>();
 
 			desktop.MainWindow = new MainWindow(services.GetRequiredService<IAppDataProvider<AppData>>())
 			{
 				DataContext = services.GetRequiredService<MainViewModel>(),
-				TrayIcon = services.GetRequiredService<TrayService>().TrayIcon
+				TrayIcon = services.GetRequiredService<TrayService>().TrayIcon,
+				MiniWindow = miniWindow
 			};
-
-			miniWindow.DataContext = services.GetRequiredService<MiniViewModel>();
 		}
 
 		base.OnFrameworkInitializationCompleted();
