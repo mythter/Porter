@@ -23,7 +23,6 @@ using Porter.Views;
 
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "Porter.Controls")]
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "Porter.AttachedProperties")]
-[assembly: XmlnsDefinition("https://github.com/avaloniaui", "Myth.Avalonia.Controls")]
 
 namespace Porter;
 

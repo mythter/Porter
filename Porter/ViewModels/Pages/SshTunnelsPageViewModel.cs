@@ -227,10 +227,10 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 	#region Private Methods
 
 	private async Task<bool> OnStartForward(
-	SshTunnel tunnel,
-	Action<Exception>? exceptionCallback = null,
-	Func<Task<string?>>? promptPassphrase = null,
-	CancellationToken? cancellationToken = null)
+		SshTunnel tunnel,
+		Action<Exception>? exceptionCallback = null,
+		Func<Task<string?>>? promptPassphrase = null,
+		CancellationToken? cancellationToken = null)
 	{
 		var cts = cancellationToken is null
 			? new CancellationTokenSource()
