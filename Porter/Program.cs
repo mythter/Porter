@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ using Porter.Services;
 
 namespace Porter;
 
+[SuppressMessage("Major Code Smell", "S1118:Utility classes should not have public constructors", Justification = "Entry point class")]
 internal sealed class Program
 {
 	// Initialization code. Don't use any Avalonia, third-party APIs or any
