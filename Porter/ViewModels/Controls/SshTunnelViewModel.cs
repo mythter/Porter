@@ -10,13 +10,16 @@ using CommunityToolkit.Mvvm.Input;
 
 using Porter.Helpers;
 using Porter.Models;
+using Porter.Services;
 using Porter.Services.Interfaces;
 
 namespace Porter.ViewModels.Controls;
 
 public partial class SshTunnelViewModel : ObservableObject
 {
-	public bool IsDisconnected => !Model.IsTunnelStarted && !Model.IsConnecting;
+	private readonly ITunnelService _tunnelService;
+
+	private CancellationTokenSource? _connectingCts;
 
 	public bool IsNameNullOrEmpty => string.IsNullOrEmpty(Model.Name) && RemoteServerAlias is not null;
 
@@ -31,6 +34,10 @@ public partial class SshTunnelViewModel : ObservableObject
 	};
 
 	public SshTunnel Model { get; }
+
+	public SshTunnelState State { get; }
+
+	public bool IsDisconnected => !State.IsRunning && !State.IsConnecting;
 
 	private SshServer? _selectedSshServer;
 	public SshServer? SelectedSshServer
@@ -73,13 +80,16 @@ public partial class SshTunnelViewModel : ObservableObject
 
 	public ObservableCollection<RemoteServer> RemoteServers { get; init; }
 
-	public Func<SshTunnel, Action<Exception>?, Func<Task<string?>>?, CancellationToken?, Task<bool>>? StartForward { get; set; }
+	public Func<SshTunnel, CancellationToken?, Task<bool>>? StartForward { get; set; }
 
 	public Action<SshTunnel>? StopForward { get; set; }
 
-	public SshTunnelViewModel(SshTunnel model, IAppDataProvider<AppData> appData)
+	public SshTunnelViewModel(SshTunnel model, IAppDataProvider<AppData> appData, ITunnelService tunnelService)
 	{
+		_tunnelService = tunnelService;
+
 		Model = model;
+		State = tunnelService.GetState(model.Id);
 
 		SshServers = appData.Value.SshServers;
 		PrivateKeys = appData.Value.PrivateKeys;
@@ -99,21 +109,29 @@ public partial class SshTunnelViewModel : ObservableObject
 			{
 				OnPropertyChanged(nameof(RemoteServerAlias));
 			}
-			else if (e.PropertyName is nameof(Model.IsTunnelStarted) or nameof(Model.IsConnecting))
+
+			OnPropertyChanged(nameof(MiniToolTip));
+		};
+
+		State.PropertyChanged += (s, e) =>
+		{
+			if (e.PropertyName == nameof(State.State))
 			{
 				OnPropertyChanged(nameof(IsDisconnected));
 			}
-
-			OnPropertyChanged(nameof(MiniToolTip));
 		};
 	}
 
 	[RelayCommand]
 	public async Task ToggleTunnel()
 	{
-		if (Model.IsTunnelStarted || Model.IsConnecting)
+		if (State.IsRunning)
 		{
 			StopTunnel();
+		}
+		else if (State.IsConnecting && _connectingCts is not null)
+		{
+			await _connectingCts.CancelAsync();
 		}
 		else
 		{
@@ -121,33 +139,32 @@ public partial class SshTunnelViewModel : ObservableObject
 		}
 	}
 
-	public async Task<bool> StartTunnel(Func<Task<string?>>? promptPassphrase = null, CancellationToken? cancellationToken = null)
+	private async Task<bool> StartTunnel()
 	{
-		if (!Model.IsTunnelStarted && StartForward is not null)
+		_connectingCts = new CancellationTokenSource();
+
+		if (StartForward is not null)
 		{
-			Model.IsConnecting = true;
-			if (await StartForward(Model, OnTunnelException, promptPassphrase, cancellationToken))
+			try
 			{
-				Model.IsTunnelStarted = true;
+				return await StartForward(Model, _connectingCts.Token);
 			}
-			Model.IsConnecting = false;
+			finally
+			{
+				_connectingCts.Dispose();
+				_connectingCts = null;
+			}
 		}
 
-		return Model.IsTunnelStarted;
+		return false;
 	}
 
-	public void StopTunnel()
+	private void StopTunnel()
 	{
-		if ((Model.IsConnecting || Model.IsTunnelStarted) && StopForward is not null)
+		if (StopForward is not null)
 		{
 			StopForward(Model);
-			Model.IsTunnelStarted = false;
 		}
-	}
-
-	public void OnTunnelException(Exception ex)
-	{
-		Model.IsTunnelStarted = false;
 	}
 
 	private string GetMiniToolTip()

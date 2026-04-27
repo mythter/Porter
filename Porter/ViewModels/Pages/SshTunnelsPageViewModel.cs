@@ -38,10 +38,10 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private readonly IAppDataProvider<AppData> _appDataProvider;
 
+	private readonly ITunnelService _tunnelService;
+
 
 	private readonly Func<SshTunnel, SshTunnelViewModel> _sshTunnelViewModelFactory;
-
-	private readonly PortForwardManager _portForwardManager;
 
 	private readonly Dictionary<SshTunnel, CancellationTokenSource> _connectingTunnels = [];
 
@@ -70,8 +70,8 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		IMessenger messenger,
 		TrayService trayService,
 		IPlatformServicesAccessor platformServices,
-		PortForwardManager portForwardManager,
 		Func<SshTunnel, SshTunnelViewModel> sshTunnelViewModelFactory,
+		ITunnelService tunnelService,
 		IAppDataProvider<AppData> appDataProvider)
 	{
 		PageName = PageNames.Tunnels;
@@ -81,7 +81,9 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		_trayService = trayService;
 		_appDataProvider = appDataProvider;
 		_sshTunnelViewModelFactory = sshTunnelViewModelFactory;
-		_portForwardManager = portForwardManager;
+		_tunnelService = tunnelService;
+
+		_tunnelService.TunnelFailed += OnTunnelFailed;
 
 		Items = new ObservableCollection<SshTunnelViewModel>(AppData.SshTunnels.Select(CreateSshTunnelViewModel));
 
@@ -126,22 +128,28 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 		_startAllCancellationTokenSource ??= new CancellationTokenSource();
 
-		async Task<string?> OnPromptPassphrase(PrivateKey privateKey)
-		{
-			var password = await Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(privateKey));
-			return password;
-		}
-
 		var startedTunnels = 0;
 
 		try
 		{
-			foreach (var tunnel in Items)
+			foreach (var tunnel in Items.Select(i => i.Model))
 			{
 				if (_startAllCancellationTokenSource.IsCancellationRequested)
 					break;
 
-				if (await tunnel.StartTunnel(() => OnPromptPassphrase(tunnel.Model.PrivateKey), _startAllCancellationTokenSource.Token))
+				var promptPassphraseCallback = tunnel.PrivateKey?.FilePath is null
+					? (Func<Task<string?>>?)null
+					: () => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(tunnel.PrivateKey));
+
+				var started = false;
+
+				try
+				{
+					started = await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, _startAllCancellationTokenSource.Token);
+				}
+				catch { /* ignore */ }
+
+				if (started)
 					startedTunnels++;
 			}
 		}
@@ -172,7 +180,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 		foreach (var tunnel in Items)
 		{
-			tunnel.StopTunnel();
+			_tunnelService.Stop(tunnel.Model);
 		}
 	}
 
@@ -218,6 +226,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		if (file is not null)
 		{
 			_appDataProvider.Load(file);
+
 			//MainViewModel.GoToTunnels();
 		}
 	}
@@ -226,32 +235,25 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	#region Private Methods
 
-	private async Task<bool> OnStartForward(
-		SshTunnel tunnel,
-		Action<Exception>? exceptionCallback = null,
-		Func<Task<string?>>? promptPassphrase = null,
-		CancellationToken? cancellationToken = null)
+	private async Task<bool> OnStartForward(SshTunnel tunnel, CancellationToken? cancellationToken = null)
 	{
 		var cts = cancellationToken is null
 			? new CancellationTokenSource()
 			: CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Value);
 
-		_connectingTunnels.Add(tunnel, cts);
+		_connectingTunnels.TryAdd(tunnel, cts);
 
-		bool started = false;
+		var started = false;
+
+		var promptPassphraseCallback = tunnel.PrivateKey?.FilePath is null
+			? (Func<Task<string?>>?)null
+			: () => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(tunnel.PrivateKey));
 
 		try
 		{
-			started = await _portForwardManager.StartForward(
-				tunnel,
-				(e) =>
-				{
-					exceptionCallback?.Invoke(e);
-					OnTunnelException(tunnel, e);
-				},
-				promptPassphrase ?? (() => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(tunnel.PrivateKey))),
-				cts.Token);
+			started = await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, cts.Token);
 		}
+		catch { /* ignore */ }
 		finally
 		{
 			cts?.Dispose();
@@ -272,24 +274,22 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private void OnStopForward(SshTunnel tunnel)
 	{
-		_startAllCancellationTokenSource?.Cancel();
-
 		if (_connectingTunnels.TryGetValue(tunnel, out var cts))
 		{
 			cts.Cancel();
 		}
 
-		_portForwardManager.StopForward(tunnel);
+		_tunnelService.Stop(tunnel);
 
-		if (!_portForwardManager.IsAnyForwardStarted())
+		if (!_tunnelService.IsAnyForwardStarted())
 		{
 			_trayService.SetTrayIcon(ForwardState.None);
 		}
 	}
 
-	private void OnTunnelException(SshTunnel tunnel, Exception exception)
+	private void OnTunnelFailed(SshTunnel tunnel, Exception exception)
 	{
-		var forwardState = _portForwardManager.IsAnyForwardStarted() switch
+		var forwardState = _tunnelService.IsAnyForwardStarted() switch
 		{
 			true => ForwardState.PartiallyDown,
 			false => ForwardState.AllDown,
@@ -305,7 +305,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		//		$"Stack trace: {exception.StackTrace ?? "not available"}");
 		//});
 	}
-
 
 	private SshTunnelViewModel CreateSshTunnelViewModel(SshTunnel tunnel)
 	{

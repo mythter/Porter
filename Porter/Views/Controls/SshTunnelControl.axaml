@@ -14,7 +14,7 @@
 
 		<Button Grid.Column="0"
 				Classes="no-padding"
-				Classes.tunnel-started="{Binding Model.IsTunnelStarted}"
+				Classes.tunnel-started="{Binding State.IsRunning}"
 				Command="{Binding ToggleTunnel}"
 				Width="{ Binding $parent.Bounds.Height }"
 				Height="{ Binding $parent.Bounds.Height }">
@@ -27,12 +27,12 @@
 				<TextBlock Text="&#xE46C;"
 						   FontSize="22"
 						   ToolTip.Tip="Stop Tunnel"
-						   IsVisible="{Binding Model.IsTunnelStarted}"
+						   IsVisible="{Binding State.IsRunning}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 				<TextBlock Text="&#xE66A;"
 						   FontSize="22"
 						   ToolTip.Tip="Connecting"
-						   IsVisible="{Binding Model.IsConnecting}"
+						   IsVisible="{Binding State.IsConnecting}"
 						   FontFamily="{ StaticResource Phosphor }"/>
 			</Panel>
 		</Button>

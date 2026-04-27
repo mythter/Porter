@@ -58,10 +58,11 @@ public partial class App : Application
 
 		collection.AddSingleton<PageFactory>();
 
-		collection.AddSingleton<Func<SshTunnel, SshTunnelViewModel>>(sp =>
-			tunnel => new SshTunnelViewModel(tunnel, sp.GetRequiredService<IAppDataProvider<AppData>>()));
-
 		collection.AddSingleton<PortForwardManager>();
+		collection.AddSingleton<ITunnelService, TunnelService>();
+
+		collection.AddSingleton<Func<SshTunnel, SshTunnelViewModel>>(sp =>
+			tunnel => new SshTunnelViewModel(tunnel, sp.GetRequiredService<IAppDataProvider<AppData>>(), sp.GetRequiredService<ITunnelService>()));
 
 		collection.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 

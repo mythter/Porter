@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -23,12 +22,4 @@ public partial class SshTunnel : ObservableObject
 
 	[ObservableProperty]
 	private RemoteServer? remoteServer;
-
-	[ObservableProperty]
-	[property: JsonIgnore]
-	private bool isTunnelStarted;
-
-	[ObservableProperty]
-	[property: JsonIgnore]
-	private bool isConnecting;
 }

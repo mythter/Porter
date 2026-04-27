@@ -24,28 +24,24 @@ public class PortForwardManager : IDisposable
 
 	private readonly ConcurrentDictionary<SshConnectionOptions, SshConnection> _connections = new();
 
+	private readonly ConcurrentDictionary<LocalPortForwardKey, SshTunnel> _forwardToTunnel = new();
+
+	#endregion
+
+	#region Events
+
+	public event Action<SshTunnel, Exception>? TunnelFailed;
+
 	#endregion
 
 	#region Public Methods
 
-	public async Task<bool> StartForward(
-	SshTunnel tunnel,
-	Action<Exception>?
-	exceptionCallback = null,
-	Func<Task<string?>>? promptPassphrase = null,
-	CancellationToken cancellationToken = default)
+	public Task<bool> StartForward(
+		SshTunnel tunnel,
+		Func<Task<string?>>? promptPassphrase = null,
+		CancellationToken cancellationToken = default)
 	{
-		// initiate async immediately
-		await Task.Yield();
-
-		try
-		{
-			return await StartForwardInternal(tunnel, exceptionCallback, promptPassphrase, cancellationToken);
-		}
-		catch
-		{
-			return false;
-		}
+		return StartForwardInternal(tunnel, promptPassphrase, cancellationToken);
 	}
 
 	public void StopForward(SshTunnel tunnel)
@@ -54,6 +50,8 @@ public class PortForwardManager : IDisposable
 		{
 			return;
 		}
+
+		_forwardToTunnel.TryRemove(localPortForward, out _);
 
 		if (GetConnectionByPortForward(localPortForward) is { } connection && connection.IsForwardStarted(localPortForward))
 		{
@@ -116,7 +114,6 @@ public class PortForwardManager : IDisposable
 
 	private async Task<bool> StartForwardInternal(
 	SshTunnel tunnel,
-	Action<Exception>? exceptionCallback = null,
 	Func<Task<string?>>? promptPassphrase = null,
 	CancellationToken cancellationToken = default)
 	{
@@ -158,7 +155,15 @@ public class PortForwardManager : IDisposable
 
 			if (!connection.IsForwardStarted(localPortForward))
 			{
-				connection.StartForward(localPortForward, exceptionCallback);
+				_forwardToTunnel[localPortForward] = tunnel;
+
+				connection.StartForward(localPortForward, ex =>
+				{
+					if (_forwardToTunnel.TryRemove(localPortForward, out var t))
+					{
+						TunnelFailed?.Invoke(t, ex);
+					}
+				});
 			}
 		}
 		catch (Exception ex)
