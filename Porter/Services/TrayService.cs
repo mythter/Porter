@@ -11,113 +11,111 @@ using Porter.Enums;
 using Porter.Services.Interfaces;
 using Porter.Views;
 
-namespace Porter.Services
+namespace Porter.Services;
+
+public class TrayService : ITrayService
 {
-	public class TrayService : ITrayService
+	private const string IMAGES_PATH = $"avares://{nameof(Porter)}/Assets/Images";
+
+	private ForwardState _iconState = ForwardState.None;
+
+	private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
+
+	private readonly MiniWindow _miniWindow;
+
+	public TrayIcon TrayIcon { get; }
+
+	public TrayService(IClassicDesktopStyleApplicationLifetime lifetime, MiniWindow miniWindow)
 	{
-		private const string IMAGES_PATH = $"avares://{nameof(Porter)}/Assets/Images";
+		_lifetime = lifetime;
+		_miniWindow = miniWindow;
 
-		private ForwardState _iconState = ForwardState.None;
+		TrayIcon = InitTrayIcon();
+	}
 
-		private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
+	public void SetTrayIcon(ForwardState forwardState)
+	{
+		_iconState = forwardState;
 
-		private readonly MiniWindow _miniWindow;
-
-		public TrayIcon TrayIcon { get; }
-
-		public TrayService(IClassicDesktopStyleApplicationLifetime lifetime, MiniWindow miniWindow)
+		if (TrayIcon.IsVisible)
 		{
-			_lifetime = lifetime;
-			_miniWindow = miniWindow;
-
-			TrayIcon = InitTrayIcon();
+			TrayIcon.Icon = GetWindowIcon(forwardState);
+			TrayIcon.ToolTipText = GetTrayToolTip(forwardState);
 		}
+	}
 
-		public void SetTrayIcon(ForwardState forwardState)
+	private TrayIcon InitTrayIcon()
+	{
+		var exitItem = new NativeMenuItem("Exit");
+		exitItem.Click += (_, _) => _lifetime.Shutdown();
+
+		var openMainWindowItem = new NativeMenuItem("Open Main Window");
+		openMainWindowItem.Click += (_, _) =>
 		{
-			_iconState = forwardState;
+			if (_lifetime.MainWindow is not { } mainWindow)
+				return;
 
-			if (TrayIcon.IsVisible)
+			if (!mainWindow.IsVisible)
+				mainWindow.Show();
+
+			mainWindow.Activate();
+		};
+
+		var trayIcon = new TrayIcon
+		{
+			Icon = GetWindowIcon(ForwardState.None),
+			ToolTipText = GetTrayToolTip(ForwardState.None),
+			IsVisible = false,
+			Menu = [
+				openMainWindowItem,
+				new NativeMenuItemSeparator(),
+				exitItem,
+			]
+		};
+
+		trayIcon.Clicked += (s, e) => _miniWindow.ToggleVisibility();
+
+		trayIcon.PropertyChanged += (s, e) =>
+		{
+			if (e.Property == TrayIcon.IsVisibleProperty && trayIcon.IsVisible)
 			{
-				TrayIcon.Icon = GetWindowIcon(forwardState);
-				TrayIcon.ToolTipText = GetTrayToolTip(forwardState);
+				SetTrayIcon(_iconState);
 			}
-		}
+		};
 
-		private TrayIcon InitTrayIcon()
+		var icons = new TrayIcons() { trayIcon };
+
+		TrayIcon.SetIcons(Application.Current!, icons);
+
+		return trayIcon;
+	}
+
+	private static WindowIcon GetWindowIcon(ForwardState forwardState)
+	{
+		var icon = forwardState switch
 		{
-			var exitItem = new NativeMenuItem("Exit");
-			exitItem.Click += (s, e) => _lifetime.Shutdown();
+			ForwardState.AllUp => "logo-green.png",
+			ForwardState.PartiallyDown => "logo-yellow.png",
+			ForwardState.AllDown => "logo-red.png",
+			_ => "logo-main.png"
+		};
 
-			var mainWindow = _lifetime.MainWindow!;
+		return GetWindowIcon(Path.Combine(IMAGES_PATH, icon));
+	}
 
-			var openMainWindowItem = new NativeMenuItem("Open Main Window");
-			openMainWindowItem.Click += (s, e) =>
-			{
-				if (!mainWindow.IsVisible)
-				{
-					mainWindow.Show();
-				}
+	private static WindowIcon GetWindowIcon(string iconPath)
+	{
+		return new WindowIcon(new Bitmap(AssetLoader.Open(new Uri(iconPath))));
+	}
 
-				mainWindow.Activate();
-			};
-
-			var trayIcon = new TrayIcon
-			{
-				Icon = GetWindowIcon(ForwardState.None),
-				ToolTipText = GetTrayToolTip(ForwardState.None),
-				IsVisible = false,
-				Menu = [
-					openMainWindowItem,
-					new NativeMenuItemSeparator(),
-					exitItem,
-				]
-			};
-
-			trayIcon.Clicked += (s, e) => _miniWindow.ToggleVisibility();
-
-			trayIcon.PropertyChanged += (s, e) =>
-			{
-				if (e.Property == TrayIcon.IsVisibleProperty && trayIcon.IsVisible)
-				{
-					SetTrayIcon(_iconState);
-				}
-			};
-
-			var icons = new TrayIcons() { trayIcon };
-
-			TrayIcon.SetIcons(Application.Current!, icons);
-
-			return trayIcon;
-		}
-
-		private static WindowIcon GetWindowIcon(ForwardState forwardState)
+	private static string GetTrayToolTip(ForwardState forwardState)
+	{
+		return forwardState switch
 		{
-			var icon = forwardState switch
-			{
-				ForwardState.AllUp => "logo-green.png",
-				ForwardState.PartiallyDown => "logo-yellow.png",
-				ForwardState.AllDown => "logo-red.png",
-				_ => "logo-main.png"
-			};
-
-			return GetWindowIcon(Path.Combine(IMAGES_PATH, icon));
-		}
-
-		private static WindowIcon GetWindowIcon(string iconPath)
-		{
-			return new WindowIcon(new Bitmap(AssetLoader.Open(new Uri(iconPath))));
-		}
-
-		private static string GetTrayToolTip(ForwardState forwardState)
-		{
-			return forwardState switch
-			{
-				ForwardState.AllUp => "All Tunnels are started",
-				ForwardState.PartiallyDown => "Some Tunnels are stopped",
-				ForwardState.AllDown => "All Tunnels are stopped",
-				_ => "Porter"
-			};
-		}
+			ForwardState.AllUp => "All Tunnels are started",
+			ForwardState.PartiallyDown => "Some Tunnels are stopped",
+			ForwardState.AllDown => "All Tunnels are stopped",
+			_ => "Porter"
+		};
 	}
 }
