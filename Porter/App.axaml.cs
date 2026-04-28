@@ -64,6 +64,8 @@ public partial class App : Application
 		collection.AddSingleton<Func<SshTunnel, SshTunnelViewModel>>(sp =>
 			tunnel => new SshTunnelViewModel(tunnel, sp.GetRequiredService<IAppDataProvider<AppData>>(), sp.GetRequiredService<ITunnelService>()));
 
+		collection.AddSingleton<IDialogContextProvider, DialogContextProvider>();
+
 		collection.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -79,9 +81,14 @@ public partial class App : Application
 
 			miniWindow.DataContext = services.GetRequiredService<MiniViewModel>();
 
+			var mainViewModel = services.GetRequiredService<MainViewModel>();
+
+			var contextProvider = (DialogContextProvider)services.GetRequiredService<IDialogContextProvider>();
+			contextProvider.SetMainDialogContext(mainViewModel);
+
 			desktop.MainWindow = new MainWindow(services.GetRequiredService<IAppDataProvider<AppData>>())
 			{
-				DataContext = services.GetRequiredService<MainViewModel>(),
+				DataContext = mainViewModel,
 				TrayIcon = services.GetRequiredService<TrayService>().TrayIcon,
 				MiniWindow = miniWindow
 			};

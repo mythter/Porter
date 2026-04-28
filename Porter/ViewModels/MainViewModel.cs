@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
+using Myth.Avalonia.Services.Abstractions;
+
 using Porter.Enums;
 using Porter.Factories;
 using Porter.Messages;
@@ -9,7 +11,7 @@ using Porter.ViewModels.Pages;
 
 namespace Porter.ViewModels;
 
-public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>
+public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>, IDialogContext
 {
 	#region Private Fields
 

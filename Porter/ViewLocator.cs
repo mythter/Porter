@@ -22,6 +22,7 @@ public class ViewLocator : IDataTemplate
 			SshServersPageViewModel => new SshServersPageView(),
 			RemoteServersPageViewModel => new RemoteServersPageView(),
 			PrivateKeysPageViewModel => new PrivateKeysPageView(),
+			PrivateKeyPasswordViewModel => new PrivateKeyPasswordView(),
 			_ => new TextBlock { Text = $"Not Found: {data?.GetType().Name}" }
 		};
 	}

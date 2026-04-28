@@ -25,7 +25,6 @@
 				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
 
-
 		<Grid Grid.Column="4"
 			  ColumnDefinitions="*, 5, Auto">
 			<NumericUpDown Grid.Column="0"

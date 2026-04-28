@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Avalonia.Controls;
 using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.Input;
@@ -20,9 +19,7 @@ using Porter.Messages;
 using Porter.Models;
 using Porter.Services;
 using Porter.Services.Interfaces;
-using Porter.Services.Ssh;
 using Porter.ViewModels.Controls;
-using Porter.Views;
 
 namespace Porter.ViewModels.Pages;
 
@@ -40,6 +37,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private readonly ITunnelService _tunnelService;
 
+	private readonly IDialogContextProvider _dialogContextProvider;
 
 	private readonly Func<SshTunnel, SshTunnelViewModel> _sshTunnelViewModelFactory;
 
@@ -72,6 +70,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		IPlatformServicesAccessor platformServices,
 		Func<SshTunnel, SshTunnelViewModel> sshTunnelViewModelFactory,
 		ITunnelService tunnelService,
+		IDialogContextProvider dialogContextProvider,
 		IAppDataProvider<AppData> appDataProvider)
 	{
 		PageName = PageNames.Tunnels;
@@ -82,6 +81,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		_appDataProvider = appDataProvider;
 		_sshTunnelViewModelFactory = sshTunnelViewModelFactory;
 		_tunnelService = tunnelService;
+		_dialogContextProvider = dialogContextProvider;
 
 		_tunnelService.TunnelFailed += OnTunnelFailed;
 
@@ -182,6 +182,8 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		{
 			_tunnelService.Stop(tunnel.Model);
 		}
+
+		_trayService.SetTrayIcon(ForwardState.None);
 	}
 
 	[RelayCommand]
@@ -206,7 +208,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		var file = await this.ShowSaveFileDialogAsync(
 			title: "Export settings",
 			suggestedFileName: "settings.json",
-			fileTypeChoices: new Dictionary<string, string[]> { ["JSON files"] = ["*.json"] }
+			fileTypeFilter: new Dictionary<string, string[]> { ["JSON files"] = ["*.json"] }
 		);
 
 		if (file is not null)
@@ -318,30 +320,10 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private async Task<string?> ShowPrivateKeyPasswordDialogAsync(PrivateKey privateKey)
 	{
-		var dialog = new PrivateKeyPasswordWindow
-		{
-			DataContext = new PrivateKeyPasswordViewModel(privateKey),
-			WindowStartupLocation = WindowStartupLocation.CenterScreen
-		};
+		var mainContext = _dialogContextProvider.GetMainDialogContext();
 
-		var mainWindow = _platformServices.MainWindow;
-
-		var windowVisible = mainWindow.IsVisible;
-		var windowState = mainWindow.WindowState;
-
-		if (!windowVisible)
-		{
-			mainWindow.WindowState = WindowState.Minimized;
-			mainWindow.Show();
-		}
-
-		var password = await dialog.ShowDialog<string>(mainWindow);
-
-		if (!windowVisible)
-		{
-			mainWindow.Hide();
-			mainWindow.WindowState = windowState;
-		}
+		var dialogViewModel = new PrivateKeyPasswordViewModel(privateKey);
+		var password = await mainContext.ShowDialogWindowSafe<string>("Enter private key passphrase", dialogViewModel);
 
 		return password;
 	}

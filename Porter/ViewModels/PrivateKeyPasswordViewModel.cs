@@ -1,18 +1,26 @@
 ﻿using System.IO;
 
+using Avalonia.Input;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
+using Myth.Avalonia.Services.Abstractions;
+using Myth.Avalonia.Services.Extensions;
 
 using Porter.Models;
 
 namespace Porter.ViewModels;
 
-public partial class PrivateKeyPasswordViewModel : ViewModelBase
+public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 {
 	[ObservableProperty]
-	private bool isPasswordVisible;
+	[NotifyPropertyChangedFor(nameof(PasswordChar))]
+	public partial bool IsPasswordVisible { get; set; }
 
 	public char? PasswordChar => IsPasswordVisible ? null : '•';
+
+	public string? Password { get; set; }
 
 	public string Message { get; set; }
 
@@ -26,14 +34,30 @@ public partial class PrivateKeyPasswordViewModel : ViewModelBase
 		};
 	}
 
-	partial void OnIsPasswordVisibleChanged(bool oldValue, bool newValue)
+	[RelayCommand]
+	private void TogglePasswordVisibility()
 	{
-		OnPropertyChanged(nameof(PasswordChar));
+		IsPasswordVisible = !IsPasswordVisible;
 	}
 
 	[RelayCommand]
-	public void TogglePasswordVisibility()
+	private void ReturnResult()
 	{
-		IsPasswordVisible = !IsPasswordVisible;
+		this.ReturnResultFromDialogWindow(Password ?? string.Empty);
+	}
+
+	[RelayCommand]
+	private void Cancel()
+	{
+		this.ReturnResultFromDialogWindow(null);
+	}
+
+	[RelayCommand]
+	public void PasswordKeyDown(KeyEventArgs e)
+	{
+		if (e.Key == Key.Enter)
+		{
+			this.ReturnResultFromDialogWindow(Password ?? string.Empty);
+		}
 	}
 }
