@@ -19,11 +19,21 @@ namespace Porter.ViewModels.Pages;
 
 public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext
 {
+	#region Private Fields
+
 	private readonly IMessenger _messenger;
 
 	private readonly AppData _appData;
 
+	#endregion
+
+	#region Public Properties
+
 	public ObservableCollection<PrivateKey> Items { get; }
+
+	#endregion
+
+	#region Constructors
 
 	public PrivateKeysPageViewModel(IMessenger messenger, IAppDataProvider<AppData> appData)
 	{
@@ -34,6 +44,10 @@ public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext
 
 		Items = _appData.PrivateKeys;
 	}
+
+	#endregion
+
+	#region Commands
 
 	[RelayCommand]
 	public void GoToTunnels() => _messenger.Send(new NavigateMessage(PageNames.Tunnels));
@@ -70,6 +84,10 @@ public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext
 		pk.FilePath = filePath;
 	}
 
+	#endregion
+
+	#region Private Methods
+
 	private Task<string?> ShowPrivateKeyOpenFileDialogAsync()
 	{
 		return this.ShowOpenFileDialogAsync(
@@ -77,4 +95,6 @@ public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext
 			new Dictionary<string, string[]> { ["Private Keys"] = ["*.pem", "*.ppk"] }
 		);
 	}
+
+	#endregion
 }

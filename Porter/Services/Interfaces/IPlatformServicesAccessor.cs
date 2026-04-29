@@ -1,14 +1,13 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input.Platform;
 
-namespace Porter.Services.Interfaces
+namespace Porter.Services.Interfaces;
+
+public interface IPlatformServicesAccessor
 {
-	public interface IPlatformServicesAccessor
-	{
-		public Window MainWindow { get; }
+	public Window MainWindow { get; }
 
-		public IClipboard? Clipboard { get; }
+	public IClipboard? Clipboard { get; }
 
-		public void Shutdown();
-	}
+	public void Shutdown();
 }

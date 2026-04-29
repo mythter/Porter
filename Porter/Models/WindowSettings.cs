@@ -5,17 +5,17 @@ namespace Porter.Models;
 public partial class WindowSettings : ObservableObject
 {
 	[ObservableProperty]
-	private int left;
+	public partial int Left { get; set; }
 
 	[ObservableProperty]
-	private int top;
+	public partial int Top { get; set; }
 
 	[ObservableProperty]
-	private double width;
+	public partial double Width { get; set; }
 
 	[ObservableProperty]
-	private double height;
+	public partial double Height { get; set; }
 
 	[ObservableProperty]
-	private bool maximized;
+	public partial bool Maximized { get; set; }
 }

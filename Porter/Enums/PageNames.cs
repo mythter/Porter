@@ -1,11 +1,10 @@
-﻿namespace Porter.Enums
+﻿namespace Porter.Enums;
+
+public enum PageNames
 {
-	public enum PageNames
-	{
-		Unknown,
-		Tunnels,
-		PrivateKeys,
-		SshServers,
-		RemoteServers
-	}
+	Unknown,
+	Tunnels,
+	PrivateKeys,
+	SshServers,
+	RemoteServers
 }

@@ -12,13 +12,23 @@ namespace Porter.Services;
 
 public class TunnelService : ITunnelService
 {
+	#region Private Fields
+
 	private readonly PortForwardManager _forwardManager;
 
 	private readonly Dictionary<Guid, SshTunnelState> _states = [];
 
 	private readonly Dictionary<Guid, CancellationTokenSource> _cts = [];
 
+	#endregion
+
+	#region Events
+
 	public event Action<SshTunnel, Exception>? TunnelFailed;
+
+	#endregion
+
+	#region Constructors
 
 	public TunnelService(PortForwardManager forwardManager)
 	{
@@ -26,6 +36,10 @@ public class TunnelService : ITunnelService
 
 		_forwardManager.TunnelFailed += OnTunnelFailed;
 	}
+
+	#endregion
+
+	#region Public Methods
 
 	public SshTunnelState GetState(Guid tunnelId)
 	{
@@ -87,6 +101,15 @@ public class TunnelService : ITunnelService
 		GetState(tunnel.Id).State = TunnelState.Stopped;
 	}
 
+	public bool IsAnyForwardStarted()
+	{
+		return _forwardManager.IsAnyForwardStarted();
+	}
+
+	#endregion
+
+	#region Private Methods
+
 	private Task<bool> StartInternal(
 		SshTunnel tunnel,
 		Func<Task<string?>>? promptPassphrase = null,
@@ -111,8 +134,5 @@ public class TunnelService : ITunnelService
 		TunnelFailed?.Invoke(tunnel, ex);
 	}
 
-	public bool IsAnyForwardStarted()
-	{
-		return _forwardManager.IsAnyForwardStarted();
-	}
+	#endregion
 }

@@ -31,7 +31,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private readonly IPlatformServicesAccessor _platformServices;
 
-	private readonly TrayService _trayService;
+	private readonly ITrayService _trayService;
 
 	private readonly IAppDataProvider<AppData> _appDataProvider;
 
@@ -66,7 +66,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	public SshTunnelsPageViewModel(
 		IMessenger messenger,
-		TrayService trayService,
+		ITrayService trayService,
 		IPlatformServicesAccessor platformServices,
 		Func<SshTunnel, SshTunnelViewModel> sshTunnelViewModelFactory,
 		ITunnelService tunnelService,

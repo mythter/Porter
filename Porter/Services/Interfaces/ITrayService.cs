@@ -1,9 +1,8 @@
 ﻿using Porter.Enums;
 
-namespace Porter.Services.Interfaces
+namespace Porter.Services.Interfaces;
+
+public interface ITrayService
 {
-	public interface ITrayService
-	{
-		void SetTrayIcon(ForwardState forwardState);
-	}
+	void SetTrayIcon(ForwardState forwardState);
 }

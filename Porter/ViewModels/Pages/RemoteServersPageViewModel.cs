@@ -14,11 +14,21 @@ namespace Porter.ViewModels.Pages;
 
 public partial class RemoteServersPageViewModel : PageViewModel
 {
+	#region Private Fields
+
 	private readonly IMessenger _messenger;
 
 	private readonly AppData _appData;
 
+	#endregion
+
+	#region Public Properties
+
 	public ObservableCollection<RemoteServer> Items { get; }
+
+	#endregion
+
+	#region Constructors
 
 	public RemoteServersPageViewModel(IMessenger messenger, IAppDataProvider<AppData> appData)
 	{
@@ -29,6 +39,10 @@ public partial class RemoteServersPageViewModel : PageViewModel
 
 		Items = _appData.RemoteServers;
 	}
+
+	#endregion
+
+	#region Commands
 
 	[RelayCommand]
 	public void GoToTunnels() => _messenger.Send(new NavigateMessage(PageNames.Tunnels));
@@ -48,4 +62,6 @@ public partial class RemoteServersPageViewModel : PageViewModel
 
 		_appData.RemoteServers.Remove(x => x.Id == remoteServer.Id);
 	}
+
+	#endregion
 }

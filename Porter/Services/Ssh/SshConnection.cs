@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -93,8 +91,7 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 
 	public void StartForward(LocalPortForwardKey portForward, Action<Exception>? exceptionCallback = null)
 	{
-		var forward = AddOrGetLocalForward(portForward, exceptionCallback);
-		forward?.Start();
+		AddOrGetLocalForward(portForward, exceptionCallback)?.Start();
 	}
 
 	public void StopForward(LocalPortForwardKey portForward)
@@ -187,9 +184,6 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 
 	private ForwardedPortLocal? AddOrGetLocalForward(LocalPortForwardKey portForward, Action<Exception>? exceptionCallback = null)
 	{
-		if (_sshClient is null)
-			return null;
-
 		if (!_forwards.TryGetValue(portForward, out var forward))
 		{
 			forward = AddLocalForward(portForward, exceptionCallback);
@@ -203,12 +197,39 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 		if (_sshClient is null)
 			return null;
 
-		ForwardedPortLocal forward;
-
 		if (portForward.BoundHost is null && portForward.BoundPort is null)
 		{
 			throw new InvalidOperationException("At least one of BoundHost or BoundPort must be specified for local port forwarding.");
 		}
+
+		var forward = CreateForwardedPortLocal(portForward);
+
+		forward.Exception += (_, e) =>
+		{
+			StopForwardInternal(portForward);
+			exceptionCallback?.Invoke(e.Exception);
+		};
+
+		_sshClient.AddForwardedPort(forward);
+
+		_forwards[portForward] = forward;
+
+		return forward;
+	}
+
+	private void StopForwardInternal(LocalPortForwardKey portForward)
+	{
+		if (_forwards.TryRemove(portForward, out var forward))
+		{
+			forward.Stop();
+
+			_sshClient?.RemoveForwardedPort(forward);
+		}
+	}
+
+	private static ForwardedPortLocal CreateForwardedPortLocal(LocalPortForwardKey portForward)
+	{
+		ForwardedPortLocal forward;
 
 		if (portForward.BoundHost is null)
 		{
@@ -223,31 +244,7 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 			forward = new ForwardedPortLocal(portForward.BoundHost, portForward.BoundPort!.Value, portForward.Host, portForward.Port);
 		}
 
-		forward.Exception += (_, e) =>
-		{
-			StopForwardInternal(portForward);
-			exceptionCallback?.Invoke(e.Exception);
-		};
-
-		_sshClient.AddForwardedPort(forward);
-		Debug.WriteLine($"Forwarding added to _sshClient, _sshClient.ForwardedPorts.Count = {_sshClient.ForwardedPorts.Count()}");
-		_forwards[portForward] = forward;
-		Debug.WriteLine($"Forwarding added to _forwards, _forwards.Count = {_forwards.Count}");
 		return forward;
-	}
-
-	private void StopForwardInternal(LocalPortForwardKey portForward)
-	{
-		if (_forwards.TryRemove(portForward, out var forward))
-		{
-			forward.Stop();
-
-			_sshClient?.RemoveForwardedPort(forward);
-
-			Debug.WriteLine($"Forwarding removed from _sshClient and _forwards;" +
-				$"\n_sshClient.ForwardedPorts.Count = {_sshClient?.ForwardedPorts.Count()}" +
-				$"\n_forwards.Count = {_forwards.Count}");
-		}
 	}
 
 	#endregion

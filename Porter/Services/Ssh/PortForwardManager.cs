@@ -103,6 +103,13 @@ public class PortForwardManager : IDisposable
 			}
 
 			_connections.Clear();
+
+			foreach (var semaphore in _locks.Values)
+			{
+				semaphore.Dispose();
+			}
+
+			_locks.Clear();
 		}
 
 		_disposed = true;
@@ -113,9 +120,9 @@ public class PortForwardManager : IDisposable
 	#region Private Methods
 
 	private async Task<bool> StartForwardInternal(
-	SshTunnel tunnel,
-	Func<Task<string?>>? promptPassphrase = null,
-	CancellationToken cancellationToken = default)
+		SshTunnel tunnel,
+		Func<Task<string?>>? promptPassphrase = null,
+		CancellationToken cancellationToken = default)
 	{
 		if (tunnel.SshServer?.User is null || tunnel.SshServer?.Host is null)
 		{
@@ -165,10 +172,6 @@ public class PortForwardManager : IDisposable
 					}
 				});
 			}
-		}
-		catch (Exception ex)
-		{
-			return false;
 		}
 		finally
 		{

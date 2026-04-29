@@ -4,14 +4,13 @@ using Avalonia.Input.Platform;
 
 using Porter.Services.Interfaces;
 
-namespace Porter.Services
+namespace Porter.Services;
+
+public class PlatformServicesAccessor(IClassicDesktopStyleApplicationLifetime applicationLifetime) : IPlatformServicesAccessor
 {
-	public class PlatformServicesAccessor(IClassicDesktopStyleApplicationLifetime applicationLifetime) : IPlatformServicesAccessor
-	{
-		public Window MainWindow => applicationLifetime.MainWindow!;
+	public Window MainWindow => applicationLifetime.MainWindow!;
 
-		public IClipboard? Clipboard => applicationLifetime.MainWindow?.Clipboard;
+	public IClipboard? Clipboard => applicationLifetime.MainWindow?.Clipboard;
 
-		public void Shutdown() => applicationLifetime.Shutdown();
-	}
+	public void Shutdown() => applicationLifetime.Shutdown();
 }

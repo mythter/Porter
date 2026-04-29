@@ -10,10 +10,10 @@ public partial class SshTunnelState : ObservableObject
 {
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsConnecting), nameof(IsStopped))]
-	private TunnelState _state;
+	public partial TunnelState State { get; set; }
 
 	[ObservableProperty]
-	private Exception? _lastError;
+	public partial Exception? LastError { get; set; }
 
 	public bool IsRunning => State == TunnelState.Running;
 

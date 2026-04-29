@@ -19,8 +19,14 @@ public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>,
 
 	#endregion
 
+	#region Public Properties
+
 	[ObservableProperty]
-	private PageViewModel _currentPage;
+	public partial PageViewModel CurrentPage { get; set; }
+
+	#endregion
+
+	#region Constructors
 
 	public MainViewModel()
 	{
@@ -36,6 +42,10 @@ public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>,
 		GoToTunnels();
 	}
 
+	#endregion
+
+	#region Commands
+
 	[RelayCommand]
 	public void GoToSshServers() => CurrentPage = _pageFactory.GetPageViewModel(PageNames.SshServers);
 
@@ -48,8 +58,14 @@ public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>,
 	[RelayCommand]
 	public void GoToTunnels() => CurrentPage = _pageFactory.GetPageViewModel(PageNames.Tunnels);
 
+	#endregion
+
+	#region Implementation IRecipient<NavigateMessage>
+
 	public void Receive(NavigateMessage message)
 	{
 		CurrentPage = _pageFactory.GetPageViewModel(message.Page);
 	}
+
+	#endregion
 }

@@ -14,11 +14,21 @@ namespace Porter.ViewModels.Pages;
 
 public partial class SshServersPageViewModel : PageViewModel
 {
+	#region Private Fields
+
 	private readonly IMessenger _messenger;
 
 	private readonly AppData _appData;
 
+	#endregion
+
+	#region Public Properties
+
 	public ObservableCollection<SshServer> Items { get; }
+
+	#endregion
+
+	#region Constructors
 
 	public SshServersPageViewModel(IMessenger messenger, IAppDataProvider<AppData> appData)
 	{
@@ -29,6 +39,10 @@ public partial class SshServersPageViewModel : PageViewModel
 
 		Items = _appData.SshServers;
 	}
+
+	#endregion
+
+	#region Commands
 
 	[RelayCommand]
 	public void GoToTunnels() => _messenger.Send(new NavigateMessage(PageNames.Tunnels));
@@ -48,4 +62,6 @@ public partial class SshServersPageViewModel : PageViewModel
 
 		_appData.SshServers.Remove(x => x.Id == server.Id);
 	}
+
+	#endregion
 }

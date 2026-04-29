@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 
+using Myth.Avalonia.Controls;
+using Myth.Avalonia.Controls.Enums;
+using Myth.Avalonia.Services.Abstractions;
+
 using Porter.Models;
 using Porter.Services;
 using Porter.Services.Interfaces;
@@ -12,15 +16,23 @@ namespace Porter.Views;
 
 public partial class MainWindow : Window
 {
+	#region Private Fields
+
 	private bool _isClosing = false;
 
-	private IAppDataProvider<AppData> _appDataProvider;
+	private readonly IAppDataProvider<AppData> _appDataProvider;
+
+	#endregion
+
+	#region Public Properties
 
 	public TrayIcon? TrayIcon { get; set; }
 
 	public MiniWindow? MiniWindow { get; set; }
 
-	public IDialogService? DialogService { get; set; }
+	#endregion
+
+	#region Constructors
 
 	public MainWindow(IAppDataProvider<AppData> appDataProvider)
 	{
@@ -41,6 +53,10 @@ public partial class MainWindow : Window
 			}
 		};
 	}
+
+	#endregion
+
+	#region Overrides
 
 	protected override async void OnOpened(EventArgs e)
 	{
@@ -69,6 +85,10 @@ public partial class MainWindow : Window
 
 		TrayIcon?.IsVisible = true;
 	}
+
+	#endregion
+
+	#region Private Methods
 
 	private void SaveWindowSettings()
 	{
@@ -113,14 +133,17 @@ public partial class MainWindow : Window
 			return;
 		}
 
-		if (DialogService is null)
+		if (DataContext is not IDialogContext context)
 			return;
 
-		await DialogService.ShowErrorAsync(
+		await context.ShowMessageBoxDialog(
 			"The application has been restarted due to a critical error. " +
 			"For details, see the crash.log file in the application folder.",
-			"Error occurred");
+			"Error occurred",
+			icon: MessageBoxIcon.Error);
 
 		CrashService.RemoveCrashData();
 	}
+
+	#endregion
 }

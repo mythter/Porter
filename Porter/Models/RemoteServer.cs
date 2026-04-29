@@ -9,11 +9,11 @@ public partial class RemoteServer : ObservableObject
 	public Guid Id { get; set; } = Guid.NewGuid();
 
 	[ObservableProperty]
-	private string? name;
+	public partial string? Name { get; set; }
 
 	[ObservableProperty]
-	private string? host;
+	public partial string? Host { get; set; }
 
 	[ObservableProperty]
-	private int? port;
+	public partial int? Port { get; set; }
 }

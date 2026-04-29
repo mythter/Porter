@@ -74,7 +74,9 @@ public partial class App : Application
 
 			var miniWindow = new MiniWindow();
 
-			collection.AddSingleton(sp => new TrayService(desktop, miniWindow));
+			var trayService = new TrayService(desktop, miniWindow);
+
+			collection.AddSingleton<ITrayService>(trayService);
 
 			var services = collection.BuildServiceProvider();
 			Ioc.Default.ConfigureServices(services);
@@ -89,7 +91,7 @@ public partial class App : Application
 			desktop.MainWindow = new MainWindow(services.GetRequiredService<IAppDataProvider<AppData>>())
 			{
 				DataContext = mainViewModel,
-				TrayIcon = services.GetRequiredService<TrayService>().TrayIcon,
+				TrayIcon = trayService.TrayIcon,
 				MiniWindow = miniWindow
 			};
 		}

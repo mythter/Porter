@@ -10,10 +10,10 @@ public partial class PrivateKey : ObservableObject
 	public Guid Id { get; set; } = Guid.NewGuid();
 
 	[ObservableProperty]
-	private string? name;
+	public partial string? Name { get; set; }
 
 	[ObservableProperty]
-	private string filePath;
+	public partial string? FilePath { get; set; }
 
 	public PrivateKey(string filePath)
 	{
@@ -23,6 +23,6 @@ public partial class PrivateKey : ObservableObject
 	[JsonConstructor]
 	public PrivateKey()
 	{
-		filePath = null!;
+		FilePath = null!;
 	}
 }

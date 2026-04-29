@@ -14,6 +14,8 @@ namespace Porter.ViewModels;
 
 public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 {
+	#region Public Properties
+
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(PasswordChar))]
 	public partial bool IsPasswordVisible { get; set; }
@@ -24,6 +26,10 @@ public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 
 	public string Message { get; set; }
 
+	#endregion
+
+	#region Constructors
+
 	public PrivateKeyPasswordViewModel(PrivateKey privateKey)
 	{
 		Message = "Enter passphrase for private key ";
@@ -33,6 +39,10 @@ public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 			false => $"{privateKey.Name}, file name: {Path.GetFileName(privateKey.FilePath)}",
 		};
 	}
+
+	#endregion
+
+	#region Commands
 
 	[RelayCommand]
 	private void TogglePasswordVisibility()
@@ -60,4 +70,6 @@ public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 			this.ReturnResultFromDialogWindow(Password ?? string.Empty);
 		}
 	}
+
+	#endregion
 }

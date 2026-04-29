@@ -4,16 +4,20 @@ using Avalonia.Controls;
 
 using Porter.Enums;
 using Porter.Helpers;
-using Porter.ViewModels;
 
 namespace Porter.Views;
 
 public partial class MiniWindow : Window
 {
+	#region Private Fields
 
 	private const int _windowMargin = 5;
 
 	private bool _isDeactivated;
+
+	#endregion
+
+	#region Constructors
 
 	public MiniWindow()
 	{
@@ -22,12 +26,9 @@ public partial class MiniWindow : Window
 		Deactivated += OnDeactivated;
 	}
 
-	private void OnDeactivated(object? sender, EventArgs e)
-	{
-		_isDeactivated = true;
-		Hide();
-		Avalonia.Threading.DispatcherTimer.RunOnce(() => _isDeactivated = false, TimeSpan.FromMilliseconds(300));
-	}
+	#endregion
+
+	#region Public Methods
 
 	public void ToggleVisibility()
 	{
@@ -41,6 +42,17 @@ public partial class MiniWindow : Window
 			PositionWindow();
 			Activate();
 		}
+	}
+
+	#endregion
+
+	#region Private Methods
+
+	private void OnDeactivated(object? sender, EventArgs e)
+	{
+		_isDeactivated = true;
+		Hide();
+		Avalonia.Threading.DispatcherTimer.RunOnce(() => _isDeactivated = false, TimeSpan.FromMilliseconds(300));
 	}
 
 	private void PositionWindow()
@@ -68,4 +80,6 @@ public partial class MiniWindow : Window
 
 		Position = new Avalonia.PixelPoint(x, y);
 	}
+
+	#endregion
 }

@@ -4,12 +4,7 @@ using Porter.ViewModels.Pages;
 
 namespace Porter.ViewModels;
 
-public class MiniViewModel : ViewModelBase
+public class MiniViewModel(PageFactory pageFactory) : ViewModelBase
 {
-	public PageViewModel Page { get; set; }
-
-	public MiniViewModel(PageFactory pageFactory)
-	{
-		Page = pageFactory.GetPageViewModel(PageNames.Tunnels);
-	}
+	public PageViewModel Page { get; set; } = pageFactory.GetPageViewModel(PageNames.Tunnels);
 }

@@ -9,17 +9,17 @@ public partial class SshTunnel : ObservableObject
 	public Guid Id { get; set; } = Guid.NewGuid();
 
 	[ObservableProperty]
-	private string? name;
+	public partial string? Name { get; set; }
 
 	[ObservableProperty]
-	private int? localPort;
+	public partial int? LocalPort { get; set; }
 
 	[ObservableProperty]
-	private SshServer? sshServer;
+	public partial SshServer? SshServer { get; set; }
 
 	[ObservableProperty]
-	private PrivateKey? privateKey;
+	public partial PrivateKey? PrivateKey { get; set; }
 
 	[ObservableProperty]
-	private RemoteServer? remoteServer;
+	public partial RemoteServer? RemoteServer { get; set; }
 }
