@@ -3,9 +3,15 @@ using System.IO;
 using System.Text.Json;
 
 using Porter.Models;
+using Porter.Services.Interfaces;
 
 namespace Porter.Services;
 
+/// <summary>
+/// Persists crash metadata to a marker JSON file used to (a) detect a previous-run crash on
+/// startup so the UI can show the recovery dialog, and (b) protect against rapid restart loops.
+/// Diagnostic text logging now lives in <see cref="ICrashLogger"/>.
+/// </summary>
 public static class CrashService
 {
 	private static readonly string _crashFilePath = Path.Combine(AppContext.BaseDirectory, "crash.json");
@@ -14,21 +20,21 @@ public static class CrashService
 	{
 		try
 		{
-			File.WriteAllText(_crashFilePath, JsonSerializer.Serialize(
-				new CrashData(
-					CrashDate: DateTimeOffset.UtcNow,
-					ErrorMessage: ex.Message,
-					StackTrace: ex.StackTrace ?? string.Empty,
-					Source: ex.TargetSite?.ToString() ?? string.Empty))
-				);
+			var data = new CrashData(
+				CrashDate: DateTimeOffset.UtcNow,
+				ErrorMessage: ex.Message,
+				StackTrace: ex.StackTrace ?? string.Empty,
+				// ex.TargetSite requires preserved reflection metadata (IL2026 under trimming/AOT).
+				// ex.Source carries the originating assembly name, which is sufficient for diagnostics.
+				Source: ex.Source ?? ex.GetType().FullName ?? string.Empty);
 
-			File.WriteAllText("crash.log", ex.ToString());
+			File.WriteAllText(_crashFilePath, JsonSerializer.Serialize(data, PorterJsonContext.Default.CrashData));
 
 			return true;
 		}
-		catch (Exception)
+		catch
 		{
-			// Handle system message box or other way to inform user of crash
+			// Failure to persist crash metadata is itself unrecoverable — give up silently.
 		}
 
 		return false;
@@ -43,9 +49,9 @@ public static class CrashService
 				File.Delete(_crashFilePath);
 			}
 		}
-		catch (Exception)
+		catch
 		{
-			// Ignored
+			// Ignored — leftover marker is harmless.
 		}
 	}
 
@@ -55,10 +61,10 @@ public static class CrashService
 		{
 			if (File.Exists(_crashFilePath))
 			{
-				return JsonSerializer.Deserialize<CrashData>(File.ReadAllText(_crashFilePath));
+				return JsonSerializer.Deserialize(File.ReadAllText(_crashFilePath), PorterJsonContext.Default.CrashData);
 			}
 		}
-		catch (Exception)
+		catch
 		{
 			ClearCrashData();
 		}

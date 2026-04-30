@@ -5,6 +5,15 @@
 		
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+		<EnableAotAnalyzer>true</EnableAotAnalyzer>
+		<!--
+		AVLN3001: MainWindow has no public parameterless ctor. We construct it via DI in App.cs;
+		compiled XAML does not require the runtime XAML loader, so this warning is benign.
+		-->
+		<NoWarn>$(NoWarn);AVLN3001</NoWarn>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>Assets\Images\logo-main.ico</ApplicationIcon>
 

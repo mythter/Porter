@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using Porter.Helpers;
 using Porter.Models;
 using Porter.Services;
 using Porter.Services.Interfaces;
@@ -17,8 +16,6 @@ namespace Porter.ViewModels.Controls;
 
 public partial class SshTunnelViewModel : ObservableObject
 {
-	private readonly ITunnelService _tunnelService;
-
 	private CancellationTokenSource? _connectingCts;
 
 	public bool IsNameNullOrEmpty => string.IsNullOrEmpty(Model.Name) && RemoteServerAlias is not null;
@@ -39,38 +36,20 @@ public partial class SshTunnelViewModel : ObservableObject
 
 	public bool IsDisconnected => !State.IsRunning && !State.IsConnecting;
 
-	private SshServer? _selectedSshServer;
-	public SshServer? SelectedSshServer
-	{
-		get => _selectedSshServer;
-		set
-		{
-			SetProperty(ref _selectedSshServer, value);
-			Model.SshServer = value;
-		}
-	}
+	[ObservableProperty]
+	public partial SshServer? SelectedSshServer { get; set; }
 
-	private RemoteServer? _selectedRemoteServer;
-	public RemoteServer? SelectedRemoteServer
-	{
-		get => _selectedRemoteServer;
-		set
-		{
-			SetProperty(ref _selectedRemoteServer, value);
-			Model.RemoteServer = value;
-		}
-	}
+	[ObservableProperty]
+	public partial RemoteServer? SelectedRemoteServer { get; set; }
 
-	private PrivateKey? _selectedPrivateKey;
-	public PrivateKey? SelectedPrivateKey
-	{
-		get => _selectedPrivateKey;
-		set
-		{
-			SetProperty(ref _selectedPrivateKey, value);
-			Model.PrivateKey = value;
-		}
-	}
+	[ObservableProperty]
+	public partial PrivateKey? SelectedPrivateKey { get; set; }
+
+	partial void OnSelectedSshServerChanged(SshServer? value) => Model.SshServer = value;
+
+	partial void OnSelectedRemoteServerChanged(RemoteServer? value) => Model.RemoteServer = value;
+
+	partial void OnSelectedPrivateKeyChanged(PrivateKey? value) => Model.PrivateKey = value;
 
 	public string MiniToolTip => GetMiniToolTip();
 
@@ -86,8 +65,6 @@ public partial class SshTunnelViewModel : ObservableObject
 
 	public SshTunnelViewModel(SshTunnel model, IAppDataProvider<AppData> appData, ITunnelService tunnelService)
 	{
-		_tunnelService = tunnelService;
-
 		Model = model;
 		State = tunnelService.GetState(model.Id);
 
@@ -95,9 +72,12 @@ public partial class SshTunnelViewModel : ObservableObject
 		PrivateKeys = appData.Value.PrivateKeys;
 		RemoteServers = appData.Value.RemoteServers;
 
-		_selectedSshServer = SshServers.FirstOrDefault(s => s.Id == model.SshServer?.Id);
-		_selectedRemoteServer = RemoteServers.FirstOrDefault(s => s.Id == model.RemoteServer?.Id);
-		_selectedPrivateKey = PrivateKeys.FirstOrDefault(s => s.Id == model.PrivateKey?.Id);
+		// Assigning through the property triggers OnSelectedXxxChanged which mirrors the choice
+		// onto the model. That's harmless here because Model already references the same instance,
+		// but it keeps initialization on a single code path.
+		SelectedSshServer = SshServers.FirstOrDefault(s => s.Id == model.SshServer?.Id);
+		SelectedRemoteServer = RemoteServers.FirstOrDefault(s => s.Id == model.RemoteServer?.Id);
+		SelectedPrivateKey = PrivateKeys.FirstOrDefault(s => s.Id == model.PrivateKey?.Id);
 
 		Model.PropertyChanged += (s, e) =>
 		{
@@ -141,22 +121,21 @@ public partial class SshTunnelViewModel : ObservableObject
 
 	private async Task<bool> StartTunnel()
 	{
-		_connectingCts = new CancellationTokenSource();
+		if (StartForward is null)
+			return false;
 
-		if (StartForward is not null)
+		using var cts = new CancellationTokenSource();
+		_connectingCts = cts;
+
+		try
 		{
-			try
-			{
-				return await StartForward(Model, _connectingCts.Token);
-			}
-			finally
-			{
-				_connectingCts.Dispose();
-				_connectingCts = null;
-			}
+			return await StartForward(Model, cts.Token);
 		}
-
-		return false;
+		finally
+		{
+			if (ReferenceEquals(_connectingCts, cts))
+				_connectingCts = null;
+		}
 	}
 
 	private void StopTunnel()
@@ -167,6 +146,7 @@ public partial class SshTunnelViewModel : ObservableObject
 		}
 	}
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "S3776:Cognitive Complexity of methods should not be too high", Justification = "It's okay here")]
 	private string GetMiniToolTip()
 	{
 		var sb = new StringBuilder();
@@ -175,10 +155,9 @@ public partial class SshTunnelViewModel : ObservableObject
 		sb.AppendLine($"Local Port: {Model.LocalPort?.ToString() ?? "-"}");
 
 		sb.Append("SSH server: ");
-		if (StringHelper.IsAllNullOrEmpty(
-			Model.SshServer?.Name,
-			Model.SshServer?.User,
-			Model.SshServer?.Host))
+		if (string.IsNullOrEmpty(Model.SshServer?.Name)
+			&& string.IsNullOrEmpty(Model.SshServer?.User)
+			&& string.IsNullOrEmpty(Model.SshServer?.Host))
 		{
 			sb.AppendLine("-");
 		}
@@ -208,9 +187,8 @@ public partial class SshTunnelViewModel : ObservableObject
 		}
 
 		sb.Append("Private key: ");
-		if (StringHelper.IsAllNullOrEmpty(
-			Model.PrivateKey?.Name,
-			Model.PrivateKey?.FilePath))
+		if (string.IsNullOrEmpty(Model.PrivateKey?.Name)
+			&& string.IsNullOrEmpty(Model.PrivateKey?.FilePath))
 		{
 			sb.AppendLine("-");
 		}
@@ -233,9 +211,8 @@ public partial class SshTunnelViewModel : ObservableObject
 		}
 
 		sb.Append("Remote server: ");
-		if (StringHelper.IsAllNullOrEmpty(
-			Model.RemoteServer?.Name,
-			Model.RemoteServer?.Host))
+		if (string.IsNullOrEmpty(Model.RemoteServer?.Name)
+			&& string.IsNullOrEmpty(Model.RemoteServer?.Host))
 		{
 			sb.Append('-');
 		}

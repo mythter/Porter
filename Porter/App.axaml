@@ -1,7 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:local="using:Porter"
-			 xmlns:conv="using:Porter.Converters"
 			 xmlns:themes="using:Myth.Avalonia.Themes"
 			 x:Class="Porter.App"
 			 RequestedThemeVariant="Dark">
@@ -22,8 +21,6 @@
 
 	<Application.Resources>
 		<ResourceDictionary>
-
-			<conv:PropertyOrDefaultConverter x:Key="PropertyOrDefaultConverter"/>
 
 			<FontFamily x:Key="Phosphor">avares://Porter/Assets/Fonts#Phosphor</FontFamily>
 			<FontFamily x:Key="PhosphorFill">avares://Porter/Assets/Fonts#Phosphor-Fill</FontFamily>

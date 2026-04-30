@@ -5,11 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Renci.SshNet;
-using Renci.SshNet.Common;
 
 namespace Porter.Services.Ssh;
 
-public class SshConnection(SshConnectionOptions options) : IDisposable
+public class SshConnection(SshConnectionOptions options, IPrivateKeyCache privateKeyCache) : IDisposable
 {
 	#region Private Fields
 
@@ -20,6 +19,8 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 	private readonly ConcurrentDictionary<LocalPortForwardKey, ForwardedPortLocal> _forwards = new();
 
 	private readonly SshConnectionOptions _options = options;
+
+	private readonly IPrivateKeyCache _privateKeyCache = privateKeyCache;
 
 	#endregion
 
@@ -47,14 +48,11 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 
 		if (_options.PrivateKeyFilePath is not null)
 		{
-			if (await GetPrivateKeyFile(promptPassphrase) is { } keyFile)
-			{
-				auth = new PrivateKeyAuthenticationMethod(_options.User, keyFile);
-			}
-			else
-			{
+			var keyFile = await GetPrivateKeyFileAsync(promptPassphrase).ConfigureAwait(false);
+			if (keyFile is null)
 				return false;
-			}
+
+			auth = new PrivateKeyAuthenticationMethod(_options.User, keyFile);
 		}
 
 		var connectionInfo = _options.Port switch
@@ -63,13 +61,21 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 			_ => new ConnectionInfo(_options.Host, _options.Port.Value, _options.User, auth)
 		};
 
-
-		_sshClient = new SshClient(connectionInfo)
+		SshClient? client = null;
+		try
 		{
-			KeepAliveInterval = TimeSpan.FromMinutes(5)
-		};
-
-		return true;
+			client = new SshClient(connectionInfo)
+			{
+				KeepAliveInterval = TimeSpan.FromMinutes(5)
+			};
+			_sshClient = client;
+			client = null; // ownership transferred
+			return true;
+		}
+		finally
+		{
+			client?.Dispose();
+		}
 	}
 
 	public async Task<bool> ConnectAsync(CancellationToken cancellationToken = default)
@@ -143,43 +149,15 @@ public class SshConnection(SshConnectionOptions options) : IDisposable
 
 	#region Private Methods
 
-	private async Task<PrivateKeyFile?> GetPrivateKeyFile(Func<Task<string?>>? promptPassphrase)
+	private Task<PrivateKeyFile?> GetPrivateKeyFileAsync(Func<Task<string?>>? promptPassphrase)
 	{
-		string? passphrase = null;
+		var path = _options.PrivateKeyFilePath;
+		if (path is null)
+			return Task.FromResult<PrivateKeyFile?>(null);
 
-		try
-		{
-			do
-			{
-				try
-				{
-					if (_options.PrivateKeyFilePath is null)
-						return null;
-
-					if (passphrase is null)
-						return new PrivateKeyFile(_options.PrivateKeyFilePath);
-
-					return new PrivateKeyFile(_options.PrivateKeyFilePath, passphrase);
-
-				}
-				catch (SshException ex) when (ex is SshPassPhraseNullOrEmptyException ||
-											  // handling Renci.SshNet.Common.SshException: 'MAC verification failed for PuTTY key file'
-											  ex.Message.Contains("putty", StringComparison.OrdinalIgnoreCase))
-				{
-					if (promptPassphrase is null)
-						break;
-
-					passphrase = await promptPassphrase();
-				}
-			}
-			while (passphrase is not null);
-		}
-		catch
-		{
-			return null;
-		}
-
-		return null;
+		// Defer loading to the cache so the decrypted key (and its passphrase prompt) is reused
+		// across multiple connect/disconnect cycles. The cache owns the key's lifetime.
+		return _privateKeyCache.GetAsync(path, promptPassphrase);
 	}
 
 	private ForwardedPortLocal? AddOrGetLocalForward(LocalPortForwardKey portForward, Action<Exception>? exceptionCallback = null)

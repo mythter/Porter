@@ -17,7 +17,6 @@ using Porter.Enums;
 using Porter.Extensions;
 using Porter.Messages;
 using Porter.Models;
-using Porter.Services;
 using Porter.Services.Interfaces;
 using Porter.ViewModels.Controls;
 
@@ -30,8 +29,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 	private readonly IMessenger _messenger;
 
 	private readonly IPlatformServicesAccessor _platformServices;
-
-	private readonly ITrayService _trayService;
 
 	private readonly IAppDataProvider<AppData> _appDataProvider;
 
@@ -59,14 +56,8 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	#region Constructors
 
-	public SshTunnelsPageViewModel()
-	{
-		PageName = PageNames.Tunnels;
-	}
-
 	public SshTunnelsPageViewModel(
 		IMessenger messenger,
-		ITrayService trayService,
 		IPlatformServicesAccessor platformServices,
 		Func<SshTunnel, SshTunnelViewModel> sshTunnelViewModelFactory,
 		ITunnelService tunnelService,
@@ -77,13 +68,10 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 		_messenger = messenger;
 		_platformServices = platformServices;
-		_trayService = trayService;
 		_appDataProvider = appDataProvider;
 		_sshTunnelViewModelFactory = sshTunnelViewModelFactory;
 		_tunnelService = tunnelService;
 		_dialogContextProvider = dialogContextProvider;
-
-		_tunnelService.TunnelFailed += OnTunnelFailed;
 
 		Items = new ObservableCollection<SshTunnelViewModel>(AppData.SshTunnels.Select(CreateSshTunnelViewModel));
 
@@ -128,8 +116,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 		_startAllCancellationTokenSource ??= new CancellationTokenSource();
 
-		var startedTunnels = 0;
-
 		try
 		{
 			foreach (var tunnel in Items.Select(i => i.Model))
@@ -141,35 +127,25 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 					? (Func<Task<string?>>?)null
 					: () => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(tunnel.PrivateKey));
 
-				var started = false;
-
 				try
 				{
-					started = await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, _startAllCancellationTokenSource.Token);
+					await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, _startAllCancellationTokenSource.Token);
 				}
-				catch { /* ignore */ }
-
-				if (started)
-					startedTunnels++;
+				catch (OperationCanceledException)
+				{
+					// User-initiated cancellation; stop iterating but treat as non-error.
+					break;
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"StartAsync failed for tunnel {tunnel.Name}: {ex}");
+				}
 			}
 		}
 		finally
 		{
 			_startAllCancellationTokenSource.Dispose();
 			_startAllCancellationTokenSource = null;
-		}
-
-		if (startedTunnels == Items.Count)
-		{
-			_trayService.SetTrayIcon(ForwardState.AllUp);
-		}
-		else if (startedTunnels == 0)
-		{
-			_trayService.SetTrayIcon(ForwardState.AllDown);
-		}
-		else
-		{
-			_trayService.SetTrayIcon(ForwardState.PartiallyDown);
 		}
 	}
 
@@ -182,8 +158,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		{
 			_tunnelService.Stop(tunnel.Model);
 		}
-
-		_trayService.SetTrayIcon(ForwardState.None);
 	}
 
 	[RelayCommand]
@@ -227,9 +201,16 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 		if (file is not null)
 		{
+			// Tear down running tunnels first — after Load() the SshTunnel instances they were
+			// started against are orphaned and the UI loses its handles to stop them.
+			StopAllSshTunnels();
+
 			_appDataProvider.Load(file);
 
-			//MainViewModel.GoToTunnels();
+			// Load() replaces _appDataProvider.Value with a fresh AppData instance, so all
+			// collections this page is bound to are now orphaned. Re-navigating recreates the
+			// page VM against the new Value and rebinds the UI.
+			_messenger.Send(new NavigateMessage(PageNames.Tunnels));
 		}
 	}
 
@@ -255,20 +236,18 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		{
 			started = await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, cts.Token);
 		}
-		catch { /* ignore */ }
+		catch (OperationCanceledException)
+		{
+			// Cancelled by the user via the toggle button; not an error.
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"StartAsync failed for tunnel {tunnel.Name}: {ex}");
+		}
 		finally
 		{
 			cts?.Dispose();
 			_connectingTunnels.Remove(tunnel);
-		}
-
-		if (started)
-		{
-			_trayService.SetTrayIcon(ForwardState.AllUp);
-		}
-		else
-		{
-			_trayService.SetTrayIcon(ForwardState.None);
 		}
 
 		return started;
@@ -282,30 +261,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		}
 
 		_tunnelService.Stop(tunnel);
-
-		if (!_tunnelService.IsAnyForwardStarted())
-		{
-			_trayService.SetTrayIcon(ForwardState.None);
-		}
-	}
-
-	private void OnTunnelFailed(SshTunnel tunnel, Exception exception)
-	{
-		var forwardState = _tunnelService.IsAnyForwardStarted() switch
-		{
-			true => ForwardState.PartiallyDown,
-			false => ForwardState.AllDown,
-		};
-
-		Dispatcher.UIThread.Invoke(() => _trayService.SetTrayIcon(forwardState));
-
-		//Dispatcher.UIThread.InvokeAsync(async () =>
-		//{
-		//	await MainViewModel.DialogService.ShowErrorAsync(
-		//		$"Tunnel {tunnel.Name ?? tunnel.LocalPort.ToString()} stopped.\n" +
-		//		$"Exception message: {exception.Message}\n" +
-		//		$"Stack trace: {exception.StackTrace ?? "not available"}");
-		//});
 	}
 
 	private SshTunnelViewModel CreateSshTunnelViewModel(SshTunnel tunnel)

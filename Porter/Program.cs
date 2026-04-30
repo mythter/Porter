@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Threading.Tasks;
 
 using Avalonia;
@@ -19,15 +18,19 @@ internal sealed class Program
 	[STAThread]
 	public static void Main(string[] args)
 	{
+		// All early-startup logging routes through one append-only file (crash.log) keyed by
+		// category — replaces the legacy fatal.log/task.log/crash.log trio.
+		var logger = new FileCrashLogger();
+
 		AppDomain.CurrentDomain.UnhandledException += (s, e) =>
 		{
 			if (e.ExceptionObject is Exception ex)
-				File.WriteAllText("fatal.log", ex.ToString());
+				logger.Log("AppDomain.UnhandledException", ex);
 		};
 
 		TaskScheduler.UnobservedTaskException += (s, e) =>
 		{
-			File.WriteAllText("task.log", e.Exception.ToString());
+			logger.Log("TaskScheduler.UnobservedTaskException", e.Exception);
 			e.SetObserved();
 		};
 
@@ -38,9 +41,11 @@ internal sealed class Program
 		}
 		catch (Exception ex)
 		{
+			logger.Log("Startup", ex);
+
 			var lastCrash = CrashService.GetCrashData();
 
-			// Write a crash log
+			// Write a crash marker so the next launch can show the recovery dialog.
 			if (CrashService.SetCrashData(ex))
 			{
 				// If we previously crashed in under 10 seconds, don't re-open
@@ -70,7 +75,11 @@ internal sealed class Program
 	{
 		try
 		{
-			Process.Start(typeof(Program).Assembly.Location.Replace(".dll", ".exe"));
+			// Environment.ProcessPath is the canonical AOT/single-file-safe way to get the
+			// running executable path (Assembly.Location returns empty for embedded assemblies).
+			var exe = Environment.ProcessPath;
+			if (!string.IsNullOrEmpty(exe))
+				Process.Start(exe);
 		}
 		catch
 		{

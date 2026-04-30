@@ -23,6 +23,5 @@ public partial class PrivateKey : ObservableObject
 	[JsonConstructor]
 	public PrivateKey()
 	{
-		FilePath = null!;
 	}
 }

@@ -4,6 +4,7 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:Porter.ViewModels.Controls"
 			 xmlns:vm_pages="using:Porter.ViewModels.Pages"
+			 xmlns:b="using:Porter.Behaviors"
 			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="40"
 			 x:DataType="vm:SshTunnelViewModel"
 			 Classes="deletable"
@@ -41,7 +42,7 @@
 				 PlaceholderText="Name"
 				 Text="{Binding Model.Name}"
 				 ToolTip.Tip="{Binding Model.Name, TargetNullValue=Tunnel Name}"
-				 KeyDown="OnKeyDown"
+				 b:CommitOnEnterBehavior.Enabled="True"
 				 VerticalContentAlignment="Center"/>
 
 		<NumericUpDown Grid.Column="4"
@@ -54,15 +55,16 @@
 					   FormatString="0"
 					   ToolTip.Tip="Local Port"
 					   ShowButtonSpinner="False"
-					   KeyDown="OnKeyDown"
+					   b:CommitOnEnterBehavior.Enabled="True"
 					   Value="{Binding Model.LocalPort}" />
 
 		<CustomComboBox Grid.Column="6"
 						Name="SshServersComboBox"
+						b:PointerWheelBehavior.Suppress="True"
 						ItemsSource="{Binding SshServers}"
 						SelectedItem="{Binding SelectedSshServer}"
 						ComboBoxProperties.TextTrimming="None"
-						ToolTip.Tip="{Binding SelectedSshServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select SSH server'}"
+						ToolTip.Tip="{Binding SelectedSshServer.Name, FallbackValue='Select SSH server', TargetNullValue='Select SSH server'}"
 						VerticalAlignment="Stretch"
 						HorizontalAlignment="Stretch">
 
@@ -83,9 +85,10 @@
 
 		<StaticComboBox Grid.Column="8"
 						Name="PrivateKeysComboBox"
+						b:PointerWheelBehavior.Suppress="True"
 						ItemsSource="{Binding PrivateKeys}"
 						SelectedItem="{Binding SelectedPrivateKey}"
-						ToolTip.Tip="{Binding SelectedPrivateKey, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|No Private key selected'}"
+						ToolTip.Tip="{Binding SelectedPrivateKey.Name, FallbackValue='No Private key selected', TargetNullValue='No Private key selected'}"
 						MinWidth="0"
 						VerticalAlignment="Stretch">
 
@@ -114,10 +117,11 @@
 			  ColumnDefinitions="*, 5, Auto">
 			<CustomComboBox Grid.Column="0"
 							Name="RemoteServersComboBox"
+							b:PointerWheelBehavior.Suppress="True"
 							ItemsSource="{Binding RemoteServers}"
 							SelectedItem="{Binding SelectedRemoteServer}"
 							ComboBoxProperties.TextTrimming="None"
-							ToolTip.Tip="{Binding SelectedRemoteServer, Converter={StaticResource PropertyOrDefaultConverter}, ConverterParameter='Name|Select Remote server'}"
+							ToolTip.Tip="{Binding SelectedRemoteServer.Name, FallbackValue='Select Remote server', TargetNullValue='Select Remote server'}"
 							VerticalAlignment="Stretch"
 							HorizontalAlignment="Stretch">
 

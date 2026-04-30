@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia.Threading;
+
 using Porter.Enums;
 
 using Porter.Models;
+using Porter.Services.Interfaces;
 using Porter.Services.Ssh;
 
 namespace Porter.Services;
@@ -20,11 +23,17 @@ public class TunnelService : ITunnelService
 
 	private readonly Dictionary<Guid, CancellationTokenSource> _cts = [];
 
+	private readonly Lock _stateSync = new();
+
+	private ForwardState _lastOverallState = ForwardState.None;
+
 	#endregion
 
 	#region Events
 
 	public event Action<SshTunnel, Exception>? TunnelFailed;
+
+	public event Action<ForwardState>? OverallStateChanged;
 
 	#endregion
 
@@ -43,13 +52,18 @@ public class TunnelService : ITunnelService
 
 	public SshTunnelState GetState(Guid tunnelId)
 	{
-		if (!_states.TryGetValue(tunnelId, out var state))
+		lock (_stateSync)
 		{
-			state = new SshTunnelState { State = TunnelState.Stopped };
-			_states[tunnelId] = state;
+			return GetStateNoLock(tunnelId);
 		}
+	}
 
-		return state;
+	public ForwardState GetOverallState()
+	{
+		lock (_stateSync)
+		{
+			return ComputeOverallStateNoLock();
+		}
 	}
 
 	public async Task<bool> StartAsync(
@@ -59,46 +73,72 @@ public class TunnelService : ITunnelService
 	{
 		var state = GetState(tunnel.Id);
 
-		if (state.State is TunnelState.Running or TunnelState.Connecting)
-			return true;
+		CancellationTokenSource cts;
+		lock (_stateSync)
+		{
+			if (state.State is TunnelState.Running or TunnelState.Connecting)
+				return true;
 
-		var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		_cts[tunnel.Id] = cts;
-
-		state.State = TunnelState.Connecting;
+			cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			_cts[tunnel.Id] = cts;
+			state.State = TunnelState.Connecting;
+		}
 
 		try
 		{
 			var started = await StartInternal(tunnel, promptPassphrase, cts.Token);
 
-			state.State = started
-				? TunnelState.Running
-				: TunnelState.Failed;
+			lock (_stateSync)
+			{
+				// Don't overwrite a Failed state set by an SSH callback that arrived during start.
+				if (state.State == TunnelState.Connecting)
+				{
+					state.State = started ? TunnelState.Running : TunnelState.Failed;
+				}
+			}
 
+			RaiseOverallStateIfChanged();
 			return started;
 		}
 		catch
 		{
-			state.State = TunnelState.Failed;
+			lock (_stateSync)
+			{
+				state.State = TunnelState.Failed;
+			}
+			RaiseOverallStateIfChanged();
 			throw;
 		}
 		finally
 		{
+			lock (_stateSync)
+			{
+				_cts.Remove(tunnel.Id);
+			}
 			cts.Dispose();
-			_cts.Remove(tunnel.Id);
 		}
 	}
 
 	public void Stop(SshTunnel tunnel)
 	{
-		if (_cts.TryGetValue(tunnel.Id, out var cts))
+		CancellationTokenSource? cts;
+		SshTunnelState state;
+		lock (_stateSync)
 		{
-			cts.Cancel();
+			_cts.TryGetValue(tunnel.Id, out cts);
+			state = GetStateNoLock(tunnel.Id);
 		}
+
+		cts?.Cancel();
 
 		_forwardManager.StopForward(tunnel);
 
-		GetState(tunnel.Id).State = TunnelState.Stopped;
+		lock (_stateSync)
+		{
+			state.State = TunnelState.Stopped;
+		}
+
+		RaiseOverallStateIfChanged();
 	}
 
 	public bool IsAnyForwardStarted()
@@ -110,6 +150,16 @@ public class TunnelService : ITunnelService
 
 	#region Private Methods
 
+	private SshTunnelState GetStateNoLock(Guid tunnelId)
+	{
+		if (!_states.TryGetValue(tunnelId, out var state))
+		{
+			state = new SshTunnelState { State = TunnelState.Stopped };
+			_states[tunnelId] = state;
+		}
+		return state;
+	}
+
 	private Task<bool> StartInternal(
 		SshTunnel tunnel,
 		Func<Task<string?>>? promptPassphrase = null,
@@ -120,18 +170,75 @@ public class TunnelService : ITunnelService
 
 	private void OnTunnelFailed(SshTunnel tunnel, Exception ex)
 	{
-		if (!_states.TryGetValue(tunnel.Id, out var state))
-			return;
-
-		if (_cts.TryGetValue(tunnel.Id, out var cts))
+		CancellationTokenSource? cts;
+		SshTunnelState? state;
+		lock (_stateSync)
 		{
-			cts.Cancel();
+			if (!_states.TryGetValue(tunnel.Id, out state))
+				return;
+
+			_cts.TryGetValue(tunnel.Id, out cts);
+
+			state.LastError = ex;
+			state.State = TunnelState.Failed;
 		}
 
-		state.LastError = ex;
-		state.State = TunnelState.Failed;
+		cts?.Cancel();
 
-		TunnelFailed?.Invoke(tunnel, ex);
+		// SSH error callbacks fire on background threads. Marshal the public events to the UI
+		// thread so subscribers (mostly view models) can update bound state safely.
+		PostToUI(() => TunnelFailed?.Invoke(tunnel, ex));
+		RaiseOverallStateIfChanged();
+	}
+
+	private ForwardState ComputeOverallStateNoLock()
+	{
+		var total = 0;
+		var running = 0;
+		var failed = 0;
+
+		foreach (var s in _states.Values)
+		{
+			total++;
+			switch (s.State)
+			{
+				case TunnelState.Running: running++; break;
+				case TunnelState.Failed: failed++; break;
+			}
+		}
+
+		if (total == 0 || (running == 0 && failed == 0))
+			return ForwardState.None;
+
+		if (running == 0)
+			return ForwardState.AllDown;
+
+		if (failed == 0 && running == total)
+			return ForwardState.AllUp;
+
+		return ForwardState.PartiallyDown;
+	}
+
+	private void RaiseOverallStateIfChanged()
+	{
+		ForwardState current;
+		lock (_stateSync)
+		{
+			current = ComputeOverallStateNoLock();
+			if (current == _lastOverallState)
+				return;
+			_lastOverallState = current;
+		}
+
+		PostToUI(() => OverallStateChanged?.Invoke(current));
+	}
+
+	private static void PostToUI(Action action)
+	{
+		if (Dispatcher.UIThread.CheckAccess())
+			action();
+		else
+			Dispatcher.UIThread.Post(action);
 	}
 
 	#endregion

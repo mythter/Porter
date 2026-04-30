@@ -8,7 +8,7 @@ using Porter.Models;
 
 namespace Porter.Services.Ssh;
 
-public class PortForwardManager : IDisposable
+public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 {
 	#region Constants
 
@@ -19,6 +19,8 @@ public class PortForwardManager : IDisposable
 	#region Private Fields
 
 	private bool _disposed;
+
+	private readonly IPrivateKeyCache _privateKeyCache = privateKeyCache;
 
 	private readonly ConcurrentDictionary<SshConnectionOptions, SemaphoreSlim> _locks = new();
 
@@ -53,15 +55,39 @@ public class PortForwardManager : IDisposable
 
 		_forwardToTunnel.TryRemove(localPortForward, out _);
 
-		if (GetConnectionByPortForward(localPortForward) is { } connection && connection.IsForwardStarted(localPortForward))
+		if (GetConnectionByPortForward(localPortForward) is not { } connection)
+			return;
+
+		if (connection.IsForwardStarted(localPortForward))
 		{
 			connection.StopForward(localPortForward);
+		}
 
-			//if(connection.Tunnels.Count == 0)
-			//{
-			//	_connections.Remove(connection);
-			//	connection.Dispose();
-			//}
+		// If no forwards remain on this connection, drop it. The decrypted private key (if any) lives
+		// in IPrivateKeyCache and survives the connection's disposal, so reconnecting later does NOT
+		// require asking the user for the passphrase again.
+		if (connection.Forwards.Count != 0)
+			return;
+
+		var options = FindOptionsForConnection(connection);
+		if (options is null)
+			return;
+
+		var semaphore = _locks.GetOrAdd(options, _ => new SemaphoreSlim(1, 1));
+		semaphore.Wait();
+		try
+		{
+			if (connection.Forwards.Count != 0)
+				return;
+
+			if (_connections.TryRemove(options, out var removed))
+			{
+				removed.Dispose();
+			}
+		}
+		finally
+		{
+			semaphore.Release();
 		}
 	}
 
@@ -139,10 +165,11 @@ public class PortForwardManager : IDisposable
 		{
 			if (!_connections.TryGetValue(options, out var connection))
 			{
-				connection = new SshConnection(options);
+				connection = new SshConnection(options, _privateKeyCache);
 
 				if (!await connection.InitializeAsync(promptPassphrase, cancellationToken))
 				{
+					connection.Dispose();
 					return false;
 				}
 
@@ -184,6 +211,11 @@ public class PortForwardManager : IDisposable
 	private SshConnection? GetConnectionByPortForward(LocalPortForwardKey portForward)
 	{
 		return _connections.Values.FirstOrDefault(c => c.Forwards.Contains(portForward));
+	}
+
+	private SshConnectionOptions? FindOptionsForConnection(SshConnection connection)
+	{
+		return _connections.FirstOrDefault(p => ReferenceEquals(p.Value, connection)).Key;
 	}
 
 	private static LocalPortForwardKey? TryCreateLocalPortForward(SshTunnel tunnel)

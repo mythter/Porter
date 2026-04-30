@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Avalonia;
 using Avalonia.Controls;
 
 using Myth.Avalonia.Controls;
@@ -18,9 +17,11 @@ public partial class MainWindow : Window
 {
 	#region Private Fields
 
-	private bool _isClosing = false;
+	private bool _isClosing;
 
 	private readonly IAppDataProvider<AppData> _appDataProvider;
+
+	private readonly IWindowStateService _windowStateService;
 
 	#endregion
 
@@ -34,44 +35,37 @@ public partial class MainWindow : Window
 
 	#region Constructors
 
-	public MainWindow(IAppDataProvider<AppData> appDataProvider)
+	public MainWindow(IAppDataProvider<AppData> appDataProvider, IWindowStateService windowStateService)
 	{
 		_appDataProvider = appDataProvider;
+		_windowStateService = windowStateService;
 
 		InitializeComponent();
 
-		RestoreWindowSettings();
+		_windowStateService.Restore(this, _appDataProvider.Value.WindowSettings);
 
-		PropertyChanged += (sender, e) =>
-		{
-			if (e.Property == IsVisibleProperty &&
-				!IsVisible && !(MiniWindow?.IsVisible ?? false)
-				&& TrayIcon is not null
-				&& !_isClosing)
-			{
-				TrayIcon.IsVisible = true;
-			}
-		};
+		PropertyChanged += OnWindowPropertyChanged;
 	}
 
 	#endregion
 
 	#region Overrides
 
-	protected override async void OnOpened(EventArgs e)
+	protected override void OnOpened(EventArgs e)
 	{
 		base.OnOpened(e);
 
 		TrayIcon?.IsVisible = false;
 
-		await ShowCrashInfoIfExists();
+		_ = ShowCrashInfoIfExistsSafeAsync();
 	}
 
 	protected override void OnClosing(WindowClosingEventArgs e)
 	{
 		base.OnClosing(e);
 
-		SaveWindowSettings();
+		_windowStateService.Save(this, _appDataProvider.Value.WindowSettings);
+		_appDataProvider.Save();
 
 		if (!_appDataProvider.Value.Settings.OnCloseMinimizeToTray)
 		{
@@ -90,39 +84,14 @@ public partial class MainWindow : Window
 
 	#region Private Methods
 
-	private void SaveWindowSettings()
+	private void OnWindowPropertyChanged(object? sender, Avalonia.AvaloniaPropertyChangedEventArgs e)
 	{
-		var windowSettings = _appDataProvider.Value.WindowSettings;
-
-		windowSettings.Left = Position.X;
-		windowSettings.Top = Position.Y;
-		windowSettings.Width = Width;
-		windowSettings.Height = Height;
-		windowSettings.Maximized = WindowState == WindowState.Maximized;
-
-		_appDataProvider.Save();
-	}
-
-	private void RestoreWindowSettings()
-	{
-		var windowSettings = _appDataProvider.Value.WindowSettings;
-
-		if (windowSettings.Maximized)
-		{
-			WindowState = WindowState.Maximized;
+		if (e.Property != IsVisibleProperty)
 			return;
-		}
 
-		var screen = Screens.ScreenFromPoint(new PixelPoint(windowSettings.Left, windowSettings.Top));
-		if (screen is null)
+		if (!IsVisible && !(MiniWindow?.IsVisible ?? false) && TrayIcon is not null && !_isClosing)
 		{
-			WindowStartupLocation = WindowStartupLocation.CenterScreen;
-		}
-		else if (windowSettings.Width > 0 && windowSettings.Height > 0)
-		{
-			Position = new PixelPoint(windowSettings.Left, windowSettings.Top);
-			Width = windowSettings.Width;
-			Height = windowSettings.Height;
+			TrayIcon.IsVisible = true;
 		}
 	}
 
@@ -143,6 +112,18 @@ public partial class MainWindow : Window
 			icon: MessageBoxIcon.Error);
 
 		CrashService.RemoveCrashData();
+	}
+
+	private async Task ShowCrashInfoIfExistsSafeAsync()
+	{
+		try
+		{
+			await ShowCrashInfoIfExists();
+		}
+		catch
+		{
+			// Failure to show the crash dialog must not crash the app on startup.
+		}
 	}
 
 	#endregion
