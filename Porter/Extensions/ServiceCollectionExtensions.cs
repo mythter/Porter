@@ -16,14 +16,14 @@ using Porter.ViewModels.Controls;
 using Porter.ViewModels.Pages;
 using Porter.Views;
 
-namespace Porter.Configuration;
+namespace Porter.Extensions;
 
 /// <summary>
 /// Centralizes Porter's service registrations so <see cref="App"/> only owns lifecycle wiring.
 /// All registrations are AOT-friendly: closed generics, no <c>ActivatorUtilities</c> with runtime
 /// types, no reflection-based factories.
 /// </summary>
-public static class ConfigurationExtensions
+public static class ServiceCollectionExtensions
 {
 	public static IServiceCollection AddServices(
 		this IServiceCollection services,

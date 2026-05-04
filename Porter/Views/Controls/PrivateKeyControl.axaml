@@ -4,8 +4,7 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:model="using:Porter.Models"
 			 xmlns:vm="using:Porter.ViewModels.Pages"
-			 xmlns:i="using:Avalonia.Xaml.Interactivity"
-			 xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
+			 xmlns:b="using:Porter.Behaviors"
 			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
 			 x:DataType="model:PrivateKey"
 			 x:Class="Porter.Views.Controls.PrivateKeyControl"
@@ -31,17 +30,9 @@
 					   TextDecorations="Underline"
 					   Text="{Binding FilePath}"
 					   ToolTip.Tip="{Binding FilePath}"
-					   TextTrimming="{x:Static TextTrimming.LeadingCharacterEllipsis}">
-
-				<i:Interaction.Behaviors>
-					<ia:EventTriggerBehavior EventName="PointerPressed">
-						<ia:InvokeCommandAction
-							Command="{Binding $parent[ItemsControl].((vm:PrivateKeysPageViewModel)DataContext).OpenPrivateKeyFileCommand}"
-							CommandParameter="{Binding}"/>
-					</ia:EventTriggerBehavior>
-				</i:Interaction.Behaviors>
-
-			</TextBlock >
+					   TextTrimming="{x:Static TextTrimming.LeadingCharacterEllipsis}"
+					   b:PointerPressedCommandBehavior.Command="{Binding $parent[ItemsControl].((vm:PrivateKeysPageViewModel)DataContext).OpenPrivateKeyFileCommand}"
+					   b:PointerPressedCommandBehavior.CommandParameter="{Binding}" />
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"
