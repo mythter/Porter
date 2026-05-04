@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ using Porter.ViewModels.Controls;
 
 namespace Porter.ViewModels.Pages;
 
-public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
+public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, IDisposable
 {
 	#region Private Fields
 
@@ -36,11 +37,11 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private readonly IDialogContextProvider _dialogContextProvider;
 
-	private readonly Func<SshTunnel, SshTunnelViewModel> _sshTunnelViewModelFactory;
-
 	private readonly Dictionary<SshTunnel, CancellationTokenSource> _connectingTunnels = [];
 
 	private CancellationTokenSource? _startAllCancellationTokenSource;
+
+	private bool _disposed;
 
 	#endregion
 
@@ -59,7 +60,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 	public SshTunnelsPageViewModel(
 		IMessenger messenger,
 		IPlatformServicesAccessor platformServices,
-		Func<SshTunnel, SshTunnelViewModel> sshTunnelViewModelFactory,
 		ITunnelService tunnelService,
 		IDialogContextProvider dialogContextProvider,
 		IAppDataProvider<AppData> appDataProvider)
@@ -69,24 +69,12 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 		_messenger = messenger;
 		_platformServices = platformServices;
 		_appDataProvider = appDataProvider;
-		_sshTunnelViewModelFactory = sshTunnelViewModelFactory;
 		_tunnelService = tunnelService;
 		_dialogContextProvider = dialogContextProvider;
 
 		Items = new ObservableCollection<SshTunnelViewModel>(AppData.SshTunnels.Select(CreateSshTunnelViewModel));
 
-		AppData.SshTunnels.CollectionChanged += (s, e) =>
-		{
-			foreach (var tunnel in e.OldItems?.Cast<SshTunnel>() ?? [])
-			{
-				Items.Remove(x => x.Model.Id == tunnel.Id);
-			}
-
-			foreach (SshTunnel tunnel in e.NewItems?.Cast<SshTunnel>() ?? [])
-			{
-				Items.Add(CreateSshTunnelViewModel(tunnel));
-			}
-		};
+		AppData.SshTunnels.CollectionChanged += OnSshTunnelsCollectionChanged;
 	}
 
 	#endregion
@@ -216,7 +204,71 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	#endregion
 
+	#region Public Methods
+
+	public void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
+
+	#region Protected Methods
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (_disposed)
+			return;
+
+		if (disposing)
+		{
+			AppData.SshTunnels.CollectionChanged -= OnSshTunnelsCollectionChanged;
+
+			foreach (var item in Items)
+				item.Dispose();
+
+			Items.Clear();
+
+			_startAllCancellationTokenSource?.Cancel();
+			_startAllCancellationTokenSource?.Dispose();
+			_startAllCancellationTokenSource = null;
+
+			foreach (var cts in _connectingTunnels.Values)
+			{
+				cts.Cancel();
+				cts.Dispose();
+			}
+
+			_connectingTunnels.Clear();
+		}
+
+		_disposed = true;
+	}
+
+	#endregion
+
 	#region Private Methods
+
+	private void OnSshTunnelsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		foreach (var tunnel in e.OldItems?.Cast<SshTunnel>() ?? [])
+		{
+			// Dispose the matching VM so its event subscriptions on Model/State are released
+			// before we drop the reference.
+			var match = Items.FirstOrDefault(x => x.Model.Id == tunnel.Id);
+			if (match is not null)
+			{
+				Items.Remove(match);
+				match.Dispose();
+			}
+		}
+
+		foreach (SshTunnel tunnel in e.NewItems?.Cast<SshTunnel>() ?? [])
+		{
+			Items.Add(CreateSshTunnelViewModel(tunnel));
+		}
+	}
 
 	private async Task<bool> OnStartForward(SshTunnel tunnel, CancellationToken? cancellationToken = null)
 	{
@@ -265,12 +317,12 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext
 
 	private SshTunnelViewModel CreateSshTunnelViewModel(SshTunnel tunnel)
 	{
-		var sshTunnelControlModel = _sshTunnelViewModelFactory(tunnel);
-
-		sshTunnelControlModel.StartForward = OnStartForward;
-		sshTunnelControlModel.StopForward = OnStopForward;
-
-		return sshTunnelControlModel;
+		return new SshTunnelViewModel(
+			tunnel,
+			_appDataProvider,
+			_tunnelService,
+			OnStartForward,
+			OnStopForward);
 	}
 
 	private async Task<string?> ShowPrivateKeyPasswordDialogAsync(PrivateKey privateKey)

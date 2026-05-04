@@ -7,5 +7,5 @@ namespace Porter.ViewModels.Pages;
 public partial class PageViewModel : ViewModelBase
 {
 	[ObservableProperty]
-	private PageNames _pageName;
+	public partial PageNames PageName { get; set; }
 }

@@ -3,8 +3,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Metadata;
 
-using CommunityToolkit.Mvvm.DependencyInjection;
-
 using Microsoft.Extensions.DependencyInjection;
 
 using Porter.Configuration;
@@ -37,7 +35,6 @@ public partial class App : Application
 				.AddServices(desktop)
 				.BuildServiceProvider();
 
-			Ioc.Default.ConfigureServices(services);
 			_serviceProvider = services;
 
 			// Resolve once so the tray manager subscribes to ITunnelService events for the app's

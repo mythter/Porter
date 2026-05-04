@@ -65,7 +65,13 @@ public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>,
 
 	public void Receive(NavigateMessage message)
 	{
+		var previous = CurrentPage;
 		CurrentPage = _pageFactory(message.Page);
+
+		// Page VMs are transient (a fresh instance per navigation). Dispose the previous one
+		// so its event subscriptions on AppData/State release before it's GC'd.
+		if (previous is IDisposable disposable && !ReferenceEquals(previous, CurrentPage))
+			disposable.Dispose();
 	}
 
 	#endregion

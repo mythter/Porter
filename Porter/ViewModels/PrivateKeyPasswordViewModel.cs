@@ -22,7 +22,8 @@ public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 
 	public char? PasswordChar => IsPasswordVisible ? null : '•';
 
-	public string? Password { get; set; }
+	[ObservableProperty]
+	public partial string? Password { get; set; }
 
 	public string Message { get; set; }
 

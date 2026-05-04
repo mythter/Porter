@@ -161,11 +161,15 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 
 		await semaphore.WaitAsync(cancellationToken);
 
+		SshConnection? connection = null;
+		var connectionWasCreated = false;
+
 		try
 		{
-			if (!_connections.TryGetValue(options, out var connection))
+			if (!_connections.TryGetValue(options, out connection))
 			{
 				connection = new SshConnection(options, _privateKeyCache);
+				connectionWasCreated = true;
 
 				if (!await connection.InitializeAsync(promptPassphrase, cancellationToken))
 				{
@@ -176,16 +180,21 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 				_connections.TryAdd(options, connection);
 			}
 
-			if (!connection.IsConnected &&
-				!await connection.ConnectAsync(cancellationToken))
+			if (!connection.IsConnected && !await connection.ConnectAsync(cancellationToken))
 			{
+				CleanupConnectionIfNeeded(options, connection, connectionWasCreated);
 				return false;
 			}
 
 			if (TryCreateLocalPortForward(tunnel) is not { } localPortForward)
 			{
+				CleanupConnectionIfNeeded(options, connection, connectionWasCreated);
 				return false;
 			}
+
+			// Check if cancellation was requested before starting the forward.
+			// This prevents starting forwards when Stop() was called during connection.
+			cancellationToken.ThrowIfCancellationRequested();
 
 			if (!connection.IsForwardStarted(localPortForward))
 			{
@@ -199,13 +208,29 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 					}
 				});
 			}
+
+			return true;
+		}
+		catch
+		{
+			// If exception occurred and connection was just created without any forwards,
+			// remove it from the pool to prevent it from being reused.
+			CleanupConnectionIfNeeded(options, connection, connectionWasCreated);
+			throw;
 		}
 		finally
 		{
 			semaphore.Release();
 		}
+	}
 
-		return true;
+	private void CleanupConnectionIfNeeded(SshConnectionOptions options, SshConnection? connection, bool wasCreated)
+	{
+		if (wasCreated && connection is not null && connection.Forwards.Count == 0)
+		{
+			_connections.TryRemove(options, out _);
+			connection.Dispose();
+		}
 	}
 
 	private SshConnection? GetConnectionByPortForward(LocalPortForwardKey portForward)

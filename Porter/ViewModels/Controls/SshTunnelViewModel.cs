@@ -14,9 +14,21 @@ using Porter.Services.Interfaces;
 
 namespace Porter.ViewModels.Controls;
 
-public partial class SshTunnelViewModel : ObservableObject
+public partial class SshTunnelViewModel : ObservableObject, IDisposable
 {
+	#region Private Fields
+
+	private bool _disposed;
+
+	private readonly Func<SshTunnel, CancellationToken?, Task<bool>> _startForward;
+
+	private readonly Action<SshTunnel> _stopForward;
+
 	private CancellationTokenSource? _connectingCts;
+
+	#endregion
+
+	#region Public Properties
 
 	public bool IsNameNullOrEmpty => string.IsNullOrEmpty(Model.Name) && RemoteServerAlias is not null;
 
@@ -59,14 +71,25 @@ public partial class SshTunnelViewModel : ObservableObject
 
 	public ObservableCollection<RemoteServer> RemoteServers { get; init; }
 
-	public Func<SshTunnel, CancellationToken?, Task<bool>>? StartForward { get; set; }
+	#endregion
 
-	public Action<SshTunnel>? StopForward { get; set; }
+	#region Constructors
 
-	public SshTunnelViewModel(SshTunnel model, IAppDataProvider<AppData> appData, ITunnelService tunnelService)
+	public SshTunnelViewModel(
+	SshTunnel model,
+	IAppDataProvider<AppData> appData,
+	ITunnelService tunnelService,
+	Func<SshTunnel, CancellationToken?, Task<bool>> startForward,
+	Action<SshTunnel> stopForward)
 	{
+		ArgumentNullException.ThrowIfNull(model);
+		ArgumentNullException.ThrowIfNull(startForward);
+		ArgumentNullException.ThrowIfNull(stopForward);
+
 		Model = model;
 		State = tunnelService.GetState(model.Id);
+		_startForward = startForward;
+		_stopForward = stopForward;
 
 		SshServers = appData.Value.SshServers;
 		PrivateKeys = appData.Value.PrivateKeys;
@@ -79,28 +102,23 @@ public partial class SshTunnelViewModel : ObservableObject
 		SelectedRemoteServer = RemoteServers.FirstOrDefault(s => s.Id == model.RemoteServer?.Id);
 		SelectedPrivateKey = PrivateKeys.FirstOrDefault(s => s.Id == model.PrivateKey?.Id);
 
-		Model.PropertyChanged += (s, e) =>
-		{
-			if (e.PropertyName == nameof(Model.Name))
-			{
-				OnPropertyChanged(nameof(IsNameNullOrEmpty));
-			}
-			else if (e.PropertyName == nameof(Model.RemoteServer))
-			{
-				OnPropertyChanged(nameof(RemoteServerAlias));
-			}
-
-			OnPropertyChanged(nameof(MiniToolTip));
-		};
-
-		State.PropertyChanged += (s, e) =>
-		{
-			if (e.PropertyName == nameof(State.State))
-			{
-				OnPropertyChanged(nameof(IsDisconnected));
-			}
-		};
+		Model.PropertyChanged += OnModelPropertyChanged;
+		State.PropertyChanged += OnStatePropertyChanged;
 	}
+
+	#endregion
+
+	#region Public Methods
+
+	public void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
+
+	#region Commands
 
 	[RelayCommand]
 	public async Task ToggleTunnel()
@@ -119,17 +137,40 @@ public partial class SshTunnelViewModel : ObservableObject
 		}
 	}
 
+	#endregion
+
+	#region Protected Methods
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (_disposed)
+			return;
+
+
+		if (disposing)
+		{
+			// Detach from singleton models so this VM can be GC'd after the page is replaced.
+			Model.PropertyChanged -= OnModelPropertyChanged;
+			State.PropertyChanged -= OnStatePropertyChanged;
+
+			_connectingCts?.Cancel();
+		}
+
+		_disposed = true;
+	}
+
+	#endregion
+
+	#region Private Methods
+
 	private async Task<bool> StartTunnel()
 	{
-		if (StartForward is null)
-			return false;
-
 		using var cts = new CancellationTokenSource();
 		_connectingCts = cts;
 
 		try
 		{
-			return await StartForward(Model, cts.Token);
+			return await _startForward(Model, cts.Token);
 		}
 		finally
 		{
@@ -140,9 +181,28 @@ public partial class SshTunnelViewModel : ObservableObject
 
 	private void StopTunnel()
 	{
-		if (StopForward is not null)
+		_stopForward(Model);
+	}
+
+	private void OnModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(Model.Name))
 		{
-			StopForward(Model);
+			OnPropertyChanged(nameof(IsNameNullOrEmpty));
+		}
+		else if (e.PropertyName == nameof(Model.RemoteServer))
+		{
+			OnPropertyChanged(nameof(RemoteServerAlias));
+		}
+
+		OnPropertyChanged(nameof(MiniToolTip));
+	}
+
+	private void OnStatePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(State.State))
+		{
+			OnPropertyChanged(nameof(IsDisconnected));
 		}
 	}
 
@@ -236,4 +296,6 @@ public partial class SshTunnelViewModel : ObservableObject
 
 		return sb.ToString();
 	}
+
+	#endregion
 }

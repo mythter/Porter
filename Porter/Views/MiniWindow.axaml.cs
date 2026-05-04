@@ -71,10 +71,10 @@ public partial class MiniWindow : Window
 
 		(int x, int y) = tbLocation switch
 		{
-			TaskBarLocation.Top => (workArea.Width - width - _windowMargin, tbSize + _windowMargin),
-			TaskBarLocation.Right => (workArea.Width - width - _windowMargin, workArea.Height - height - _windowMargin),
-			TaskBarLocation.Bottom => (workArea.Width - width - _windowMargin, workArea.Height - height - _windowMargin),
-			TaskBarLocation.Left => (tbSize + _windowMargin, workArea.Height - height - _windowMargin),
+			TaskBarLocation.Top => (workArea.X + workArea.Width - width - _windowMargin, workArea.Y + tbSize + _windowMargin),
+			TaskBarLocation.Right => (workArea.X + workArea.Width - width - _windowMargin, workArea.Y + workArea.Height - height - _windowMargin),
+			TaskBarLocation.Bottom => (workArea.X + workArea.Width - width - _windowMargin, workArea.Y + workArea.Height - height - _windowMargin),
+			TaskBarLocation.Left => (workArea.X + tbSize + _windowMargin, workArea.Y + workArea.Height - height - _windowMargin),
 			_ => throw new NotSupportedException(),
 		};
 
