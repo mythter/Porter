@@ -19,7 +19,7 @@ public class AppDataProvider : IAppDataProvider<AppData>
 
 	public AppData Value { get; set; } = new();
 
-	public string FilePath { get; } = Path.Combine(AppContext.BaseDirectory, "settings.json");
+	public string FilePath { get; } = GetDefaultSettingsPath();
 
 	#endregion
 
@@ -88,6 +88,31 @@ public class AppDataProvider : IAppDataProvider<AppData>
 	#endregion
 
 	#region Private Methods
+
+	private static string GetDefaultSettingsPath()
+	{
+#if DEBUG
+		// Development mode: store settings next to the executable for easy access and debugging.
+		// This makes it simple to inspect/modify settings during development.
+		var appFolder = AppContext.BaseDirectory;
+#else
+		// Publish mode: use ApplicationData (roaming) for user-specific settings that should:
+		// - Not require admin rights
+		// - Persist across app updates
+		// - Be isolated per user
+		// - Sync in domain roaming profiles (Windows)
+		//
+		// Windows: %APPDATA%\Porter\settings.json (e.g., C:\Users\YourName\AppData\Roaming\Porter)
+		// Linux/macOS: ~/.config/Porter/settings.json
+		var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+		var appFolder = Path.Combine(appDataFolder, "Porter");
+
+		// Ensure the directory exists
+		Directory.CreateDirectory(appFolder);
+#endif
+
+		return Path.Combine(appFolder, "settings.json");
+	}
 
 	private static void TryBackup(string path)
 	{
