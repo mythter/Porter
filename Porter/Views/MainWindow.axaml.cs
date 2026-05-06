@@ -65,6 +65,7 @@ public partial class MainWindow : Window
 		base.OnClosing(e);
 
 		_windowStateService.Save(this, _appDataProvider.Value.WindowSettings);
+
 		_appDataProvider.Save();
 
 		if (!_appDataProvider.Value.Settings.OnCloseMinimizeToTray)

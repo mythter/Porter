@@ -15,7 +15,13 @@ namespace Porter.Services;
 
 public class TrayService : ITrayService
 {
+	#region Constants
+
 	private const string IMAGES_PATH = $"avares://{nameof(Porter)}/Assets/Images";
+
+	#endregion
+
+	#region Private Fields
 
 	private ForwardState _iconState = ForwardState.None;
 
@@ -23,7 +29,15 @@ public class TrayService : ITrayService
 
 	private readonly MiniWindow _miniWindow;
 
+	#endregion
+
+	#region Public Properties
+
 	public TrayIcon TrayIcon { get; }
+
+	#endregion
+
+	#region Constructors
 
 	public TrayService(IClassicDesktopStyleApplicationLifetime lifetime, MiniWindow miniWindow)
 	{
@@ -32,6 +46,10 @@ public class TrayService : ITrayService
 
 		TrayIcon = InitTrayIcon();
 	}
+
+	#endregion
+
+	#region Public Methods
 
 	public void SetTrayIcon(ForwardState forwardState)
 	{
@@ -43,6 +61,10 @@ public class TrayService : ITrayService
 			TrayIcon.ToolTipText = GetTrayToolTip(forwardState);
 		}
 	}
+
+	#endregion
+
+	#region Private Methods
 
 	private TrayIcon InitTrayIcon()
 	{
@@ -118,4 +140,6 @@ public class TrayService : ITrayService
 			_ => "Porter"
 		};
 	}
+
+	#endregion
 }

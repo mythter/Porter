@@ -14,7 +14,13 @@ namespace Porter.Services;
 /// </summary>
 public static class CrashService
 {
+	#region Private Fields
+
 	private static readonly string _crashFilePath = Path.Combine(AppContext.BaseDirectory, "crash.json");
+
+	#endregion
+
+	#region Public Methods
 
 	public static bool SetCrashData(Exception ex)
 	{
@@ -76,4 +82,6 @@ public static class CrashService
 	{
 		ClearCrashData();
 	}
+
+	#endregion
 }

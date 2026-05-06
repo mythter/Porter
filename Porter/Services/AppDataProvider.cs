@@ -9,11 +9,21 @@ namespace Porter.Services;
 
 public class AppDataProvider : IAppDataProvider<AppData>
 {
+	#region Private Fields
+
 	private readonly ICrashLogger? _logger;
+
+	#endregion
+
+	#region Public Properties
 
 	public AppData Value { get; set; } = new();
 
 	public string FilePath { get; } = Path.Combine(AppContext.BaseDirectory, "settings.json");
+
+	#endregion
+
+	#region Constructors
 
 	public AppDataProvider() : this(null) { }
 
@@ -22,6 +32,10 @@ public class AppDataProvider : IAppDataProvider<AppData>
 		_logger = logger;
 		Load();
 	}
+
+	#endregion
+
+	#region Public Methods
 
 	public AppData Load()
 	{
@@ -71,6 +85,10 @@ public class AppDataProvider : IAppDataProvider<AppData>
 		}
 	}
 
+	#endregion
+
+	#region Private Methods
+
 	private static void TryBackup(string path)
 	{
 		try
@@ -85,4 +103,6 @@ public class AppDataProvider : IAppDataProvider<AppData>
 	}
 
 	private static AppData GetDefault() => new();
+
+	#endregion
 }

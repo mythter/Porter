@@ -12,9 +12,17 @@ namespace Porter.Services;
 /// </summary>
 public sealed class TrayStateManager : ITrayStateManager, IDisposable
 {
-	private readonly ITrayService _trayService;
-	private readonly ITunnelService _tunnelService;
+	#region Private Fields
+
 	private bool _disposed;
+
+	private readonly ITrayService _trayService;
+
+	private readonly ITunnelService _tunnelService;
+
+	#endregion
+
+	#region Constructors
 
 	public TrayStateManager(ITrayService trayService, ITunnelService tunnelService)
 	{
@@ -22,6 +30,10 @@ public sealed class TrayStateManager : ITrayStateManager, IDisposable
 		_tunnelService = tunnelService;
 		_tunnelService.OverallStateChanged += OnOverallStateChanged;
 	}
+
+	#endregion
+
+	#region Public Methods
 
 	public void Refresh()
 	{
@@ -32,21 +44,20 @@ public sealed class TrayStateManager : ITrayStateManager, IDisposable
 	{
 		if (_disposed)
 			return;
-		_disposed = true;
+
 		_tunnelService.OverallStateChanged -= OnOverallStateChanged;
+
+		_disposed = true;
 	}
+
+	#endregion
+
+	#region Private Methods
 
 	private void OnOverallStateChanged(ForwardState state)
 	{
 		_trayService.SetTrayIcon(state);
 	}
-}
 
-public interface ITrayStateManager
-{
-	/// <summary>
-	/// Forces a recomputation of the tray indicator from the current tunnel states. Useful at app
-	/// start, after settings reload, etc.
-	/// </summary>
-	void Refresh();
+	#endregion
 }

@@ -10,12 +10,22 @@ namespace Porter.ViewModels;
 
 public class MiniViewModel : ViewModelBase, IRecipient<NavigateMessage>
 {
+	#region Private Fields
+
 	private readonly Func<PageNames, PageViewModel> _pageFactory;
 
 	private PageViewModel? _page;
 
+	#endregion
+
+	#region Public Properties
+
 	// Lazy: the embedded page VM only materializes when the mini-window is first shown.
 	public PageViewModel Page => _page ??= _pageFactory(PageNames.Tunnels);
+
+	#endregion
+
+	#region Constructors
 
 	public MiniViewModel(Func<PageNames, PageViewModel> pageFactory, IMessenger messenger)
 	{
@@ -23,6 +33,10 @@ public class MiniViewModel : ViewModelBase, IRecipient<NavigateMessage>
 
 		messenger.Register(this);
 	}
+
+	#endregion
+
+	#region Public Methods
 
 	public void Receive(NavigateMessage message)
 	{
@@ -38,4 +52,6 @@ public class MiniViewModel : ViewModelBase, IRecipient<NavigateMessage>
 			OnPropertyChanged(nameof(Page));
 		}
 	}
+
+	#endregion
 }
