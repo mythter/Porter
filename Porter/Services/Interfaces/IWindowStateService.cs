@@ -2,7 +2,7 @@
 
 using Porter.Models;
 
-namespace Porter.Services;
+namespace Porter.Services.Interfaces;
 
 public interface IWindowStateService
 {
