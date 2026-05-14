@@ -143,6 +143,7 @@ public class TunnelService : ITunnelService
 	{
 		CancellationTokenSource? cts;
 		SshTunnelState state;
+
 		lock (_stateSync)
 		{
 			_cts.TryGetValue(tunnel.Id, out cts);
@@ -150,6 +151,9 @@ public class TunnelService : ITunnelService
 		}
 
 		cts?.Cancel();
+
+		if (state.State == TunnelState.Connecting && !_forwardManager.IsForwardStarted(tunnel))
+			return;
 
 		_forwardManager.StopForward(tunnel);
 
@@ -276,7 +280,7 @@ public class TunnelService : ITunnelService
 		// the tray state reflects only newly started ones.
 		lock (_stateSync)
 		{
-			if (!_states.Values.Any(s => s.State == TunnelState.Running))
+			if (!_states.Values.Any(s => s.State is not TunnelState.Running and not TunnelState.Connecting))
 			{
 				foreach (var s in _states.Values)
 				{
