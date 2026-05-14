@@ -25,9 +25,7 @@ namespace Porter.Configuration;
 /// </summary>
 public static class ConfigurationExtensions
 {
-	public static IServiceCollection AddServices(
-		this IServiceCollection services,
-		IClassicDesktopStyleApplicationLifetime desktop)
+	public static IServiceCollection AddServices(this IServiceCollection services, IClassicDesktopStyleApplicationLifetime desktop)
 	{
 		// === ViewModels ===
 		// MainViewModel is a singleton: it owns the navigation pipeline and acts as the main
