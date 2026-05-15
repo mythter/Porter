@@ -1,9 +1,16 @@
-﻿using Avalonia;
+﻿using System;
+
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Metadata;
+using Avalonia.Styling;
 
 using Microsoft.Extensions.DependencyInjection;
+
+using Myth.Avalonia.Controls.Enums;
 
 using Porter.Configuration;
 using Porter.Models;
@@ -11,6 +18,8 @@ using Porter.Services;
 using Porter.Services.Interfaces;
 using Porter.ViewModels;
 using Porter.Views;
+
+using Color = Avalonia.Media.Color;
 
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "Porter.Controls")]
 [assembly: XmlnsDefinition("https://github.com/avaloniaui", "Porter.AttachedProperties")]
@@ -48,8 +57,12 @@ public partial class App : Application
 
 			var mainViewModel = services.GetRequiredService<MainViewModel>();
 
+			var appDataProvider = services.GetRequiredService<IAppDataProvider<AppData>>();
+
+			ApplyTheme(appDataProvider);
+
 			desktop.MainWindow = new MainWindow(
-				services.GetRequiredService<IAppDataProvider<AppData>>(),
+				appDataProvider,
 				services.GetRequiredService<IWindowStateService>())
 			{
 				DataContext = mainViewModel,
@@ -70,5 +83,38 @@ public partial class App : Application
 		// (PortForwardManager — closes all SSH connections; PrivateKeyCache — wipes keys).
 		_serviceProvider?.Dispose();
 		_serviceProvider = null;
+	}
+
+	private static void ApplyTheme(IAppDataProvider<AppData> appDataProvider)
+	{
+		if (Application.Current is { } app)
+		{
+			app.ActualThemeVariantChanged += (sender, args) =>
+			{
+				if (app.ActualThemeVariant == ThemeVariant.Light &&
+					Application.Current!.TryGetResource("ToggleButtonBackgroundChecked", out var resource) &&
+					resource is SolidColorBrush brush)
+				{
+					Application.Current.Resources["CustomToggleButtonBackgroundChecked"] = LightenPercent(brush.Color, 0.6f);
+				}
+			};
+
+			app.RequestedThemeVariant = appDataProvider.Value.Settings.Theme switch
+			{
+				AppTheme.Light => ThemeVariant.Light,
+				AppTheme.Dark => ThemeVariant.Dark,
+				_ => ThemeVariant.Default,
+			};
+		}
+	}
+
+	private static Color LightenPercent(Color color, float percent)
+	{
+		var hsl = color.ToHsl();
+
+		var l = hsl.L + (hsl.L * percent);
+		l = Math.Clamp(l, 0f, 1f);
+
+		return HsvColor.FromHsv(hsl.H, hsl.S, l).ToRgb();
 	}
 }

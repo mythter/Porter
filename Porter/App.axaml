@@ -1,9 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:local="using:Porter"
+			 xmlns:mythConv="using:Myth.Avalonia.Controls.Converters"
+			 xmlns:conv="using:Porter.Converters"
 			 xmlns:themes="using:Myth.Avalonia.Themes"
-			 x:Class="Porter.App"
-			 RequestedThemeVariant="Dark">
+			 x:Class="Porter.App">
 	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
 	<Application.Styles>
@@ -21,9 +22,44 @@
 
 	<Application.Resources>
 		<ResourceDictionary>
+			<mythConv:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
+			<conv:EqualityConverter x:Key="EqualityConverter"/>
 
 			<FontFamily x:Key="Phosphor">avares://Porter/Assets/Fonts#Phosphor</FontFamily>
 			<FontFamily x:Key="PhosphorFill">avares://Porter/Assets/Fonts#Phosphor-Fill</FontFamily>
+
+			<ResourceDictionary.ThemeDictionaries>
+				<ResourceDictionary x:Key='Light'>
+					<!-- Main backgrounds -->
+					<SolidColorBrush x:Key='PrimaryBackground'>#ffffff</SolidColorBrush>
+					<SolidColorBrush x:Key='SecondaryBackground'>#f0f0f0</SolidColorBrush>
+
+					<SolidColorBrush x:Key='MiniWindowBackground'>#ffffff</SolidColorBrush>
+
+					<!-- Foreground colors -->
+					<SolidColorBrush x:Key='ComboBoxSecondaryForeground'>#999999</SolidColorBrush>
+
+					<!-- Button overrides -->
+					<SolidColorBrush x:Key="ButtonForeground">#222222</SolidColorBrush>
+					<SolidColorBrush x:Key="ButtonBackground">#cccdd0</SolidColorBrush>
+					<SolidColorBrush x:Key="ButtonBackgroundPointerOver">#b6b7b9</SolidColorBrush>
+					<SolidColorBrush x:Key="ButtonBackgroundPressed">#919293</SolidColorBrush>
+
+					<!-- Toggle Button overrides -->
+					<SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{DynamicResource CustomToggleButtonBackgroundChecked}" />
+
+				</ResourceDictionary>
+				<ResourceDictionary x:Key='Dark'>
+					<!-- Main backgrounds -->
+					<SolidColorBrush x:Key='PrimaryBackground'>#202020</SolidColorBrush>
+					<SolidColorBrush x:Key='SecondaryBackground'>#2E2E2E</SolidColorBrush>
+
+					<SolidColorBrush x:Key='MiniWindowBackground'>#FF333333</SolidColorBrush>
+
+					<!-- Foreground colors -->
+					<SolidColorBrush x:Key='ComboBoxSecondaryForeground'>#808080</SolidColorBrush>
+				</ResourceDictionary>
+			</ResourceDictionary.ThemeDictionaries>
 
 		</ResourceDictionary>
 	</Application.Resources>

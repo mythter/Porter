@@ -2,15 +2,21 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia;
+using Avalonia.Styling;
 using Avalonia.Threading;
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
+using Myth.Avalonia.Controls.Enums;
 using Myth.Avalonia.Services.Abstractions;
 using Myth.Avalonia.Services.Extensions;
 
@@ -53,6 +59,8 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 
 	public ObservableCollection<SshTunnelViewModel> Items { get; }
 
+	public static AppTheme[] AppThemes { get; } = Enum.GetValues<AppTheme>();
+
 	#endregion
 
 	#region Constructors
@@ -75,6 +83,8 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 		Items = new ObservableCollection<SshTunnelViewModel>(AppData.SshTunnels.Select(CreateSshTunnelViewModel));
 
 		AppData.SshTunnels.CollectionChanged += OnSshTunnelsCollectionChanged;
+
+		Settings.PropertyChanged += OnSettingsChanges;
 	}
 
 	#endregion
@@ -95,6 +105,9 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 
 	[RelayCommand]
 	public void GoToPrivateKeys() => _messenger.Send(new NavigateMessage(PageNames.PrivateKeys));
+
+	[RelayCommand]
+	private void SelectTheme(AppTheme theme) => Settings.Theme = theme;
 
 	[RelayCommand]
 	public async Task StartAllSshTunnels()
@@ -224,6 +237,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 		if (disposing)
 		{
 			AppData.SshTunnels.CollectionChanged -= OnSshTunnelsCollectionChanged;
+			Settings.PropertyChanged -= OnSettingsChanges;
 
 			foreach (var item in Items)
 				item.Dispose();
@@ -267,6 +281,20 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 		foreach (SshTunnel tunnel in e.NewItems?.Cast<SshTunnel>() ?? [])
 		{
 			Items.Add(CreateSshTunnelViewModel(tunnel));
+		}
+	}
+
+	private void OnSettingsChanges(object? sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(AppSettings.Theme) &&
+			Application.Current is { } app)
+		{
+			app.RequestedThemeVariant = Settings.Theme switch
+			{
+				AppTheme.Light => ThemeVariant.Light,
+				AppTheme.Dark => ThemeVariant.Dark,
+				_ => ThemeVariant.Default,
+			};
 		}
 	}
 

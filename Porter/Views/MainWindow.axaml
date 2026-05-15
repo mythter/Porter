@@ -13,7 +13,7 @@
 		s:DialogManager.Register="{Binding}"
 		Icon="/Assets/Images/logo-main.ico"
 		Focusable="True"
-		Background="#202020"
+		Background="{DynamicResource PrimaryBackground}"
 		Title="Porter">
 
 	<Design.DataContext>

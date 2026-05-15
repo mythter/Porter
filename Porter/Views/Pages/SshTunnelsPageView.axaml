@@ -95,6 +95,26 @@
 						<MenuItem Header="Import settings"
 								  Command="{Binding ImportSettingsCommand}" />
 
+						<!-- Theme -->
+						<MenuItem Header="Theme"
+								  ItemsSource="{Binding	AppThemes}">
+							<MenuItem.ItemContainerTheme>
+								<ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+									<Setter Property="Header" Value="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
+									<Setter Property="ToggleType" Value="Radio" />
+									<Setter Property="GroupName" Value="ThemesGroup" />
+									<Setter Property="Command" Value="{Binding $parent[MenuItem].((vm:SshTunnelsPageViewModel)DataContext).SelectThemeCommand}" />
+									<Setter Property="CommandParameter" Value="{Binding}" />
+									<Setter Property="IsChecked">
+										<MultiBinding Converter="{StaticResource EqualityConverter}">
+											<Binding />
+											<Binding Path="$parent[MenuItem].((vm:SshTunnelsPageViewModel)DataContext).Settings.Theme" />
+										</MultiBinding>
+									</Setter>
+								</ControlTheme>
+							</MenuItem.ItemContainerTheme>
+						</MenuItem>
+
 					</MenuFlyout>
 				</Button.Flyout>
 			</Button>
@@ -122,7 +142,7 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
 						<c:SshTunnelControl Padding="5"
-											Background="#2E2E2E"
+											Background="{DynamicResource SecondaryBackground}"
 											CornerRadius="5">
 
 						</c:SshTunnelControl>

@@ -17,7 +17,7 @@
 		Topmost="True"
 		WindowStartupLocation="Manual">
 
-	<Border CornerRadius="8" Background="#FF333333">
+	<Border CornerRadius="8" Background="{DynamicResource MiniWindowBackground}">
 		<views:MiniView DataContext="{Binding Page}" />
 	</Border>
 

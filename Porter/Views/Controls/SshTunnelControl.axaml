@@ -70,7 +70,7 @@
 
 			<CustomComboBox.DefaultItem>
 				<DataTemplate>
-					<TextBlock Text="SSH server" Foreground="Gray"/>
+					<TextBlock Text="SSH server" Foreground="{DynamicResource ComboBoxSecondaryForeground}"/>
 				</DataTemplate>
 			</CustomComboBox.DefaultItem>
 
@@ -101,7 +101,7 @@
 
 			<CustomComboBox.DefaultItem>
 				<DataTemplate>
-					<TextBlock Text="Private key" Foreground="Gray"/>
+					<TextBlock Text="Private key" Foreground="{DynamicResource ComboBoxSecondaryForeground}"/>
 				</DataTemplate>
 			</CustomComboBox.DefaultItem>
 
@@ -127,7 +127,7 @@
 
 				<CustomComboBox.DefaultItem>
 					<DataTemplate>
-						<TextBlock Text="Remote server" Foreground="Gray"/>
+						<TextBlock Text="Remote server" Foreground="{DynamicResource ComboBoxSecondaryForeground}"/>
 					</DataTemplate>
 				</CustomComboBox.DefaultItem>
 

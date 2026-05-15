@@ -53,7 +53,7 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
 						<c:PrivateKeyControl Padding="5"
-											 Background="#2E2E2E"
+											 Background="{DynamicResource SecondaryBackground}"
 											 CornerRadius="5">
 						</c:PrivateKeyControl>
 					</DataTemplate>
