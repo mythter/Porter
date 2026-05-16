@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-using Myth.Avalonia.Controls.Enums;
+using Porter.Enums;
 
 namespace Porter.Models;
 

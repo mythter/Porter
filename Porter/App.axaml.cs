@@ -10,9 +10,8 @@ using Avalonia.Styling;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Myth.Avalonia.Controls.Enums;
-
 using Porter.Configuration;
+using Porter.Enums;
 using Porter.Models;
 using Porter.Services;
 using Porter.Services.Interfaces;
