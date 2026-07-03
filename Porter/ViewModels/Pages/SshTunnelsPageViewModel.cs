@@ -119,13 +119,9 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 				if (_startAllCancellationTokenSource.IsCancellationRequested)
 					break;
 
-				var promptPassphraseCallback = tunnel.PrivateKey?.FilePath is null
-					? (Func<Task<string?>>?)null
-					: () => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(tunnel.PrivateKey));
-
 				try
 				{
-					await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, _startAllCancellationTokenSource.Token);
+					await StartTunnel(tunnel, _startAllCancellationTokenSource.Token);
 				}
 				catch (OperationCanceledException)
 				{
@@ -152,7 +148,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 
 		foreach (var tunnel in Items)
 		{
-			_tunnelService.Stop(tunnel.Model);
+			_tunnelService.Stop(tunnel.Model.Id);
 		}
 	}
 
@@ -303,13 +299,9 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 
 		var started = false;
 
-		var promptPassphraseCallback = tunnel.PrivateKey?.FilePath is null
-			? (Func<Task<string?>>?)null
-			: () => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(tunnel.PrivateKey));
-
 		try
 		{
-			started = await _tunnelService.StartAsync(tunnel, promptPassphraseCallback, cts.Token);
+			started = await StartTunnel(tunnel, cts.Token);
 		}
 		catch (OperationCanceledException)
 		{
@@ -328,6 +320,23 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 		return started;
 	}
 
+	private Task<bool> StartTunnel(SshTunnel tunnel, CancellationToken cancellationToken = default)
+	{
+		var sshServer = AppData.SshServers.FirstOrDefault(s => s.Id == tunnel.SshServerId);
+		var remoteServer = AppData.RemoteServers.FirstOrDefault(s => s.Id == tunnel.RemoteServerId);
+		var privateKey = AppData.PrivateKeys.FirstOrDefault(k => k.Id == tunnel.PrivateKeyId);
+
+		// TODO: maybe show a message to the user if any of these are null, instead of silently skipping them
+		if (sshServer is null || remoteServer is null)
+			return Task.FromResult(false);
+
+		var promptPassphraseCallback = privateKey?.FilePath is null
+			? (Func<Task<string?>>?)null
+			: () => Dispatcher.UIThread.InvokeAsync(() => ShowPrivateKeyPasswordDialogAsync(privateKey));
+
+		return _tunnelService.StartAsync(tunnel, sshServer, remoteServer, privateKey, promptPassphraseCallback, cancellationToken);
+	}
+
 	private void OnStopForward(SshTunnel tunnel)
 	{
 		if (_connectingTunnels.TryGetValue(tunnel, out var cts))
@@ -335,7 +344,7 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 			cts.Cancel();
 		}
 
-		_tunnelService.Stop(tunnel);
+		_tunnelService.Stop(tunnel.Id);
 	}
 
 	private SshTunnelViewModel CreateSshTunnelViewModel(SshTunnel tunnel)

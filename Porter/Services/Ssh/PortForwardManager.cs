@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Porter.Models;
-
 namespace Porter.Services.Ssh;
 
 public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
@@ -26,34 +24,30 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 
 	private readonly ConcurrentDictionary<SshConnectionOptions, SshConnection> _connections = new();
 
-	private readonly ConcurrentDictionary<LocalPortForwardKey, SshTunnel> _forwardToTunnel = new();
+	private readonly ConcurrentDictionary<Guid, LocalPortForwardKey> _tunnelIdToForward = new();
 
 	#endregion
 
 	#region Events
 
-	public event Action<SshTunnel, Exception>? TunnelFailed;
+	public event Action<Guid, Exception>? TunnelFailed;
 
 	#endregion
 
 	#region Public Methods
 
 	public Task<bool> StartForward(
-		SshTunnel tunnel,
+		LocalPortForwardOptions options,
 		Func<Task<string?>>? promptPassphrase = null,
 		CancellationToken cancellationToken = default)
 	{
-		return StartForwardInternal(tunnel, promptPassphrase, cancellationToken);
+		return StartForwardInternal(options, promptPassphrase, cancellationToken);
 	}
 
-	public void StopForward(SshTunnel tunnel)
+	public void StopForward(Guid tunnelId)
 	{
-		if (TryCreateLocalPortForward(tunnel) is not { } localPortForward)
-		{
+		if (!_tunnelIdToForward.TryRemove(tunnelId, out var localPortForward))
 			return;
-		}
-
-		_forwardToTunnel.TryRemove(localPortForward, out _);
 
 		if (GetConnectionByPortForward(localPortForward) is not { } connection)
 			return;
@@ -91,9 +85,9 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 		}
 	}
 
-	public bool IsForwardStarted(SshTunnel tunnel)
+	public bool IsForwardStarted(Guid tunnelId)
 	{
-		if (TryCreateLocalPortForward(tunnel) is not { } localPortForward)
+		if (!_tunnelIdToForward.TryGetValue(tunnelId, out var localPortForward))
 		{
 			return false;
 		}
@@ -146,18 +140,18 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 	#region Private Methods
 
 	private async Task<bool> StartForwardInternal(
-		SshTunnel tunnel,
+		LocalPortForwardOptions forwardOptions,
 		Func<Task<string?>>? promptPassphrase = null,
 		CancellationToken cancellationToken = default)
 	{
-		if (tunnel.SshServer?.User is null || tunnel.SshServer?.Host is null)
+		if (forwardOptions.SshServerUser is null || forwardOptions.SshServerHost is null)
 		{
 			return false;
 		}
 
-		var options = new SshConnectionOptions(tunnel.SshServer.User, tunnel.SshServer.Host, tunnel.SshServer.Port, tunnel.PrivateKey?.FilePath);
+		var connectionOptions = new SshConnectionOptions(forwardOptions.SshServerUser, forwardOptions.SshServerHost, forwardOptions.SshServerPort, forwardOptions.PrivateKeyFilePath);
 
-		var semaphore = _locks.GetOrAdd(options, _ => new SemaphoreSlim(1, 1));
+		var semaphore = _locks.GetOrAdd(connectionOptions, _ => new SemaphoreSlim(1, 1));
 
 		await semaphore.WaitAsync(cancellationToken);
 
@@ -166,9 +160,9 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 
 		try
 		{
-			if (!_connections.TryGetValue(options, out connection))
+			if (!_connections.TryGetValue(connectionOptions, out connection))
 			{
-				connection = new SshConnection(options, _privateKeyCache);
+				connection = new SshConnection(connectionOptions, _privateKeyCache);
 				connectionWasCreated = true;
 
 				if (!await connection.InitializeAsync(promptPassphrase, cancellationToken))
@@ -177,18 +171,18 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 					return false;
 				}
 
-				_connections.TryAdd(options, connection);
+				_connections.TryAdd(connectionOptions, connection);
 			}
 
 			if (!connection.IsConnected && !await connection.ConnectAsync(cancellationToken))
 			{
-				CleanupConnectionIfNeeded(options, connection, connectionWasCreated);
+				CleanupConnectionIfNeeded(connectionOptions, connection, connectionWasCreated);
 				return false;
 			}
 
-			if (TryCreateLocalPortForward(tunnel) is not { } localPortForward)
+			if (TryCreateLocalPortForward(forwardOptions) is not { } localPortForward)
 			{
-				CleanupConnectionIfNeeded(options, connection, connectionWasCreated);
+				CleanupConnectionIfNeeded(connectionOptions, connection, connectionWasCreated);
 				return false;
 			}
 
@@ -198,13 +192,13 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 
 			if (!connection.IsForwardStarted(localPortForward))
 			{
-				_forwardToTunnel[localPortForward] = tunnel;
+				_tunnelIdToForward[forwardOptions.TunnelId] = localPortForward;
 
 				connection.StartForward(localPortForward, ex =>
 				{
-					if (_forwardToTunnel.TryRemove(localPortForward, out var t))
+					if (_tunnelIdToForward.TryRemove(forwardOptions.TunnelId, out _))
 					{
-						TunnelFailed?.Invoke(t, ex);
+						TunnelFailed?.Invoke(forwardOptions.TunnelId, ex);
 					}
 				});
 			}
@@ -215,7 +209,7 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 		{
 			// If exception occurred and connection was just created without any forwards,
 			// remove it from the pool to prevent it from being reused.
-			CleanupConnectionIfNeeded(options, connection, connectionWasCreated);
+			CleanupConnectionIfNeeded(connectionOptions, connection, connectionWasCreated);
 			throw;
 		}
 		finally
@@ -243,14 +237,14 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 		return _connections.FirstOrDefault(p => ReferenceEquals(p.Value, connection)).Key;
 	}
 
-	private static LocalPortForwardKey? TryCreateLocalPortForward(SshTunnel tunnel)
+	private static LocalPortForwardKey? TryCreateLocalPortForward(LocalPortForwardOptions forwardOptions)
 	{
-		if (tunnel.RemoteServer?.Host is null || tunnel.RemoteServer?.Port is null)
+		if (forwardOptions.RemoteServerHost is null || forwardOptions.RemoteServerPort is null)
 		{
 			return null;
 		}
 
-		return new LocalPortForwardKey(LOCALHOST, (uint?)tunnel.LocalPort, tunnel.RemoteServer.Host, (uint)tunnel.RemoteServer.Port);
+		return new LocalPortForwardKey(LOCALHOST, (uint?)forwardOptions.LocalPort, forwardOptions.RemoteServerHost, (uint)forwardOptions.RemoteServerPort);
 	}
 
 	#endregion

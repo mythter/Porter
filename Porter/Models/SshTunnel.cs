@@ -15,11 +15,11 @@ public partial class SshTunnel : ObservableObject
 	public partial int? LocalPort { get; set; }
 
 	[ObservableProperty]
-	public partial SshServer? SshServer { get; set; }
+	public partial Guid? SshServerId { get; set; }
 
 	[ObservableProperty]
-	public partial PrivateKey? PrivateKey { get; set; }
+	public partial Guid? PrivateKeyId { get; set; }
 
 	[ObservableProperty]
-	public partial RemoteServer? RemoteServer { get; set; }
+	public partial Guid? RemoteServerId { get; set; }
 }

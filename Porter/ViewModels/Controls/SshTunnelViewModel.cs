@@ -32,12 +32,12 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 
 	public bool IsNameNullOrEmpty => string.IsNullOrEmpty(Model.Name) && RemoteServerAlias is not null;
 
-	public string? RemoteServerAlias => Model.RemoteServer?.Host switch
+	public string? RemoteServerAlias => SelectedRemoteServer?.Host switch
 	{
-		not null => Model.RemoteServer.Port switch
+		not null => SelectedRemoteServer?.Port switch
 		{
-			not null => $"{Model.RemoteServer.Host}:{Model.RemoteServer.Port}",
-			_ => Model.RemoteServer.Host
+			not null => $"{SelectedRemoteServer?.Host}:{SelectedRemoteServer?.Port}",
+			_ => SelectedRemoteServer?.Host
 		},
 		_ => null
 	};
@@ -52,16 +52,17 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 	public partial SshServer? SelectedSshServer { get; set; }
 
 	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(RemoteServerAlias))]
 	public partial RemoteServer? SelectedRemoteServer { get; set; }
 
 	[ObservableProperty]
 	public partial PrivateKey? SelectedPrivateKey { get; set; }
 
-	partial void OnSelectedSshServerChanged(SshServer? value) => Model.SshServer = value;
+	partial void OnSelectedSshServerChanged(SshServer? value) => Model.SshServerId = value?.Id;
 
-	partial void OnSelectedRemoteServerChanged(RemoteServer? value) => Model.RemoteServer = value;
+	partial void OnSelectedRemoteServerChanged(RemoteServer? value) => Model.RemoteServerId = value?.Id;
 
-	partial void OnSelectedPrivateKeyChanged(PrivateKey? value) => Model.PrivateKey = value;
+	partial void OnSelectedPrivateKeyChanged(PrivateKey? value) => Model.PrivateKeyId = value?.Id;
 
 	public string MiniToolTip => GetMiniToolTip();
 
@@ -76,11 +77,11 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 	#region Constructors
 
 	public SshTunnelViewModel(
-	SshTunnel model,
-	IAppDataProvider<AppData> appData,
-	ITunnelService tunnelService,
-	Func<SshTunnel, CancellationToken?, Task<bool>> startForward,
-	Action<SshTunnel> stopForward)
+		SshTunnel model,
+		IAppDataProvider<AppData> appData,
+		ITunnelService tunnelService,
+		Func<SshTunnel, CancellationToken?, Task<bool>> startForward,
+		Action<SshTunnel> stopForward)
 	{
 		ArgumentNullException.ThrowIfNull(model);
 		ArgumentNullException.ThrowIfNull(startForward);
@@ -98,9 +99,9 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		// Assigning through the property triggers OnSelectedXxxChanged which mirrors the choice
 		// onto the model. That's harmless here because Model already references the same instance,
 		// but it keeps initialization on a single code path.
-		SelectedSshServer = SshServers.FirstOrDefault(s => s.Id == model.SshServer?.Id);
-		SelectedRemoteServer = RemoteServers.FirstOrDefault(s => s.Id == model.RemoteServer?.Id);
-		SelectedPrivateKey = PrivateKeys.FirstOrDefault(s => s.Id == model.PrivateKey?.Id);
+		SelectedSshServer = SshServers.FirstOrDefault(s => s.Id == model.SshServerId);
+		SelectedRemoteServer = RemoteServers.FirstOrDefault(s => s.Id == model.RemoteServerId);
+		SelectedPrivateKey = PrivateKeys.FirstOrDefault(s => s.Id == model.PrivateKeyId);
 
 		Model.PropertyChanged += OnModelPropertyChanged;
 		State.PropertyChanged += OnStatePropertyChanged;
@@ -190,10 +191,6 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		{
 			OnPropertyChanged(nameof(IsNameNullOrEmpty));
 		}
-		else if (e.PropertyName == nameof(Model.RemoteServer))
-		{
-			OnPropertyChanged(nameof(RemoteServerAlias));
-		}
 
 		OnPropertyChanged(nameof(MiniToolTip));
 	}
@@ -215,31 +212,31 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		sb.AppendLine($"Local Port: {Model.LocalPort?.ToString() ?? "-"}");
 
 		sb.Append("SSH server: ");
-		if (string.IsNullOrEmpty(Model.SshServer?.Name)
-			&& string.IsNullOrEmpty(Model.SshServer?.User)
-			&& string.IsNullOrEmpty(Model.SshServer?.Host))
+		if (string.IsNullOrEmpty(SelectedSshServer?.Name)
+			&& string.IsNullOrEmpty(SelectedSshServer?.User)
+			&& string.IsNullOrEmpty(SelectedSshServer?.Host))
 		{
 			sb.AppendLine("-");
 		}
 		else
 		{
-			if (Model.SshServer?.Name is not null)
+			if (SelectedSshServer?.Name is not null)
 			{
-				sb.Append($"{Model.SshServer?.Name}");
+				sb.Append($"{SelectedSshServer?.Name}");
 			}
 
-			if (Model.SshServer?.Host is not null)
+			if (SelectedSshServer?.Host is not null)
 			{
-				if (Model.SshServer?.Name is not null)
+				if (SelectedSshServer?.Name is not null)
 					sb.Append(" - ");
 
-				sb.Append(Model.SshServer?.User is null
-					? Model.SshServer?.Host
-					: $"{Model.SshServer?.User}@{Model.SshServer?.Host}");
+				sb.Append(SelectedSshServer?.User is null
+					? SelectedSshServer?.Host
+					: $"{SelectedSshServer?.User}@{SelectedSshServer?.Host}");
 
-				if (Model.SshServer?.Port is not null)
+				if (SelectedSshServer?.Port is not null)
 				{
-					sb.Append($":{Model.SshServer?.Port}");
+					sb.Append($":{SelectedSshServer?.Port}");
 				}
 			}
 
@@ -247,50 +244,50 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		}
 
 		sb.Append("Private key: ");
-		if (string.IsNullOrEmpty(Model.PrivateKey?.Name)
-			&& string.IsNullOrEmpty(Model.PrivateKey?.FilePath))
+		if (string.IsNullOrEmpty(SelectedPrivateKey?.Name)
+			&& string.IsNullOrEmpty(SelectedPrivateKey?.FilePath))
 		{
 			sb.AppendLine("-");
 		}
 		else
 		{
-			if (Model.PrivateKey?.Name is not null)
+			if (SelectedPrivateKey?.Name is not null)
 			{
-				sb.Append($"{Model.PrivateKey?.Name}");
+				sb.Append($"{SelectedPrivateKey?.Name}");
 			}
 
-			if (Model.PrivateKey?.FilePath is not null)
+			if (SelectedPrivateKey?.FilePath is not null)
 			{
-				if (Model.PrivateKey?.Name is not null)
+				if (SelectedPrivateKey?.Name is not null)
 					sb.Append(" - ");
 
-				sb.Append(Model.PrivateKey?.FilePath);
+				sb.Append(SelectedPrivateKey?.FilePath);
 			}
 
 			sb.AppendLine();
 		}
 
 		sb.Append("Remote server: ");
-		if (string.IsNullOrEmpty(Model.RemoteServer?.Name)
-			&& string.IsNullOrEmpty(Model.RemoteServer?.Host))
+		if (string.IsNullOrEmpty(SelectedRemoteServer?.Name)
+			&& string.IsNullOrEmpty(SelectedRemoteServer?.Host))
 		{
 			sb.Append('-');
 		}
 		else
 		{
-			if (Model.RemoteServer?.Name is not null)
+			if (SelectedRemoteServer?.Name is not null)
 			{
-				sb.Append($"{Model.RemoteServer?.Name}");
+				sb.Append($"{SelectedRemoteServer?.Name}");
 			}
 
-			if (Model.RemoteServer?.Host is not null)
+			if (SelectedRemoteServer?.Host is not null)
 			{
-				if (Model.RemoteServer?.Name is not null)
+				if (SelectedRemoteServer?.Name is not null)
 					sb.Append(" - ");
 
-				sb.Append(Model.RemoteServer?.Port is null
-					? Model.RemoteServer?.Host
-					: $"{Model.RemoteServer?.Host}:{Model.RemoteServer?.Port}");
+				sb.Append(SelectedRemoteServer?.Port is null
+					? SelectedRemoteServer?.Host
+					: $"{SelectedRemoteServer?.Host}:{SelectedRemoteServer?.Port}");
 			}
 		}
 

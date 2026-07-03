@@ -32,8 +32,10 @@ public class TunnelService : ITunnelService
 
 	#region Events
 
-	public event Action<SshTunnel, Exception>? TunnelFailed;
+	/// <inheritdoc />
+	public event Action<Guid, Exception>? TunnelFailed;
 
+	/// <inheritdoc />
 	public event Action<ForwardState>? OverallStateChanged;
 
 	#endregion
@@ -51,6 +53,7 @@ public class TunnelService : ITunnelService
 
 	#region Public Methods
 
+	/// <inheritdoc />
 	public SshTunnelState GetState(Guid tunnelId)
 	{
 		lock (_stateSync)
@@ -59,6 +62,7 @@ public class TunnelService : ITunnelService
 		}
 	}
 
+	/// <inheritdoc />
 	public ForwardState GetOverallState()
 	{
 		lock (_stateSync)
@@ -67,14 +71,19 @@ public class TunnelService : ITunnelService
 		}
 	}
 
+	/// <inheritdoc />
 	public async Task<bool> StartAsync(
 		SshTunnel tunnel,
+		SshServer sshServer,
+		RemoteServer remoteServer,
+		PrivateKey? privateKey,
 		Func<Task<string?>>? promptPassphrase = null,
 		CancellationToken cancellationToken = default)
 	{
 		var state = GetState(tunnel.Id);
 
 		CancellationTokenSource cts;
+
 		lock (_stateSync)
 		{
 			if (state.State is TunnelState.Running or TunnelState.Connecting)
@@ -88,7 +97,7 @@ public class TunnelService : ITunnelService
 
 		try
 		{
-			var started = await StartInternal(tunnel, promptPassphrase, cts.Token);
+			var started = await StartInternal(tunnel, sshServer, remoteServer, privateKey, promptPassphrase, cts.Token);
 
 			lock (_stateSync)
 			{
@@ -139,23 +148,24 @@ public class TunnelService : ITunnelService
 		}
 	}
 
-	public void Stop(SshTunnel tunnel)
+	/// <inheritdoc />
+	public void Stop(Guid tunnelId)
 	{
 		CancellationTokenSource? cts;
 		SshTunnelState state;
 
 		lock (_stateSync)
 		{
-			_cts.TryGetValue(tunnel.Id, out cts);
-			state = GetStateNoLock(tunnel.Id);
+			_cts.TryGetValue(tunnelId, out cts);
+			state = GetStateNoLock(tunnelId);
 		}
 
 		cts?.Cancel();
 
-		if (state.State == TunnelState.Connecting && !_forwardManager.IsForwardStarted(tunnel))
+		if (state.State == TunnelState.Connecting && !_forwardManager.IsForwardStarted(tunnelId))
 			return;
 
-		_forwardManager.StopForward(tunnel);
+		_forwardManager.StopForward(tunnelId);
 
 		lock (_stateSync)
 		{
@@ -168,6 +178,7 @@ public class TunnelService : ITunnelService
 		ResetIntendedStateIfNoRunning();
 	}
 
+	/// <inheritdoc />
 	public bool IsAnyForwardStarted()
 	{
 		return _forwardManager.IsAnyForwardStarted();
@@ -189,22 +200,37 @@ public class TunnelService : ITunnelService
 
 	private Task<bool> StartInternal(
 		SshTunnel tunnel,
+		SshServer sshServer,
+		RemoteServer remoteServer,
+		PrivateKey? privateKey,
 		Func<Task<string?>>? promptPassphrase = null,
 		CancellationToken cancellationToken = default)
 	{
-		return _forwardManager.StartForward(tunnel, promptPassphrase, cancellationToken);
+		var forwardOptions = new LocalPortForwardOptions
+		{
+			TunnelId = tunnel.Id,
+			LocalPort = tunnel.LocalPort,
+			SshServerUser = sshServer.User,
+			SshServerHost = sshServer.Host,
+			SshServerPort = sshServer.Port,
+			RemoteServerHost = remoteServer.Host,
+			RemoteServerPort = remoteServer.Port,
+			PrivateKeyFilePath = privateKey?.FilePath,
+		};
+
+		return _forwardManager.StartForward(forwardOptions, promptPassphrase, cancellationToken);
 	}
 
-	private void OnTunnelFailed(SshTunnel tunnel, Exception ex)
+	private void OnTunnelFailed(Guid tunnelId, Exception ex)
 	{
 		CancellationTokenSource? cts;
 
 		lock (_stateSync)
 		{
-			if (!_states.TryGetValue(tunnel.Id, out var state))
+			if (!_states.TryGetValue(tunnelId, out var state))
 				return;
 
-			_cts.TryGetValue(tunnel.Id, out cts);
+			_cts.TryGetValue(tunnelId, out cts);
 
 			state.LastError = ex;
 			state.State = TunnelState.Failed;
@@ -214,7 +240,7 @@ public class TunnelService : ITunnelService
 
 		// SSH error callbacks fire on background threads. Marshal the public events to the UI
 		// thread so subscribers (mostly view models) can update bound state safely.
-		PostToUI(() => TunnelFailed?.Invoke(tunnel, ex));
+		PostToUI(() => TunnelFailed?.Invoke(tunnelId, ex));
 
 		RaiseOverallStateIfChanged();
 
