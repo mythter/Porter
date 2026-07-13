@@ -122,11 +122,8 @@ public class TrayService : ITrayService
 			_ => "logo-main.png"
 		};
 
-		return GetWindowIcon(Path.Combine(IMAGES_PATH, icon));
-	}
+		var iconPath = Path.Combine(IMAGES_PATH, icon);
 
-	private static WindowIcon GetWindowIcon(string iconPath)
-	{
 		return new WindowIcon(new Bitmap(AssetLoader.Open(new Uri(iconPath))));
 	}
 

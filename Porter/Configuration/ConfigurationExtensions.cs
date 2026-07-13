@@ -12,7 +12,6 @@ using Porter.Services;
 using Porter.Services.Interfaces;
 using Porter.Services.Ssh;
 using Porter.ViewModels;
-using Porter.ViewModels.Controls;
 using Porter.ViewModels.Pages;
 using Porter.Views;
 

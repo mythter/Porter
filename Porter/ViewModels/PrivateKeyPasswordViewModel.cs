@@ -33,12 +33,13 @@ public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 
 	public PrivateKeyPasswordViewModel(PrivateKey privateKey)
 	{
+		var fileName = Path.GetFileName(privateKey.FilePath);
+
 		Message = "Enter passphrase for private key ";
-		Message += string.IsNullOrWhiteSpace(privateKey.Name) switch
-		{
-			true => Path.GetFileName(privateKey.FilePath),
-			false => $"{privateKey.Name}, file name: {Path.GetFileName(privateKey.FilePath)}",
-		};
+
+		Message += string.IsNullOrWhiteSpace(privateKey.Name)
+			? fileName
+			: $"{privateKey.Name}, file name: {fileName}";
 	}
 
 	#endregion

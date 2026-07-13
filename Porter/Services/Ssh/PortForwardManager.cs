@@ -64,11 +64,14 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 			return;
 
 		var options = FindOptionsForConnection(connection);
+
 		if (options is null)
 			return;
 
 		var semaphore = _locks.GetOrAdd(options, _ => new SemaphoreSlim(1, 1));
+
 		semaphore.Wait();
+
 		try
 		{
 			if (connection.Forwards.Count != 0)
@@ -220,7 +223,7 @@ public class PortForwardManager(IPrivateKeyCache privateKeyCache) : IDisposable
 
 	private void CleanupConnectionIfNeeded(SshConnectionOptions options, SshConnection? connection, bool wasCreated)
 	{
-		if (wasCreated && connection is not null && connection.Forwards.Count == 0)
+		if (wasCreated && connection is { Forwards.Count: 0 })
 		{
 			_connections.TryRemove(options, out _);
 			connection.Dispose();

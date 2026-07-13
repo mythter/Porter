@@ -34,7 +34,7 @@ public static class CrashService
 				// ex.Source carries the originating assembly name, which is sufficient for diagnostics.
 				Source: ex.Source ?? ex.GetType().FullName ?? string.Empty);
 
-			File.WriteAllText(_crashFilePath, JsonSerializer.Serialize(data, PorterJsonContext.Default.CrashData));
+			File.WriteAllText(_crashFilePath, JsonSerializer.Serialize(data, AppJsonContext.Default.CrashData));
 
 			return true;
 		}
@@ -67,7 +67,7 @@ public static class CrashService
 		{
 			if (File.Exists(_crashFilePath))
 			{
-				return JsonSerializer.Deserialize(File.ReadAllText(_crashFilePath), PorterJsonContext.Default.CrashData);
+				return JsonSerializer.Deserialize(File.ReadAllText(_crashFilePath), AppJsonContext.Default.CrashData);
 			}
 		}
 		catch

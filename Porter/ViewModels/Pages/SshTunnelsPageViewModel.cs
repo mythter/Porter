@@ -87,9 +87,6 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 	#region Commands
 
 	[RelayCommand]
-	public void Exit() => _platformServices.Shutdown();
-
-	[RelayCommand]
 	public void OpenMainWindow() => _platformServices.MainWindow.Show();
 
 	[RelayCommand]
@@ -164,6 +161,8 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 	private void Delete(SshTunnel tunnel)
 	{
 		ArgumentNullException.ThrowIfNull(tunnel);
+
+		_tunnelService.Stop(tunnel.Id);
 
 		AppData.SshTunnels.Remove(x => x.Id == tunnel.Id);
 	}

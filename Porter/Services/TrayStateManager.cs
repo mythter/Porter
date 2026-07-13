@@ -35,11 +35,13 @@ public sealed class TrayStateManager : ITrayStateManager, IDisposable
 
 	#region Public Methods
 
+	/// <inheritdoc />
 	public void Refresh()
 	{
 		_trayService.SetTrayIcon(_tunnelService.GetOverallState());
 	}
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		if (_disposed)

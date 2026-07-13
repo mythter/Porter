@@ -14,6 +14,7 @@ public static class CollectionExtensions
 	public static bool Remove<T>(this ICollection<T> col, Predicate<T> predicate)
 	{
 		var match = col.FirstOrDefault(x => predicate(x));
+
 		if (match is null)
 			return false;
 

@@ -25,10 +25,8 @@
 			<mythConv:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
 			<conv:EqualityConverter x:Key="EqualityConverter"/>
 
-			<FontFamily x:Key="Phosphor">avares://Porter/Assets/Fonts#Phosphor</FontFamily>
-			<FontFamily x:Key="PhosphorFill">avares://Porter/Assets/Fonts#Phosphor-Fill</FontFamily>
-
 			<ResourceDictionary.ThemeDictionaries>
+
 				<ResourceDictionary x:Key='Light'>
 					<!-- Main backgrounds -->
 					<SolidColorBrush x:Key='PrimaryBackground'>#ffffff</SolidColorBrush>
@@ -49,6 +47,7 @@
 					<SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{DynamicResource CustomToggleButtonBackgroundChecked}" />
 
 				</ResourceDictionary>
+
 				<ResourceDictionary x:Key='Dark'>
 					<!-- Main backgrounds -->
 					<SolidColorBrush x:Key='PrimaryBackground'>#202020</SolidColorBrush>
@@ -59,6 +58,7 @@
 					<!-- Foreground colors -->
 					<SolidColorBrush x:Key='ComboBoxSecondaryForeground'>#808080</SolidColorBrush>
 				</ResourceDictionary>
+
 			</ResourceDictionary.ThemeDictionaries>
 
 		</ResourceDictionary>

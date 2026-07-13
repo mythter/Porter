@@ -15,12 +15,19 @@ namespace Porter.Services.Ssh;
 /// </summary>
 public sealed class PrivateKeyCache : IPrivateKeyCache
 {
+	#region Private Fields
+
 	private readonly ConcurrentDictionary<string, PrivateKeyFile> _keys = new(StringComparer.OrdinalIgnoreCase);
 
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new(StringComparer.OrdinalIgnoreCase);
 
 	private bool _disposed;
 
+	#endregion
+
+	#region Public Methods
+
+	/// <inheritdoc />
 	public async Task<PrivateKeyFile?> GetAsync(string filePath, Func<Task<string?>>? promptPassphrase)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
@@ -31,6 +38,7 @@ public sealed class PrivateKeyCache : IPrivateKeyCache
 		var semaphore = _locks.GetOrAdd(filePath, _ => new SemaphoreSlim(1, 1));
 
 		await semaphore.WaitAsync().ConfigureAwait(false);
+
 		try
 		{
 			// Double-checked: another caller may have populated the cache while we were waiting.
@@ -38,10 +46,12 @@ public sealed class PrivateKeyCache : IPrivateKeyCache
 				return cached;
 
 			var loaded = await LoadAsync(filePath, promptPassphrase).ConfigureAwait(false);
+
 			if (loaded is null)
 				return null;
 
 			_keys[filePath] = loaded;
+
 			return loaded;
 		}
 		finally
@@ -50,6 +60,7 @@ public sealed class PrivateKeyCache : IPrivateKeyCache
 		}
 	}
 
+	/// <inheritdoc />
 	public void Invalidate(string filePath)
 	{
 		if (_keys.TryRemove(filePath, out var key))
@@ -58,27 +69,40 @@ public sealed class PrivateKeyCache : IPrivateKeyCache
 		}
 	}
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		if (_disposed)
 			return;
-
-		_disposed = true;
 
 		foreach (var key in _keys.Values)
 		{
 			try { key.Dispose(); }
 			catch { /* best-effort cleanup on shutdown */ }
 		}
+
 		_keys.Clear();
 
 		foreach (var semaphore in _locks.Values)
 		{
 			semaphore.Dispose();
 		}
+
 		_locks.Clear();
+
+		_disposed = true;
 	}
 
+	#endregion
+
+	#region Private Methods
+
+	/// <summary>
+	/// Attempts to load a <see cref="PrivateKeyFile"/> from the given file path, prompting for a passphrase if necessary.
+	/// </summary>
+	/// <param name="filePath">The path to the private key file.</param>
+	/// <param name="promptPassphrase">A function to prompt the user for a passphrase if the key is encrypted.</param>
+	/// <returns>The loaded <see cref="PrivateKeyFile"/> or <c>null</c> if loading failed.</returns>
 	private static async Task<PrivateKeyFile?> LoadAsync(string filePath, Func<Task<string?>>? promptPassphrase)
 	{
 		string? passphrase = null;
@@ -99,6 +123,7 @@ public sealed class PrivateKeyCache : IPrivateKeyCache
 					return null;
 
 				passphrase = await promptPassphrase().ConfigureAwait(false);
+
 				if (passphrase is null)
 					return null;
 			}
@@ -108,4 +133,6 @@ public sealed class PrivateKeyCache : IPrivateKeyCache
 			}
 		}
 	}
+
+	#endregion
 }

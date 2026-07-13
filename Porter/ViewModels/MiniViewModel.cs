@@ -49,6 +49,7 @@ public class MiniViewModel : ViewModelBase, IRecipient<NavigateMessage>
 				disposable.Dispose();
 
 			_page = null;
+
 			OnPropertyChanged(nameof(Page));
 		}
 	}

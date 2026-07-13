@@ -12,6 +12,6 @@ namespace Porter.Services;
 [JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(AppData))]
 [JsonSerializable(typeof(CrashData))]
-public partial class PorterJsonContext : JsonSerializerContext
+public partial class AppJsonContext : JsonSerializerContext
 {
 }

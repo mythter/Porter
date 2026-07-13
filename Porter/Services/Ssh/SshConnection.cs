@@ -44,30 +44,37 @@ public class SshConnection(SshConnectionOptions options, IPrivateKeyCache privat
 			throw new InvalidOperationException("SSH client is already initialized.");
 		}
 
-		AuthenticationMethod auth = new NoneAuthenticationMethod(_options.User);
+		AuthenticationMethod auth;
 
 		if (_options.PrivateKeyFilePath is not null)
 		{
 			var keyFile = await GetPrivateKeyFileAsync(promptPassphrase).ConfigureAwait(false);
+
 			if (keyFile is null)
 				return false;
 
 			auth = new PrivateKeyAuthenticationMethod(_options.User, keyFile);
 		}
-
-		var connectionInfo = _options.Port switch
+		else
 		{
-			null => new ConnectionInfo(_options.Host, _options.User, auth),
-			_ => new ConnectionInfo(_options.Host, _options.Port.Value, _options.User, auth)
+			auth = new NoneAuthenticationMethod(_options.User);
+		}
+
+		var connectionInfo = _options.Port.HasValue switch
+		{
+			false => new ConnectionInfo(_options.Host, _options.User, auth),
+			true => new ConnectionInfo(_options.Host, _options.Port.Value, _options.User, auth)
 		};
 
 		SshClient? client = null;
+
 		try
 		{
 			client = new SshClient(connectionInfo)
 			{
 				KeepAliveInterval = TimeSpan.FromMinutes(5)
 			};
+
 			_sshClient = client;
 			client = null; // ownership transferred
 			return true;
@@ -152,6 +159,7 @@ public class SshConnection(SshConnectionOptions options, IPrivateKeyCache privat
 	private Task<PrivateKeyFile?> GetPrivateKeyFileAsync(Func<Task<string?>>? promptPassphrase)
 	{
 		var path = _options.PrivateKeyFilePath;
+
 		if (path is null)
 			return Task.FromResult<PrivateKeyFile?>(null);
 

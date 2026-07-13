@@ -53,7 +53,7 @@ public class AppDataProvider : IAppDataProvider<AppData>
 		try
 		{
 			string json = File.ReadAllText(path);
-			Value = JsonSerializer.Deserialize(json, PorterJsonContext.Default.AppData) ?? GetDefault();
+			Value = JsonSerializer.Deserialize(json, AppJsonContext.Default.AppData) ?? GetDefault();
 		}
 		catch (Exception ex)
 		{
@@ -76,7 +76,7 @@ public class AppDataProvider : IAppDataProvider<AppData>
 	{
 		try
 		{
-			string json = JsonSerializer.Serialize(Value, PorterJsonContext.Default.AppData);
+			string json = JsonSerializer.Serialize(Value, AppJsonContext.Default.AppData);
 			File.WriteAllText(path, json);
 		}
 		catch (Exception ex)

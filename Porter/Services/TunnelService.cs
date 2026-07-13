@@ -91,6 +91,7 @@ public class TunnelService : ITunnelService
 
 			cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			_cts[tunnel.Id] = cts;
+
 			state.State = TunnelState.Connecting;
 			state.IsIntendedToRun = true;
 		}
@@ -195,6 +196,7 @@ public class TunnelService : ITunnelService
 			state = new SshTunnelState { State = TunnelState.Stopped };
 			_states[tunnelId] = state;
 		}
+
 		return state;
 	}
 
@@ -336,9 +338,13 @@ public class TunnelService : ITunnelService
 	private static void PostToUI(Action action)
 	{
 		if (Dispatcher.UIThread.CheckAccess())
+		{
 			action();
+		}
 		else
+		{
 			Dispatcher.UIThread.Post(action);
+		}
 	}
 
 	#endregion
