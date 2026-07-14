@@ -93,12 +93,13 @@ public class TunnelService : ITunnelService
 			_cts[tunnel.Id] = cts;
 
 			state.State = TunnelState.Connecting;
-			state.IsIntendedToRun = true;
 		}
+
+		bool started = false;
 
 		try
 		{
-			var started = await StartInternal(tunnel, sshServer, remoteServer, privateKey, promptPassphrase, cts.Token);
+			started = await StartInternal(tunnel, sshServer, remoteServer, privateKey, promptPassphrase, cts.Token);
 
 			lock (_stateSync)
 			{
@@ -110,7 +111,13 @@ public class TunnelService : ITunnelService
 				}
 			}
 
+			if (started)
+			{
+				ResetFailedTunnels();
+			}
+
 			RaiseOverallStateIfChanged();
+
 			return started;
 		}
 		catch (Exception ex)
@@ -128,13 +135,6 @@ public class TunnelService : ITunnelService
 				}
 
 				RaiseOverallStateIfChanged();
-
-				// If user cancelled the start operation, clear the intent flag so this tunnel
-				// doesn't affect the tray state calculation.
-				if (ex is OperationCanceledException)
-				{
-					state.IsIntendedToRun = false;
-				}
 			}
 
 			throw;
@@ -171,12 +171,9 @@ public class TunnelService : ITunnelService
 		lock (_stateSync)
 		{
 			state.State = TunnelState.Stopped;
-			state.IsIntendedToRun = false;
 		}
 
 		RaiseOverallStateIfChanged();
-
-		ResetIntendedStateIfNoRunning();
 	}
 
 	/// <inheritdoc />
@@ -245,8 +242,6 @@ public class TunnelService : ITunnelService
 		PostToUI(() => TunnelFailed?.Invoke(tunnelId, ex));
 
 		RaiseOverallStateIfChanged();
-
-		ResetIntendedStateIfNoRunning();
 	}
 
 	private ForwardState? ComputeOverallStateNoLock()
@@ -255,65 +250,39 @@ public class TunnelService : ITunnelService
 		if (_states.Values.Any(s => s.State == TunnelState.Connecting))
 			return null;
 
-		// Only consider tunnels the user intends to be running.
-		// Tracks user intent vs actual state to distinguish:
-		// - User stopped all tunnels → None
-		// - User wants them running but all failed → AllDown
-		// - User wants them running and all are up → AllUp
-		// - User wants them running but some failed → PartiallyDown
-		var intendedCount = 0;
 		var runningCount = 0;
 		var failedCount = 0;
-		var stoppedCount = 0;
 
-		foreach (var s in _states.Values)
+		foreach (var state in _states.Values.Select(v => v.State))
 		{
-			if (!s.IsIntendedToRun)
-				continue;
-
-			intendedCount++;
-
-			if (s.State == TunnelState.Running)
+			if (state == TunnelState.Running)
 				runningCount++;
-			else if (s.State == TunnelState.Stopped)
-				stoppedCount++;
-			else if (s.State == TunnelState.Failed)
+			else if (state == TunnelState.Failed)
 				failedCount++;
 		}
 
-		// No tunnels intended to run → None
-		if (intendedCount == 0)
-			return ForwardState.None;
-
-		// All intended tunnels are stopped → don't change the state
-		if (intendedCount == stoppedCount)
-			return null;
-
 		// All intended tunnels are running → AllUp
-		if (runningCount == intendedCount)
+		if (runningCount > 0 && failedCount == 0)
 			return ForwardState.AllUp;
 
 		// All intended tunnels failed → AllDown
-		if (failedCount == intendedCount)
+		if (runningCount == 0 && failedCount > 0)
 			return ForwardState.AllDown;
 
-		// Some intended tunnels running, some failed/connecting → PartiallyDown
-		return ForwardState.PartiallyDown;
+		// Some tunnels running and some failed → PartiallyDown
+		if (runningCount > 0 && failedCount > 0)
+			return ForwardState.PartiallyDown;
+
+		return ForwardState.None;
 	}
 
-	private void ResetIntendedStateIfNoRunning()
+	private void ResetFailedTunnels()
 	{
-		// If no tunnels are running anymore, reset all IsIntendedToRun flags.
-		// This resets the intent tracking so the next time user starts tunnels,
-		// the tray state reflects only newly started ones.
 		lock (_stateSync)
 		{
-			if (!_states.Values.Any(s => s.State is not TunnelState.Running and not TunnelState.Connecting))
+			foreach (var state in _states.Values.Where(v => v.State == TunnelState.Failed))
 			{
-				foreach (var s in _states.Values)
-				{
-					s.IsIntendedToRun = false;
-				}
+				state.State = TunnelState.Stopped;
 			}
 		}
 	}
