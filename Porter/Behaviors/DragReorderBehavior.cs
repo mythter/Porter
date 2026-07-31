@@ -8,7 +8,9 @@ using Avalonia.Animation;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Transformation;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 using Porter.ViewModels;
@@ -28,7 +30,11 @@ public static class DragReorderBehavior
 {
 	private const double DragThreshold = 4;
 
+	private const double DimmedOpacity = 0.45;
+
 	private static readonly TimeSpan SlideDuration = TimeSpan.FromMilliseconds(150);
+
+	private static readonly TimeSpan FadeDuration = TimeSpan.FromMilliseconds(200);
 
 	public static readonly AttachedProperty<bool> EnabledProperty =
 		AvaloniaProperty.RegisterAttached<ItemsControl, bool>(
@@ -163,20 +169,43 @@ public static class DragReorderBehavior
 
 		foreach (var container in _containers)
 		{
-			// The dragged one must stick to the pointer, the others animate into place.
-			container.Transitions = container == _container
-				? null
-				: [
-					new TransformOperationsTransition
-					{
-						Property = Visual.RenderTransformProperty,
-						Duration = SlideDuration,
-						Easing = new CubicEaseOut(),
-					}
-				];
+			if (container == _container)
+			{
+				// The dragged one must stick to the pointer, so it gets no transitions.
+				container.Transitions = null;
+				continue;
+			}
+
+			// The others animate into place and fade out to highlight the dragged item.
+			container.Transitions =
+			[
+				new TransformOperationsTransition
+				{
+					Property = Visual.RenderTransformProperty,
+					Duration = SlideDuration,
+					Easing = new CubicEaseOut(),
+				},
+				new DoubleTransition
+				{
+					Property = Visual.OpacityProperty,
+					Duration = FadeDuration,
+					Easing = new CubicEaseOut(),
+				},
+			];
+
+			container.Opacity = DimmedOpacity;
 		}
 
 		_container.ZIndex = 1;
+		_container.Effect = new DropShadowEffect
+		{
+			BlurRadius = 12,
+			OffsetX = 0,
+			OffsetY = 2,
+			Color = Colors.Black,
+			Opacity = 0.35,
+		};
+
 		_dragging = true;
 
 		return true;
@@ -229,14 +258,37 @@ public static class DragReorderBehavior
 		var startIndex = _startIndex;
 		var currentIndex = _currentIndex;
 
-		// Drop the transitions first so the containers snap back to their neutral state
-		// instead of animating while the collection is being reordered.
-		foreach (var container in _containers)
+		// Drop the transform transitions so the containers snap back to their neutral
+		// position instead of animating while the collection is being reordered, but keep
+		// an opacity transition so the dimming fades out smoothly.
+		var restored = _containers.ToArray();
+
+		foreach (var container in restored)
 		{
-			container.Transitions = null;
+			container.Transitions =
+			[
+				new DoubleTransition
+				{
+					Property = Visual.OpacityProperty,
+					Duration = FadeDuration,
+					Easing = new CubicEaseOut(),
+				},
+			];
+
 			container.RenderTransform = null;
 			container.ZIndex = 0;
+			container.Opacity = 1;
+			container.Effect = null;
 		}
+
+		// Once the fade is over the transitions are no longer needed.
+		DispatcherTimer.RunOnce(
+			() =>
+			{
+				foreach (var container in restored)
+					container.Transitions = null;
+			},
+			FadeDuration);
 
 		Reset();
 
