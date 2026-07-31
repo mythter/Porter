@@ -4,6 +4,7 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:c="using:Porter.Views.Controls"
 			 xmlns:vm="using:Porter.ViewModels.Pages"
+			 xmlns:b="using:Porter.Behaviors"
 			 x:DataType="vm:SshTunnelsPageViewModel"
 			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="300"
 			 x:Class="Porter.Views.MiniView">
@@ -19,7 +20,8 @@
 		<Grid RowDefinitions="*, 5, Auto">
 
 			<ScrollViewer Grid.Row="0">
-				<ItemsControl ItemsSource="{Binding Items}">
+				<ItemsControl ItemsSource="{Binding Items}"
+							  b:DragReorderBehavior.Enabled="True">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
 							<StackPanel Spacing="5" />

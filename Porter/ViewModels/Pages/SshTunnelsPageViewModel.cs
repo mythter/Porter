@@ -24,7 +24,7 @@ using Porter.ViewModels.Controls;
 
 namespace Porter.ViewModels.Pages;
 
-public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, IDisposable
+public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, IReorderableViewModel, IDisposable
 {
 	#region Private Fields
 
@@ -209,6 +209,13 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 
 	#region Public Methods
 
+	public void MoveItem(int oldIndex, int newIndex)
+	{
+		// AppData is the source of truth; every page VM instance (main window and mini
+		// window) mirrors the move into its own Items via OnSshTunnelsCollectionChanged.
+		AppData.SshTunnels.Move(oldIndex, newIndex);
+	}
+
 	public void Dispose()
 	{
 		Dispose(true);
@@ -256,6 +263,13 @@ public partial class SshTunnelsPageViewModel : PageViewModel, IDialogContext, ID
 
 	private void OnSshTunnelsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
 	{
+		// Reordering keeps the same view models, just at a different position.
+		if (e.Action == NotifyCollectionChangedAction.Move)
+		{
+			Items.Move(e.OldStartingIndex, e.NewStartingIndex);
+			return;
+		}
+
 		foreach (var tunnel in e.OldItems?.Cast<SshTunnel>() ?? [])
 		{
 			// Dispose the matching VM so its event subscriptions on Model/State are released

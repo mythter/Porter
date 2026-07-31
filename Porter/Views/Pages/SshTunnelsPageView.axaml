@@ -5,6 +5,7 @@
 			 xmlns:c="using:Porter.Views.Controls"
 			 xmlns:vm="using:Porter.ViewModels.Pages"
 			 xmlns:s="using:Myth.Avalonia.Services"
+			 xmlns:b="using:Porter.Behaviors"
 			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
 			 s:DialogManager.Register="{Binding}"
 			 x:DataType="vm:SshTunnelsPageViewModel"
@@ -133,7 +134,8 @@
 		</Grid>
 
 		<ScrollViewer Grid.Row="2">
-			<ItemsControl ItemsSource="{Binding Items}">
+			<ItemsControl ItemsSource="{Binding Items}"
+						  b:DragReorderBehavior.Enabled="True">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<StackPanel Spacing="5" />

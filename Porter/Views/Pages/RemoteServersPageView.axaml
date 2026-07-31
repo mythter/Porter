@@ -4,6 +4,7 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="clr-namespace:Porter.ViewModels.Pages"
 			 xmlns:c="clr-namespace:Porter.Views.Controls"
+			 xmlns:b="using:Porter.Behaviors"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 x:DataType="vm:RemoteServersPageViewModel"
 			 x:Class="Porter.Views.RemoteServersPageView">
@@ -41,7 +42,8 @@
 		</Grid>
 
 		<ScrollViewer Grid.Row="2">
-			<ItemsControl ItemsSource="{Binding Items}">
+			<ItemsControl ItemsSource="{Binding Items}"
+						  b:DragReorderBehavior.Enabled="True">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<StackPanel Spacing="5" />

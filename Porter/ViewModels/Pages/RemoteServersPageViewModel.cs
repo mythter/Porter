@@ -12,7 +12,7 @@ using Porter.Services.Interfaces;
 
 namespace Porter.ViewModels.Pages;
 
-public partial class RemoteServersPageViewModel : PageViewModel
+public partial class RemoteServersPageViewModel : PageViewModel, IReorderableViewModel
 {
 	#region Private Fields
 
@@ -39,6 +39,12 @@ public partial class RemoteServersPageViewModel : PageViewModel
 
 		Items = _appData.RemoteServers;
 	}
+
+	#endregion
+
+	#region Public Methods
+
+	public void MoveItem(int oldIndex, int newIndex) => _appData.RemoteServers.Move(oldIndex, newIndex);
 
 	#endregion
 

@@ -17,7 +17,7 @@ using Porter.Services.Interfaces;
 
 namespace Porter.ViewModels.Pages;
 
-public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext
+public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext, IReorderableViewModel
 {
 	#region Private Fields
 
@@ -44,6 +44,12 @@ public partial class PrivateKeysPageViewModel : PageViewModel, IDialogContext
 
 		Items = _appData.PrivateKeys;
 	}
+
+	#endregion
+
+	#region Public Methods
+
+	public void MoveItem(int oldIndex, int newIndex) => _appData.PrivateKeys.Move(oldIndex, newIndex);
 
 	#endregion
 

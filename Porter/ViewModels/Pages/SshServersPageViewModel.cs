@@ -12,7 +12,7 @@ using Porter.Services.Interfaces;
 
 namespace Porter.ViewModels.Pages;
 
-public partial class SshServersPageViewModel : PageViewModel
+public partial class SshServersPageViewModel : PageViewModel, IReorderableViewModel
 {
 	#region Private Fields
 
@@ -39,6 +39,12 @@ public partial class SshServersPageViewModel : PageViewModel
 
 		Items = _appData.SshServers;
 	}
+
+	#endregion
+
+	#region Public Methods
+
+	public void MoveItem(int oldIndex, int newIndex) => _appData.SshServers.Move(oldIndex, newIndex);
 
 	#endregion
 
