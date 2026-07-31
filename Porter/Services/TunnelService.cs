@@ -124,8 +124,7 @@ public class TunnelService : ITunnelService
 		{
 			lock (_stateSync)
 			{
-				// if user stops tunnel that was failed consider it failed anyway
-				if (ex is OperationCanceledException && state.LastError is null)
+				if (ex is OperationCanceledException)
 				{
 					state.State = TunnelState.Stopped;
 				}
