@@ -20,7 +20,7 @@
 
 		<TextBox Grid.Column="2"
 				 PlaceholderText="Host"
-				 Text="{Binding Host}"
+				 Text="{Binding Host, UpdateSourceTrigger=LostFocus}"
 				 ToolTip.Tip="{Binding Host, TargetNullValue=Remote Host}"
 				 KeyDown="OnKeyDown"
 				 VerticalContentAlignment="Center"/>
@@ -37,7 +37,7 @@
 						   FormatString="0"
 						   ShowButtonSpinner="False"
 						   KeyDown="OnKeyDown"
-						   Value="{Binding Port}" />
+						   Value="{Binding Port, UpdateSourceTrigger=LostFocus}" />
 
 			<Button Grid.Column="2"
 					x:Name="DeleteButton"

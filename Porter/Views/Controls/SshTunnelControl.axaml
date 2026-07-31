@@ -56,7 +56,7 @@
 					   ToolTip.Tip="Local Port"
 					   ShowButtonSpinner="False"
 					   b:CommitOnEnterBehavior.Enabled="True"
-					   Value="{Binding Model.LocalPort}" />
+					   Value="{Binding Model.LocalPort, UpdateSourceTrigger=LostFocus}" />
 
 		<CustomComboBox Grid.Column="6"
 						Name="SshServersComboBox"

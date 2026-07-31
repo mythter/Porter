@@ -24,6 +24,8 @@ public class TunnelService : ITunnelService
 
 	private readonly Dictionary<Guid, CancellationTokenSource> _cts = [];
 
+	private readonly HashSet<Guid> _restartingTunnels = [];
+
 	private readonly Lock _stateSync = new();
 
 	private ForwardState _lastOverallState = ForwardState.None;
@@ -173,6 +175,24 @@ public class TunnelService : ITunnelService
 		}
 
 		RaiseOverallStateIfChanged();
+	}
+
+	/// <inheritdoc />
+	public bool TryBeginRestart(Guid tunnelId)
+	{
+		lock (_stateSync)
+		{
+			return _restartingTunnels.Add(tunnelId);
+		}
+	}
+
+	/// <inheritdoc />
+	public void EndRestart(Guid tunnelId)
+	{
+		lock (_stateSync)
+		{
+			_restartingTunnels.Remove(tunnelId);
+		}
 	}
 
 	/// <inheritdoc />

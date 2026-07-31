@@ -20,6 +20,8 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 
 	private bool _disposed;
 
+	private readonly ITunnelService _tunnelService;
+
 	private readonly Func<SshTunnel, CancellationToken?, Task<bool>> _startForward;
 
 	private readonly Action<SshTunnel> _stopForward;
@@ -58,11 +60,23 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 	[ObservableProperty]
 	public partial PrivateKey? SelectedPrivateKey { get; set; }
 
-	partial void OnSelectedSshServerChanged(SshServer? value) => Model.SshServerId = value?.Id;
+	partial void OnSelectedSshServerChanged(SshServer? oldValue, SshServer? newValue)
+	{
+		Model.SshServerId = newValue?.Id;
+		ResubscribeReferencedModel(oldValue, newValue);
+	}
 
-	partial void OnSelectedRemoteServerChanged(RemoteServer? value) => Model.RemoteServerId = value?.Id;
+	partial void OnSelectedRemoteServerChanged(RemoteServer? oldValue, RemoteServer? newValue)
+	{
+		Model.RemoteServerId = newValue?.Id;
+		ResubscribeReferencedModel(oldValue, newValue);
+	}
 
-	partial void OnSelectedPrivateKeyChanged(PrivateKey? value) => Model.PrivateKeyId = value?.Id;
+	partial void OnSelectedPrivateKeyChanged(PrivateKey? oldValue, PrivateKey? newValue)
+	{
+		Model.PrivateKeyId = newValue?.Id;
+		ResubscribeReferencedModel(oldValue, newValue);
+	}
 
 	public string MiniToolTip => GetMiniToolTip();
 
@@ -89,6 +103,7 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 
 		Model = model;
 		State = tunnelService.GetState(model.Id);
+		_tunnelService = tunnelService;
 		_startForward = startForward;
 		_stopForward = stopForward;
 
@@ -154,6 +169,10 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 			Model.PropertyChanged -= OnModelPropertyChanged;
 			State.PropertyChanged -= OnStatePropertyChanged;
 
+			UnsubscribeReferencedModel(SelectedSshServer);
+			UnsubscribeReferencedModel(SelectedRemoteServer);
+			UnsubscribeReferencedModel(SelectedPrivateKey);
+
 			_connectingCts?.Cancel();
 		}
 
@@ -185,7 +204,63 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		_stopForward(Model);
 	}
 
-	private void OnModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	private void ResubscribeReferencedModel(ObservableObject? oldValue, ObservableObject? newValue)
+	{
+		UnsubscribeReferencedModel(oldValue);
+
+		newValue?.PropertyChanged += OnReferencedModelPropertyChanged;
+	}
+
+	private void UnsubscribeReferencedModel(ObservableObject? model)
+	{
+		model?.PropertyChanged -= OnReferencedModelPropertyChanged;
+	}
+
+	private async void OnReferencedModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+	{
+		if (sender is RemoteServer)
+			OnPropertyChanged(nameof(RemoteServerAlias));
+
+		OnPropertyChanged(nameof(MiniToolTip));
+
+		// Editing the connection details of a referenced model invalidates an active forward.
+		if (AffectsForwarding(sender, e.PropertyName))
+		{
+			await RestartIfActive();
+		}
+	}
+
+	private static bool AffectsForwarding(object? model, string? propertyName) => model switch
+	{
+		SshServer => propertyName is nameof(SshServer.User) or nameof(SshServer.Host) or nameof(SshServer.Port),
+		RemoteServer => propertyName is nameof(RemoteServer.Host) or nameof(RemoteServer.Port),
+		PrivateKey => propertyName is nameof(PrivateKey.FilePath),
+		_ => false
+	};
+
+	private async Task RestartIfActive()
+	{
+		if (!State.IsRunning && !State.IsConnecting)
+			return;
+
+		// The same tunnel is shown by several view models (main and mini windows), so every
+		// model change is observed more than once. Only the first observer restarts it,
+		// otherwise the second one would tear down the forward the first one just started.
+		if (!_tunnelService.TryBeginRestart(Model.Id))
+			return;
+
+		try
+		{
+			StopTunnel();
+			await StartTunnel();
+		}
+		finally
+		{
+			_tunnelService.EndRestart(Model.Id);
+		}
+	}
+
+	private async void OnModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(Model.Name))
 		{
@@ -193,6 +268,15 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		}
 
 		OnPropertyChanged(nameof(MiniToolTip));
+
+		// Editing the forwarding parameters of the tunnel itself invalidates an active forward.
+		if (e.PropertyName is nameof(Model.LocalPort)
+			or nameof(Model.SshServerId)
+			or nameof(Model.RemoteServerId)
+			or nameof(Model.PrivateKeyId))
+		{
+			await RestartIfActive();
+		}
 	}
 
 	private void OnStatePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

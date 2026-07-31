@@ -54,6 +54,21 @@ public interface ITunnelService
 	void Stop(Guid tunnelId);
 
 	/// <summary>
+	/// Reserves an exclusive restart slot for the specified tunnel. Returns false when a restart
+	/// is already in progress, which lets several view models bound to the same tunnel react to
+	/// the same change without restarting it more than once.
+	/// </summary>
+	/// <param name="tunnelId">The ID of the tunnel to restart.</param>
+	/// <returns>True if the caller owns the restart, otherwise false.</returns>
+	bool TryBeginRestart(Guid tunnelId);
+
+	/// <summary>
+	/// Releases the restart slot previously taken by <see cref="TryBeginRestart"/>.
+	/// </summary>
+	/// <param name="tunnelId">The ID of the restarted tunnel.</param>
+	void EndRestart(Guid tunnelId);
+
+	/// <summary>
 	/// Returns true if any of the tunnels currently tracked by the service are in a connecting or running state.
 	/// </summary>
 	/// <returns>True if any tunnel is connecting or running, otherwise false.</returns>
