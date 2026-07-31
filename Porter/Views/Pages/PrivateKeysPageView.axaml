@@ -11,7 +11,7 @@
 			 x:DataType="vm:PrivateKeysPageViewModel"
 			 x:Class="Porter.Views.PrivateKeysPageView">
 	
-	<Grid RowDefinitions="Auto,10,Auto">
+	<Grid RowDefinitions="Auto,10,*">
 		<Grid Grid.Row="0" 
 			  ColumnDefinitions="Auto,*,Auto"
 			  Height="30">

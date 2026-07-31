@@ -10,7 +10,7 @@
 			 Classes="deletable"
 			 x:Class="Porter.Views.Controls.SshTunnelControl">
 
-	<Grid ColumnDefinitions="Auto, 5, 0.8*, 5, 65, 5, *, 5, Auto, 5, *"
+	<Grid ColumnDefinitions="Auto, 5, *, 5, 65, 5, 0.8*, 5, Auto, 5, *"
 		  MinHeight="20">
 
 		<Button Grid.Column="0"
