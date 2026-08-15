@@ -111,9 +111,6 @@ public partial class SshTunnelViewModel : ObservableObject, IDisposable
 		PrivateKeys = appData.Value.PrivateKeys;
 		RemoteServers = appData.Value.RemoteServers;
 
-		// Assigning through the property triggers OnSelectedXxxChanged which mirrors the choice
-		// onto the model. That's harmless here because Model already references the same instance,
-		// but it keeps initialization on a single code path.
 		SelectedSshServer = SshServers.FirstOrDefault(s => s.Id == model.SshServerId);
 		SelectedRemoteServer = RemoteServers.FirstOrDefault(s => s.Id == model.RemoteServerId);
 		SelectedPrivateKey = PrivateKeys.FirstOrDefault(s => s.Id == model.PrivateKeyId);
