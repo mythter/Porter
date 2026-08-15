@@ -1,37 +1,31 @@
-﻿using System;
-
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 
 using Porter.ViewModels;
+using Porter.ViewModels.Pages;
+using Porter.Views;
 
-namespace Porter
+namespace Porter;
+
+public class ViewLocator : IDataTemplate
 {
-	public class ViewLocator : IDataTemplate
+	public Control Build(object? data)
 	{
-		public Control Build(object? data)
+		if (data is null)
 		{
-			if (data is null)
-			{
-				return new TextBlock { Text = "data was null" };
-			}
-
-			var name = data.GetType().FullName!.Replace("ViewModel", "View");
-			var type = Type.GetType(name);
-
-			if (type != null)
-			{
-				return (Control)Activator.CreateInstance(type)!;
-			}
-			else
-			{
-				return new TextBlock { Text = "Not Found: " + name };
-			}
+			return new TextBlock { Text = "data was null" };
 		}
 
-		public bool Match(object? data)
+		return data switch
 		{
-			return data is ViewModelBase;
-		}
+			SshTunnelsPageViewModel => new SshTunnelsPageView(),
+			SshServersPageViewModel => new SshServersPageView(),
+			RemoteServersPageViewModel => new RemoteServersPageView(),
+			PrivateKeysPageViewModel => new PrivateKeysPageView(),
+			PrivateKeyPasswordViewModel => new PrivateKeyPasswordView(),
+			_ => new TextBlock { Text = $"Not Found: {data?.GetType().Name}" }
+		};
 	}
+
+	public bool Match(object? data) => data is ViewModelBase;
 }

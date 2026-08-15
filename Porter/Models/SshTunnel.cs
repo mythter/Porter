@@ -1,19 +1,25 @@
 ﻿using System;
 
-namespace Porter.Models
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Porter.Models;
+
+public partial class SshTunnel : ObservableObject
 {
-	public class SshTunnel
-	{
-		public Guid Id { get; set; } = Guid.NewGuid();
+	public Guid Id { get; set; } = Guid.NewGuid();
 
-		public string? Name { get; set; }
+	[ObservableProperty]
+	public partial string? Name { get; set; }
 
-		public int? LocalPort { get; set; }
+	[ObservableProperty]
+	public partial int? LocalPort { get; set; }
 
-		public SshServer? SshServer { get; set; }
+	[ObservableProperty]
+	public partial Guid? SshServerId { get; set; }
 
-		public PrivateKey? PrivateKey { get; set; }
+	[ObservableProperty]
+	public partial Guid? PrivateKeyId { get; set; }
 
-		public RemoteServer? RemoteServer { get; set; }
-	}
+	[ObservableProperty]
+	public partial Guid? RemoteServerId { get; set; }
 }

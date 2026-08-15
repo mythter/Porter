@@ -9,10 +9,15 @@ namespace Porter.Views;
 
 public partial class MiniWindow : Window
 {
+	#region Private Fields
 
 	private const int _windowMargin = 5;
 
 	private bool _isDeactivated;
+
+	#endregion
+
+	#region Constructors
 
 	public MiniWindow()
 	{
@@ -21,12 +26,9 @@ public partial class MiniWindow : Window
 		Deactivated += OnDeactivated;
 	}
 
-	private void OnDeactivated(object? sender, EventArgs e)
-	{
-		_isDeactivated = true;
-		Hide();
-		Avalonia.Threading.DispatcherTimer.RunOnce(() => _isDeactivated = false, TimeSpan.FromMilliseconds(300));
-	}
+	#endregion
+
+	#region Public Methods
 
 	public void ToggleVisibility()
 	{
@@ -40,6 +42,17 @@ public partial class MiniWindow : Window
 			PositionWindow();
 			Activate();
 		}
+	}
+
+	#endregion
+
+	#region Private Methods
+
+	private void OnDeactivated(object? sender, EventArgs e)
+	{
+		_isDeactivated = true;
+		Hide();
+		Avalonia.Threading.DispatcherTimer.RunOnce(() => _isDeactivated = false, TimeSpan.FromMilliseconds(300));
 	}
 
 	private void PositionWindow()
@@ -58,13 +71,15 @@ public partial class MiniWindow : Window
 
 		(int x, int y) = tbLocation switch
 		{
-			TaskBarLocation.Top => (workArea.Width - width - _windowMargin, tbSize + _windowMargin),
-			TaskBarLocation.Right => (workArea.Width - width - _windowMargin, workArea.Height - height - _windowMargin),
-			TaskBarLocation.Bottom => (workArea.Width - width - _windowMargin, workArea.Height - height - _windowMargin),
-			TaskBarLocation.Left => (tbSize + _windowMargin, workArea.Height - height - _windowMargin),
+			TaskBarLocation.Top => (workArea.X + workArea.Width - width - _windowMargin, workArea.Y + tbSize + _windowMargin),
+			TaskBarLocation.Right => (workArea.X + workArea.Width - width - _windowMargin, workArea.Y + workArea.Height - height - _windowMargin),
+			TaskBarLocation.Bottom => (workArea.X + workArea.Width - width - _windowMargin, workArea.Y + workArea.Height - height - _windowMargin),
+			TaskBarLocation.Left => (workArea.X + tbSize + _windowMargin, workArea.Y + workArea.Height - height - _windowMargin),
 			_ => throw new NotSupportedException(),
 		};
 
 		Position = new Avalonia.PixelPoint(x, y);
 	}
+
+	#endregion
 }

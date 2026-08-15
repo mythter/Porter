@@ -1,40 +1,77 @@
 ﻿using System.IO;
 
+using Avalonia.Input;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Myth.Avalonia.Services.Abstractions;
+using Myth.Avalonia.Services.Extensions;
+
 using Porter.Models;
 
-namespace Porter.ViewModels
+namespace Porter.ViewModels;
+
+public partial class PrivateKeyPasswordViewModel : ViewModelBase, IDialogContext
 {
-	public partial class PrivateKeyPasswordViewModel : ViewModelBase
+	#region Public Properties
+
+	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(PasswordChar))]
+	public partial bool IsPasswordVisible { get; set; }
+
+	public char? PasswordChar => IsPasswordVisible ? null : '•';
+
+	[ObservableProperty]
+	public partial string? Password { get; set; }
+
+	public string Message { get; set; }
+
+	#endregion
+
+	#region Constructors
+
+	public PrivateKeyPasswordViewModel(PrivateKey privateKey)
 	{
-		[ObservableProperty]
-		private bool isPasswordVisible;
+		var fileName = Path.GetFileName(privateKey.FilePath);
 
-		public char? PasswordChar => IsPasswordVisible ? null : '•';
+		Message = "Enter passphrase for private key ";
 
-		public string Message { get; set; }
+		Message += string.IsNullOrWhiteSpace(privateKey.Name)
+			? fileName
+			: $"{privateKey.Name}, file name: {fileName}";
+	}
 
-		public PrivateKeyPasswordViewModel(PrivateKey privateKey)
+	#endregion
+
+	#region Commands
+
+	[RelayCommand]
+	private void TogglePasswordVisibility()
+	{
+		IsPasswordVisible = !IsPasswordVisible;
+	}
+
+	[RelayCommand]
+	private void ReturnResult()
+	{
+		this.ReturnResultFromDialogWindow(Password ?? string.Empty);
+	}
+
+	[RelayCommand]
+	private void Cancel()
+	{
+		this.ReturnResultFromDialogWindow(null);
+	}
+
+	[RelayCommand]
+	public void PasswordKeyDown(KeyEventArgs e)
+	{
+		if (e.Key == Key.Enter)
 		{
-			Message = "Enter passphrase for private key ";
-			Message += string.IsNullOrWhiteSpace(privateKey.Name) switch
-			{
-				true => Path.GetFileName(privateKey.FilePath),
-				false => $"{privateKey.Name}, file name: {Path.GetFileName(privateKey.FilePath)}",
-			};
-		}
-
-		partial void OnIsPasswordVisibleChanged(bool oldValue, bool newValue)
-		{
-			OnPropertyChanged(nameof(PasswordChar));
-		}
-
-		[RelayCommand]
-		public void TogglePasswordVisibility()
-		{
-			IsPasswordVisible = !IsPasswordVisible;
+			this.ReturnResultFromDialogWindow(Password ?? string.Empty);
 		}
 	}
+
+	#endregion
 }

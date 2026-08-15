@@ -1,0 +1,160 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:Porter.ViewModels.Controls"
+			 xmlns:vm_pages="using:Porter.ViewModels.Pages"
+			 xmlns:b="using:Porter.Behaviors"
+			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="40"
+			 x:DataType="vm:SshTunnelViewModel"
+			 Classes="deletable"
+			 x:Class="Porter.Views.Controls.SshTunnelControl">
+
+	<Grid ColumnDefinitions="Auto, 5, *, 5, 65, 5, 0.8*, 5, Auto, 5, *"
+		  MinHeight="20">
+
+		<Button Grid.Column="0"
+				Classes="no-padding"
+				Classes.tunnel-started="{Binding State.IsRunning}"
+				Command="{Binding ToggleTunnel}"
+				Width="{ Binding $parent.Bounds.Height }"
+				Height="{ Binding $parent.Bounds.Height }">
+			<Panel Classes="center">
+				<TextBlock Text="&#xE3D0;"
+						   FontSize="22"
+						   ToolTip.Tip="Start Tunnel"
+						   IsVisible="{Binding IsDisconnected}"
+						   FontFamily="{ StaticResource Phosphor }"/>
+				<TextBlock Text="&#xE46C;"
+						   FontSize="22"
+						   ToolTip.Tip="Stop Tunnel"
+						   IsVisible="{Binding State.IsRunning}"
+						   FontFamily="{ StaticResource Phosphor }"/>
+				<TextBlock Text="&#xE66A;"
+						   FontSize="22"
+						   ToolTip.Tip="Connecting"
+						   IsVisible="{Binding State.IsConnecting}"
+						   FontFamily="{ StaticResource Phosphor }"/>
+			</Panel>
+		</Button>
+
+		<TextBox Grid.Column="2"
+				 PlaceholderText="Name"
+				 Text="{Binding Model.Name}"
+				 ToolTip.Tip="{Binding Model.Name, TargetNullValue=Tunnel Name}"
+				 b:CommitOnEnterBehavior.Enabled="True"
+				 VerticalContentAlignment="Center"/>
+
+		<NumericUpDown Grid.Column="4"
+					   PlaceholderText="Port"
+					   VerticalContentAlignment="Center"
+					   AllowSpin="False"
+					   MinWidth="0"
+					   Maximum="65535"
+					   Minimum="0"
+					   FormatString="0"
+					   ToolTip.Tip="Local Port"
+					   ShowButtonSpinner="False"
+					   b:CommitOnEnterBehavior.Enabled="True"
+					   Value="{Binding Model.LocalPort, UpdateSourceTrigger=LostFocus}" />
+
+		<CustomComboBox Grid.Column="6"
+						Name="SshServersComboBox"
+						b:PointerWheelBehavior.Suppress="True"
+						ItemsSource="{Binding SshServers}"
+						SelectedItem="{Binding SelectedSshServer}"
+						ComboBoxProperties.TextTrimming="None"
+						ToolTip.Tip="{Binding SelectedSshServer.Name, FallbackValue='Select SSH server', TargetNullValue='Select SSH server'}"
+						VerticalAlignment="Stretch"
+						HorizontalAlignment="Stretch">
+
+			<CustomComboBox.DefaultItem>
+				<DataTemplate>
+					<TextBlock Text="SSH server" Foreground="{DynamicResource ComboBoxSecondaryForeground}"/>
+				</DataTemplate>
+			</CustomComboBox.DefaultItem>
+
+			<ComboBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding Name}"
+							   ToolTip.Tip="{Binding Host}"
+							   TextTrimming="None" />
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</CustomComboBox>
+
+		<StaticComboBox Grid.Column="8"
+						Name="PrivateKeysComboBox"
+						b:PointerWheelBehavior.Suppress="True"
+						ItemsSource="{Binding PrivateKeys}"
+						SelectedItem="{Binding SelectedPrivateKey}"
+						ToolTip.Tip="{Binding SelectedPrivateKey.Name, FallbackValue='No Private key selected', TargetNullValue='No Private key selected'}"
+						MinWidth="0"
+						VerticalAlignment="Stretch">
+
+			<StaticComboBox.Placeholder>
+				<TextBlock Text="&#xE2D6;"
+						   FontFamily="{StaticResource Phosphor}"
+						   VerticalAlignment="Center"
+						   FontSize="20"/>
+			</StaticComboBox.Placeholder>
+
+			<CustomComboBox.DefaultItem>
+				<DataTemplate>
+					<TextBlock Text="Private key" Foreground="{DynamicResource ComboBoxSecondaryForeground}"/>
+				</DataTemplate>
+			</CustomComboBox.DefaultItem>
+
+			<StaticComboBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding Name}" 
+							   ToolTip.Tip="{Binding FilePath}"/>
+				</DataTemplate>
+			</StaticComboBox.ItemTemplate>
+		</StaticComboBox>
+
+		<Grid Grid.Column="10"
+			  ColumnDefinitions="*, 5, Auto">
+			<CustomComboBox Grid.Column="0"
+							Name="RemoteServersComboBox"
+							b:PointerWheelBehavior.Suppress="True"
+							ItemsSource="{Binding RemoteServers}"
+							SelectedItem="{Binding SelectedRemoteServer}"
+							ComboBoxProperties.TextTrimming="None"
+							ToolTip.Tip="{Binding SelectedRemoteServer.Name, FallbackValue='Select Remote server', TargetNullValue='Select Remote server'}"
+							VerticalAlignment="Stretch"
+							HorizontalAlignment="Stretch">
+
+				<CustomComboBox.DefaultItem>
+					<DataTemplate>
+						<TextBlock Text="Remote server" Foreground="{DynamicResource ComboBoxSecondaryForeground}"/>
+					</DataTemplate>
+				</CustomComboBox.DefaultItem>
+
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}"
+								   ToolTip.Tip="{Binding Host}"
+								   TextTrimming="None" />
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</CustomComboBox>
+
+			<Button Grid.Column="2"
+					x:Name="DeleteButton"
+					ToolTip.Tip="Delete Tunnel"
+					Command="{Binding $parent[ItemsControl].((vm_pages:SshTunnelsPageViewModel)DataContext).DeleteCommand}"
+					CommandParameter="{Binding Model}"
+					Classes="no-padding content-center"
+					VerticalAlignment="Stretch"
+					Height="{ Binding $parent.Bounds.Height }">
+
+				<TextBlock
+					Text="&#xE4A6;"
+					FontSize="24"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+
+	</Grid>
+</UserControl>

@@ -1,0 +1,156 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:c="using:Porter.Views.Controls"
+			 xmlns:vm="using:Porter.ViewModels.Pages"
+			 xmlns:s="using:Myth.Avalonia.Services"
+			 xmlns:b="using:Porter.Behaviors"
+			 mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+			 s:DialogManager.Register="{Binding}"
+			 x:DataType="vm:SshTunnelsPageViewModel"
+			 x:Class="Porter.Views.SshTunnelsPageView">
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:SshTunnelsPageViewModel />
+	</Design.DataContext>
+
+	<Grid RowDefinitions="Auto, 10, *">
+		<Grid Grid.Row="0" ColumnDefinitions="Auto,5,Auto,5,*,5,*,5,*,5,Auto,5,Auto" Height="30">
+
+			<Button Grid.Column="0"
+					Classes="no-padding content-center"
+					Command="{Binding StartAllSshTunnels}"
+					ToolTip.Tip="Start all tunnels"
+					Height="{Binding $parent.Height }"
+					Width="{ Binding $self.Height }">
+				<TextBlock
+				Text="&#xE3D0;"
+				FontSize="20"
+				FontFamily="{ StaticResource PhosphorFill }"/>
+			</Button>
+
+			<Button Grid.Column="2"
+					Classes="no-padding content-center"
+					Command="{Binding StopAllSshTunnels}"
+					ToolTip.Tip="Stop all tunnels"
+					Height="{Binding $parent.Height }"
+					Width="{ Binding $self.Height }">
+				<TextBlock
+				Text="&#xE46C;"
+				FontSize="20"
+				FontFamily="{ StaticResource PhosphorFill }"/>
+			</Button>
+
+			<Button Grid.Column="4"
+					Padding="5, 0"
+					Classes="content-center"
+					Command="{ Binding GoToSshServersCommand }"
+					HorizontalAlignment="Stretch"
+					Height="{Binding $parent.Height }">
+				SSH Servers
+			</Button>
+
+			<Button Grid.Column="6"
+					Padding="5, 0"
+					Classes="content-center"
+					Command="{ Binding GoToPrivateKeysCommand }"
+					HorizontalAlignment="Stretch"
+					Height="{Binding $parent.Height }">
+				Private Keys
+			</Button>
+
+			<Button Grid.Column="8"
+					Padding="5, 0"
+					Classes="content-center"
+					Command="{ Binding GoToRemoteServersCommand }"
+					HorizontalAlignment="Stretch"
+					Height="{Binding $parent.Height }">
+				Remote Servers
+			</Button>
+
+			<Button Grid.Column="10"
+					Classes="no-padding content-center"
+					Height="{Binding $parent.Height }"
+					Width="{Binding $self.Height}">
+				<TextBlock
+				Text="&#xE272;"
+				FontSize="20"
+				FontFamily="{ StaticResource Phosphor }"/>
+
+				<Button.Flyout>
+					<MenuFlyout Placement="BottomEdgeAlignedRight">
+
+						<!-- On Close Minimize to Tray -->
+						<MenuItem Header="On close minimize to tray"
+								  ToggleType="CheckBox"
+								  IsChecked="{Binding Settings.OnCloseMinimizeToTray, Mode=TwoWay}" />
+
+						<!-- Export -->
+						<MenuItem Header="Export settings"
+								  Command="{Binding ExportSettingsCommand}" />
+
+						<!-- Import -->
+						<MenuItem Header="Import settings"
+								  Command="{Binding ImportSettingsCommand}" />
+
+						<!-- Theme -->
+						<MenuItem Header="Theme"
+								  ItemsSource="{Binding	AppThemes}">
+							<MenuItem.ItemContainerTheme>
+								<ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+									<Setter Property="Header" Value="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
+									<Setter Property="ToggleType" Value="Radio" />
+									<Setter Property="GroupName" Value="ThemesGroup" />
+									<Setter Property="Command" Value="{Binding $parent[MenuItem].((vm:SshTunnelsPageViewModel)DataContext).SelectThemeCommand}" />
+									<Setter Property="CommandParameter" Value="{Binding}" />
+									<Setter Property="IsChecked">
+										<MultiBinding Converter="{StaticResource EqualityConverter}">
+											<Binding />
+											<Binding Path="$parent[MenuItem].((vm:SshTunnelsPageViewModel)DataContext).Settings.Theme" />
+										</MultiBinding>
+									</Setter>
+								</ControlTheme>
+							</MenuItem.ItemContainerTheme>
+						</MenuItem>
+
+					</MenuFlyout>
+				</Button.Flyout>
+			</Button>
+
+			<Button Grid.Column="12"
+					Classes="no-padding content-center"
+					ToolTip.Tip="Add new Tunnel"
+					Command="{Binding AddSshTunnel}"
+					Height="{Binding $parent.Height }"
+					Width="{ Binding $self.Height }">
+				<TextBlock
+				Text="&#xE3D4;"
+				FontSize="20"
+				FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+
+		<ScrollViewer Grid.Row="2">
+			<ItemsControl ItemsSource="{Binding Items}"
+						  b:DragReorderBehavior.Enabled="True">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Spacing="5" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<c:SshTunnelControl Padding="5"
+											Background="{DynamicResource SecondaryBackground}"
+											CornerRadius="5">
+
+						</c:SshTunnelControl>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

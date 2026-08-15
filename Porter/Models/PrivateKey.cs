@@ -1,33 +1,27 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
-namespace Porter.Models
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Porter.Models;
+
+public partial class PrivateKey : ObservableObject
 {
-	public class PrivateKey
+	public Guid Id { get; set; } = Guid.NewGuid();
+
+	[ObservableProperty]
+	public partial string? Name { get; set; }
+
+	[ObservableProperty]
+	public partial string? FilePath { get; set; }
+
+	public PrivateKey(string filePath)
 	{
-		public Guid Id { get; set; } = Guid.NewGuid();
+		FilePath = filePath;
+	}
 
-		public string? Name { get; set; }
-
-		public string FilePath { get; set; }
-
-		public PrivateKey(string filePath)
-		{
-			FilePath = filePath;
-		}
-
-		public override bool Equals(object? obj)
-		{
-			if (obj is not PrivateKey other)
-				return false;
-
-			return string.Equals(FilePath, other.FilePath, StringComparison.OrdinalIgnoreCase);
-		}
-
-		public override int GetHashCode()
-		{
-			return FilePath is not null
-				? StringComparer.OrdinalIgnoreCase.GetHashCode(FilePath)
-				: 0;
-		}
+	[JsonConstructor]
+	public PrivateKey()
+	{
 	}
 }

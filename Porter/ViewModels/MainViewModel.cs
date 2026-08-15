@@ -1,104 +1,78 @@
 ﻿using System;
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
-using Porter.Interfaces;
+using Myth.Avalonia.Services.Abstractions;
+
+using Porter.Enums;
+using Porter.Messages;
+using Porter.ViewModels.Pages;
 
 namespace Porter.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IRecipient<NavigateMessage>, IDialogContext
 {
 	#region Private Fields
 
-	private readonly Action _exitAction;
+	private readonly Func<PageNames, PageViewModel> _pageFactory;
 
-	private readonly Action _openMainWindowAction;
-
-	#endregion
-
-	#region ViewModels
-
-	public TunnelsViewModel TunnelsViewModel { get; private set; }
-
-	public SshServersViewModel SshServersViewModel { get; private set; }
-
-	public RemoteServersViewModel RemoteServersViewModel { get; private set; }
-
-	public PrivateKeysViewModel PrivateKeysViewModel { get; private set; }
+	private readonly IMessenger _messenger;
 
 	#endregion
 
-	#region Services
+	#region Public Properties
 
-	public IDialogService DialogService { get; private set; }
-
-	public ITrayService TrayService { get; private set; }
+	[ObservableProperty]
+	public partial PageViewModel CurrentPage { get; set; } = null!;
 
 	#endregion
 
-	private ViewModelBase _CurrentPage;
+	#region Constructors
 
-	/// <summary>
-	/// Gets the current page. The property is read-only
-	/// </summary>
-	public ViewModelBase CurrentPage
+	public MainViewModel(Func<PageNames, PageViewModel> pageFactory, IMessenger messenger)
 	{
-		get { return _CurrentPage; }
-		private set { SetProperty(ref _CurrentPage, value); }
+		_pageFactory = pageFactory;
+		_messenger = messenger;
+
+		messenger.Register(this);
+
+		// Use the unified navigation pipeline for the initial page so that any future Receive-side
+		// hooks (logging, history, etc.) also see it.
+		_messenger.Send(new NavigateMessage(PageNames.Tunnels));
 	}
 
-	public MainViewModel()
-	{
+	#endregion
 
-	}
-
-	public MainViewModel(
-		IDialogService fileDialogService,
-		ITrayService trayService,
-		Action exitAction,
-		Action openMainWindowAction)
-	{
-		DialogService = fileDialogService;
-		TrayService = trayService;
-
-		_exitAction = exitAction;
-		_openMainWindowAction = openMainWindowAction;
-
-		InitViewModels();
-
-		_CurrentPage = TunnelsViewModel!;
-	}
-
-	public void InitViewModels()
-	{
-		SshServersViewModel = new SshServersViewModel(this);
-		RemoteServersViewModel = new RemoteServersViewModel(this);
-		PrivateKeysViewModel = new PrivateKeysViewModel(this);
-		TunnelsViewModel = new TunnelsViewModel(this, _exitAction, _openMainWindowAction);
-		OnPropertyChanged(nameof(TunnelsViewModel));
-	}
+	#region Commands
 
 	[RelayCommand]
-	public void GoToSshServers()
-	{
-		CurrentPage = SshServersViewModel;
-	}
+	public void GoToSshServers() => _messenger.Send(new NavigateMessage(PageNames.SshServers));
 
 	[RelayCommand]
-	public void GoToRemoteServers()
-	{
-		CurrentPage = RemoteServersViewModel;
-	}
+	public void GoToRemoteServers() => _messenger.Send(new NavigateMessage(PageNames.RemoteServers));
 
 	[RelayCommand]
-	public void GoToPrivateKeys()
-	{
-		CurrentPage = PrivateKeysViewModel;
-	}
+	public void GoToPrivateKeys() => _messenger.Send(new NavigateMessage(PageNames.PrivateKeys));
 
 	[RelayCommand]
-	public void GoToTunnels()
+	public void GoToTunnels() => _messenger.Send(new NavigateMessage(PageNames.Tunnels));
+
+	#endregion
+
+	#region Implementation IRecipient<NavigateMessage>
+
+	public void Receive(NavigateMessage message)
 	{
-		CurrentPage = TunnelsViewModel;
+		var previous = CurrentPage;
+		CurrentPage = _pageFactory(message.Page);
+
+		// Page VMs are transient (a fresh instance per navigation). Dispose the previous one
+		// so its event subscriptions on AppData/State release before it's GC'd.
+		if (previous is IDisposable disposable && !ReferenceEquals(previous, CurrentPage))
+			disposable.Dispose();
 	}
+
+	#endregion
 }

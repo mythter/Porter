@@ -1,15 +1,21 @@
-﻿namespace Porter.Models
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Porter.Models;
+
+public partial class WindowSettings : ObservableObject
 {
-	public class WindowSettings
-	{
-		public int Left { get; set; }
+	[ObservableProperty]
+	public partial int Left { get; set; }
 
-		public int Top { get; set; }
+	[ObservableProperty]
+	public partial int Top { get; set; }
 
-		public double Width { get; set; }
+	[ObservableProperty]
+	public partial double Width { get; set; }
 
-		public double Height { get; set; }
+	[ObservableProperty]
+	public partial double Height { get; set; }
 
-		public bool Maximized { get; set; }
-	}
+	[ObservableProperty]
+	public partial bool Maximized { get; set; }
 }

@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:model="using:Porter.Models"
+			 xmlns:vm="using:Porter.ViewModels.Pages"
+			 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="40"
+			 x:DataType="model:RemoteServer"
+			 x:Class="Porter.Views.Controls.RemoteServerControl"
+			 Classes="deletable">
+
+	<Grid ColumnDefinitions="0.6*, 5, *, 5, 100"
+		  MinHeight="20">
+		<TextBox Grid.Column="0"
+				 PlaceholderText="Name"
+				 Text="{Binding Name}"
+				 ToolTip.Tip="{Binding Name, TargetNullValue=Remote Server Name}"
+				 KeyDown="OnKeyDown"
+				 VerticalContentAlignment="Center"/>
+
+		<TextBox Grid.Column="2"
+				 PlaceholderText="Host"
+				 Text="{Binding Host, UpdateSourceTrigger=LostFocus}"
+				 ToolTip.Tip="{Binding Host, TargetNullValue=Remote Host}"
+				 KeyDown="OnKeyDown"
+				 VerticalContentAlignment="Center"/>
+
+		<Grid Grid.Column="4"
+			  ColumnDefinitions="*, 5, Auto">
+			<NumericUpDown Grid.Column="0"
+						   PlaceholderText="Port"
+						   ToolTip.Tip="Remote Server Port"
+						   VerticalContentAlignment="Center"
+						   MinWidth="0"
+						   Maximum="65535"
+						   Minimum="0"
+						   FormatString="0"
+						   ShowButtonSpinner="False"
+						   KeyDown="OnKeyDown"
+						   Value="{Binding Port, UpdateSourceTrigger=LostFocus}" />
+
+			<Button Grid.Column="2"
+					x:Name="DeleteButton"
+					ToolTip.Tip="Delete Remote Server"
+					Command="{Binding $parent[ItemsControl].((vm:RemoteServersPageViewModel)DataContext).DeleteCommand}"
+					CommandParameter="{Binding}"
+					Classes="no-padding content-center"
+					VerticalAlignment="Stretch"
+					Height="{ Binding $parent.Bounds.Height }">
+
+				<TextBlock
+					Text="&#xE4A6;"
+					FontSize="24"
+					FontFamily="{ StaticResource Phosphor }"/>
+			</Button>
+		</Grid>
+
+	</Grid>
+	
+</UserControl>

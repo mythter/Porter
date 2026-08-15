@@ -3,72 +3,85 @@ using System.IO;
 using System.Text.Json;
 
 using Porter.Models;
+using Porter.Services.Interfaces;
 
-namespace Porter.Services
+namespace Porter.Services;
+
+/// <summary>
+/// Persists crash metadata to a marker JSON file used to (a) detect a previous-run crash on
+/// startup so the UI can show the recovery dialog, and (b) protect against rapid restart loops.
+/// Diagnostic text logging now lives in <see cref="ICrashLogger"/>.
+/// </summary>
+public static class CrashService
 {
-	public static class CrashService
+	#region Private Fields
+
+	private static readonly string _crashFilePath = Path.Combine(AppContext.BaseDirectory, "crash.json");
+
+	#endregion
+
+	#region Public Methods
+
+	public static bool SetCrashData(Exception ex)
 	{
-		private static readonly string _crashFilePath = Path.Combine(AppContext.BaseDirectory, "crash.json");
-
-		public static bool SetCrashData(Exception ex)
+		try
 		{
-			try
-			{
-				File.WriteAllText(_crashFilePath, JsonSerializer.Serialize(
-					new CrashData(
-						CrashDate: DateTimeOffset.UtcNow,
-						ErrorMessage: ex.Message,
-						StackTrace: ex.StackTrace ?? string.Empty,
-						Source: ex.TargetSite?.ToString() ?? string.Empty))
-					);
+			var data = new CrashData(
+				CrashDate: DateTimeOffset.UtcNow,
+				ErrorMessage: ex.Message,
+				StackTrace: ex.StackTrace ?? string.Empty,
+				// ex.TargetSite requires preserved reflection metadata (IL2026 under trimming/AOT).
+				// ex.Source carries the originating assembly name, which is sufficient for diagnostics.
+				Source: ex.Source ?? ex.GetType().FullName ?? string.Empty);
 
-				File.WriteAllText("crash.log", ex.ToString());
+			File.WriteAllText(_crashFilePath, JsonSerializer.Serialize(data, AppJsonContext.Default.CrashData));
 
-				return true;
-			}
-			catch (Exception)
-			{
-				// Handle system message box or other way to inform user of crash
-			}
-
-			return false;
+			return true;
+		}
+		catch
+		{
+			// Failure to persist crash metadata is itself unrecoverable — give up silently.
 		}
 
-		public static void ClearCrashData()
+		return false;
+	}
+
+	public static void ClearCrashData()
+	{
+		try
 		{
-			try
+			if (File.Exists(_crashFilePath))
 			{
-				if (File.Exists(_crashFilePath))
-				{
-					File.Delete(_crashFilePath);
-				}
-			}
-			catch (Exception)
-			{
-				// Ignored
+				File.Delete(_crashFilePath);
 			}
 		}
-
-		public static CrashData? GetCrashData()
+		catch
 		{
-			try
-			{
-				if (File.Exists(_crashFilePath))
-				{
-					return JsonSerializer.Deserialize<CrashData>(File.ReadAllText(_crashFilePath));
-				}
-			}
-			catch (Exception)
-			{
-				ClearCrashData();
-			}
-
-			return null;
+			// Ignored — leftover marker is harmless.
 		}
+	}
 
-		public static void RemoveCrashData()
+	public static CrashData? GetCrashData()
+	{
+		try
+		{
+			if (File.Exists(_crashFilePath))
+			{
+				return JsonSerializer.Deserialize(File.ReadAllText(_crashFilePath), AppJsonContext.Default.CrashData);
+			}
+		}
+		catch
 		{
 			ClearCrashData();
 		}
+
+		return null;
 	}
+
+	public static void RemoveCrashData()
+	{
+		ClearCrashData();
+	}
+
+	#endregion
 }
